@@ -2,7 +2,12 @@
     import { PanelLeftClose } from "@lucide/svelte";
     import type { Chord } from "#lib/types.ts";
 
-    let { chord }: { chord: Chord } = $props();
+    type Props = {
+        chord: Chord;
+        onTitleChange: (value: string) => void;
+    };
+
+    let { chord, onTitleChange }: Props = $props();
 </script>
 
 <div class="flex flex-col">
@@ -15,7 +20,12 @@
     <div class="flex flex-col">
         <fieldset class="fieldset">
             <legend class="fieldset-legend">Title</legend>
-            <input type="text" class="input" placeholder="" />
+            <input
+                type="text"
+                class="input"
+                value={chord.title}
+                oninput={(event) => onTitleChange(event.currentTarget.value)}
+            />
         </fieldset>
         <fieldset class="fieldset">
             <legend class="fieldset-legend">Tuning</legend>

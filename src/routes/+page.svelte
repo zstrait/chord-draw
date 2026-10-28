@@ -6,13 +6,17 @@
     import { createDefaultChord } from "#lib/chord.ts";
 
     let chord = $state(createDefaultChord());
+
+    function changeTitle(value: string) {
+        chord.title = value;
+    }
 </script>
 
 <div class="flex h-dvh gap-4 p-2">
-    <Menu {chord} />
+    <Menu {chord} onTitleChange={changeTitle}/>
     <div class="flex min-w-0 flex-1 flex-col">
         <Header />
-        <Content {chord}/>
+        <Content {chord} />
         <Toolbar />
     </div>
 </div>
