@@ -1,5 +1,8 @@
 <script lang="ts">
     import { RotateCcw } from "@lucide/svelte";
+    import type { Chord } from "#lib/types.ts";
+
+    let { chord }: { chord: Chord } = $props();
 </script>
 
 <div>

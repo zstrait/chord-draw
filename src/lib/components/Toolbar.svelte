@@ -1,5 +1,13 @@
 <script>
-    import { Trash, Undo2, Redo2, Copy, Download, Share, PanelBottomClose } from "@lucide/svelte"
+    import {
+        Trash,
+        Undo2,
+        Redo2,
+        Copy,
+        Download,
+        Share,
+        PanelBottomClose,
+    } from "@lucide/svelte";
 </script>
 
 <div class="h-18 bg-red-300 px-4 rounded-xl items-center flex justify-between">
