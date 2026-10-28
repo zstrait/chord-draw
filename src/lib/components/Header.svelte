@@ -1,3 +1,15 @@
-<header class='h-14 border border-orange-500'>
-    <h1>ChordDraw</h1>
+<header
+    class=" p-2 items-center flex h-14 border border-orange-500 justify-between"
+>
+    <span>ChordDraw</span>
+
+    <div class='flex gap-50 items-center'>
+        <div class="flex gap-4">
+            <a href="/" class="underline">Chord Diagram</a>
+            |
+            <a href="/">Chord Chart</a>
+        </div>
+
+        <button class="btn">Dark</button>
+    </div>
 </header>
