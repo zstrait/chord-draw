@@ -11,7 +11,7 @@
     </div>
     <div>
         <fieldset class="fieldset">
-            <legend class="fieldset-legend">Styling</legend>
+            <legend class="fieldset-legend">Style</legend>
             <select defaultValue="Normal" class="select">
                 <option>Normal</option>
                 <option>Handdrawn</option>
@@ -20,7 +20,7 @@
         <div class="flex justify-between gap-4">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Line Thickness</legend>
-                <input type="number" class="input" placeholder="" />
+                <input type="number" class="input" defaultValue="11" />
             </fieldset>
             <fieldset class="fieldset w-55">
                 <legend class="fieldset-legend">Line Color</legend>
@@ -37,7 +37,7 @@
         <div class="flex justify-between gap-4">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Circle Size</legend>
-                <input type="number" class="input" placeholder="" />
+                <input type="number" class="input" defaultValue="10" />
             </fieldset>
             <fieldset class="fieldset w-55">
                 <legend class="fieldset-legend">Circle Color</legend>
@@ -67,11 +67,11 @@
     <div class="flex justify-between gap-4">
         <fieldset class="fieldset">
             <legend class="fieldset-legend">Title Font Size</legend>
-            <input type="number" class="input" placeholder="" />
+            <input type="number" class="input" defaultValue="18" />
         </fieldset>
         <fieldset class="fieldset">
             <legend class="fieldset-legend">Finger Font Size</legend>
-            <input type="number" class="input" placeholder="" />
+            <input type="number" class="input" defaultValue="16" />
         </fieldset>
     </div>
 </div>
