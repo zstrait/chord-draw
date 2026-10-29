@@ -19,6 +19,6 @@
     <div class="flex min-w-0 flex-1 flex-col">
         <Header />
         <Content {chord} />
-        <Toolbar />
+        <Toolbar onChordChange={updateChord}/>
     </div>
 </div>

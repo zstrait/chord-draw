@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import {
         Trash,
         Undo2,
@@ -8,11 +8,25 @@
         Share,
         PanelBottomClose,
     } from "@lucide/svelte";
+
+    import type { Chord } from "#lib/types.ts";
+    import { createDefaultChord } from "#lib/chord.ts";
+
+    type Props = {
+        onChordChange: (changes: Partial<Chord>) => void;
+    };
+
+    let { onChordChange }: Props = $props();
 </script>
 
 <div class="h-18 bg-red-300 px-4 rounded-xl items-center flex justify-between">
     <div class="flex">
-        <button class="btn btn-square">
+        <button
+            class="btn btn-square"
+            onclick={(event) => {
+                onChordChange(createDefaultChord());
+            }}
+        >
             <Trash color="#0a0a0a" />
         </button>
         <div class="divider divider-horizontal mx-2"></div>
