@@ -57,7 +57,7 @@
                 <input
                     type="checkbox"
                     class="checkbox"
-                    value={chord.showStringNoteLabels}
+                    checked={chord.showStringNoteLabels}
                     oninput={(event) => {
                         onChordChange({
                             showStringNoteLabels: event.currentTarget.checked,
@@ -70,7 +70,7 @@
                 <input
                     type="checkbox"
                     class="checkbox"
-                    value={chord.showTuningLabel}
+                    checked={chord.showTuningLabel}
                     oninput={(event) => {
                         onChordChange({
                             showTuningLabel: event.currentTarget.checked,
@@ -112,7 +112,7 @@
             <input
                 type="checkbox"
                 class="checkbox"
-                value={chord.capoIndicator}
+                checked={chord.capoIndicator}
                 oninput={(event) => {
                     onChordChange({
                         capoIndicator: event.currentTarget.checked,
