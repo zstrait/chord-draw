@@ -44,7 +44,7 @@
         <span class="text-xl font-bold">Customize</span>
         <button
             class="btn btn-square w-8 h-8"
-            onclick={() => onChordChange(resetChordStyling(chord))}
+            onclick={() => onChordChange(resetChordStyling())}
         >
             <RotateCcw color="#0a0a0a" />
         </button>
@@ -75,7 +75,7 @@
                     type="number"
                     class="input"
                     value={chord.styling.lineThickness}
-                    onchange={(event) => {
+                    oninput={(event) => {
                         onChordChange({
                             styling: {
                                 ...chord.styling,
@@ -115,7 +115,7 @@
                     type="number"
                     class="input"
                     value={chord.styling.circleSize}
-                    onchange={(event) => {
+                    oninput={(event) => {
                         onChordChange({
                             styling: {
                                 ...chord.styling,
@@ -175,7 +175,7 @@
                 type="number"
                 class="input"
                 value={chord.styling.titleFontSize}
-                onchange={(event) => {
+                oninput={(event) => {
                     onChordChange({
                         styling: {
                             ...chord.styling,
@@ -191,7 +191,7 @@
                 type="number"
                 class="input"
                 value={chord.styling.fingerFontSize}
-                onchange={(event) => {
+                oninput={(event) => {
                     onChordChange({
                         styling: {
                             ...chord.styling,
