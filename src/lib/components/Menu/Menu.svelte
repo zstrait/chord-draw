@@ -5,14 +5,14 @@
 
     type Props = {
         chord: Chord;
-        onTitleChange: (value: string) => void;
+        onChordChange: (changes: Partial<Chord>) => void;
     };
 
-    let { chord, onTitleChange }: Props = $props();
+    let { chord, onChordChange }: Props = $props();
 </script>
 
 <div class="w-75 shrink-0 bg-blue-500 rounded-xl p-4">
-    <EditMenu {chord} {onTitleChange} />
+    <EditMenu {chord} {onChordChange} />
     <div class="divider my-3"></div>
     <CustomizeMenu {chord} />
 </div>

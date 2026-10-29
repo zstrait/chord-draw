@@ -14,7 +14,7 @@ interface Barre {
     finger: Finger;
 }
 
-interface Tuning {
+export interface Tuning {
     label: string;
     notes: string[];
 }
