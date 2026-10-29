@@ -10,7 +10,32 @@ export function createDefaultChord(): Chord {
         fretCount: 5,
         capoIndicator: false,
         stringCount: 6,
-        strings: [],
+        strings: [
+            {
+                fret: null,
+                markerText: null,
+            },
+            {
+                fret: null,
+                markerText: null,
+            },
+            {
+                fret: null,
+                markerText: null,
+            },
+            {
+                fret: null,
+                markerText: null,
+            },
+            {
+                fret: null,
+                markerText: null,
+            },
+            {
+                fret: null,
+                markerText: null,
+            },
+        ],
         barres: [],
         styling: {
             style: "normal",

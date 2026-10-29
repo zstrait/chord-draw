@@ -1,17 +1,14 @@
 // -1 = muted, 0 = open, number = fret
-type FretValue = number | null;
-type Finger = string | null;
-
 interface StringNote {
-    fret: FretValue;
-    finger: Finger;
+    fret: number | null;
+    markerText: string | null;
 }
 
 interface Barre {
-    fret: FretValue;
+    fret: number | null;
     startString: number;
     endString: number;
-    finger: Finger;
+    markerText: string | null;
 }
 
 export interface Tuning {

@@ -18,7 +18,7 @@
     <Menu {chord} onChordChange={updateChord} />
     <div class="flex min-w-0 flex-1 flex-col">
         <Header />
-        <Content {chord} />
+        <Content {chord} onChordChange={updateChord}/>
         <Toolbar onChordChange={updateChord}/>
     </div>
 </div>
