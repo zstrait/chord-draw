@@ -1,6 +1,6 @@
 <script lang="ts">
     import { PanelLeftClose } from "@lucide/svelte";
-    import type { Chord, Tuning } from "#lib/types.ts";
+    import type { Chord } from "#lib/types.ts";
     import { tuningPresets } from "#lib/tunings.ts";
 
     type Props = {

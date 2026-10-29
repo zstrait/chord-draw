@@ -20,7 +20,7 @@ export interface Tuning {
 }
 
 interface Styling {
-    style: "normal" | "handdrawn";
+    style: string;
     lineThickness: number;
     lineColor: string; // all "color" fields are hex codes
     circleSize: number;

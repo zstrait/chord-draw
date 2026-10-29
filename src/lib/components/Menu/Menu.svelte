@@ -11,8 +11,8 @@
     let { chord, onChordChange }: Props = $props();
 </script>
 
-<div class="w-75 shrink-0 bg-blue-500 rounded-xl p-4">
+<div class="w-75 shrink-0 bg-blue-400 rounded-xl p-4">
     <EditMenu {chord} {onChordChange} />
     <div class="divider my-3"></div>
-    <CustomizeMenu {chord} />
+    <CustomizeMenu {chord} {onChordChange}/>
 </div>

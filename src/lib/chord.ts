@@ -24,3 +24,18 @@ export function createDefaultChord(): Chord {
         },
     };
 }
+
+export function resetChordStyling(chord: Chord): Chord {
+    chord.styling = {
+        style: "normal",
+        lineThickness: 11,
+        lineColor: "#000000",
+        circleSize: 10,
+        circleColor: "#000000",
+        backgroundColor: "transparent",
+        titleFontSize: 18,
+        fingerFontSize: 16,
+    };
+
+    return chord;
+}
