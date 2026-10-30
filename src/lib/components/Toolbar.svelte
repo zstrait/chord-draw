@@ -42,26 +42,19 @@
 
     <div class="flex">
         <div class="flex gap-4">
-            <div class="flex gap-2">
-                <button class="btn btn-square">
-                    <Copy color="#0a0a0a" />
-                </button>
-                <select defaultValue="PNG" class="select w-20 shrink-0">
-                    <option>PNG</option>
-                    <option>JPEG</option>
-                    <option>SVG</option>
-                </select>
-            </div>
-            <div class="flex gap-2">
-                <button class="btn btn-square">
-                    <Download color="#0a0a0a" />
-                </button>
-                <select defaultValue="PNG" class="select w-20 shrink-0">
-                    <option>PNG</option>
-                    <option>JPEG</option>
-                    <option>SVG</option>
-                </select>
-            </div>
+            <button class="btn btn-square">
+                <Copy color="#0a0a0a" />
+            </button>
+
+            <button class="btn btn-square">
+                <Download color="#0a0a0a" />
+            </button>
+
+            <select defaultValue="PNG" class="select w-20 shrink-0">
+                <option>PNG</option>
+                <option>SVG</option>
+            </select>
+
             <select defaultValue="Medium" class="select w-25 shrink-0">
                 <option>Small</option>
                 <option>Medium</option>
