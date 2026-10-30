@@ -10,12 +10,35 @@
     };
 
     let { chord, onChordChange }: Props = $props();
+
+    let isDoubleView = $state(true);
+    let isEditorView = $state(true);
+
+    function onViewChange(value: boolean) {
+        isDoubleView = value;
+    }
+    function onSingleViewChange(value: boolean) {
+        isEditorView = value;
+    }
 </script>
 
 <div class="flex flex-col flex-1 border border-green-500 p-2">
-    <ContentHeader />
+    <ContentHeader
+        {isDoubleView}
+        {onViewChange}
+        {isEditorView}
+        {onSingleViewChange}
+    />
     <div class="flex justify-center px-12 py-4 gap-24">
-        <ChordEditor heading="Editor" {chord} {onChordChange}/>
-        <ChordResult heading="Result" {chord} />
+        {#if isDoubleView}
+            <ChordEditor heading="Editor" {chord} {onChordChange} />
+            <ChordResult heading="Result" {chord} />
+        {:else}
+            {#if isEditorView}
+                <ChordEditor heading="Editor" {chord} {onChordChange} />
+            {:else}
+                <ChordResult heading="Result" {chord} />
+            {/if}
+        {/if}
     </div>
 </div>
