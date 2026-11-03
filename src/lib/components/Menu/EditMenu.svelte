@@ -9,6 +9,17 @@
     };
 
     let { chord, onChordChange }: Props = $props();
+
+    function validatePosInput(event: Event): number | null {
+        const input = event.currentTarget as HTMLInputElement;
+        const value = input.valueAsNumber;
+
+        if (Number.isInteger(value) && value >= 1) {
+            return value;
+        }
+
+        return null;
+    }
 </script>
 
 <div class="flex flex-col">
@@ -93,9 +104,21 @@
                     placeholder="None"
                     value={chord.capoFret}
                     oninput={(event) => {
-                        onChordChange({
-                            capoFret: Number(event.currentTarget.value),
-                        });
+                        if (event.currentTarget.value === "") {
+                            onChordChange({ capoFret: null });
+                            return;
+                        }
+
+                        const value = validatePosInput(event);
+
+                        if (value !== null) {
+                            onChordChange({
+                                capoFret: Number(event.currentTarget.value),
+                            });
+                        }
+                    }}
+                    onblur={(event) => {
+                        event.currentTarget.value = String(chord.capoFret);
                     }}
                 />
             </fieldset>
@@ -107,9 +130,14 @@
                     class="input w-21"
                     value={chord.startFret}
                     oninput={(event) => {
-                        onChordChange({
-                            startFret: Number(event.currentTarget.value),
-                        });
+                        const value = validatePosInput(event);
+
+                        if (value !== null) {
+                            onChordChange({ startFret: value });
+                        }
+                    }}
+                    onblur={(event) => {
+                        event.currentTarget.value = String(chord.startFret);
                     }}
                 />
             </fieldset>
@@ -119,11 +147,19 @@
                 <input
                     type="number"
                     class="input w-26"
+                    min="1"
                     value={chord.fretCount}
                     oninput={(event) => {
-                        onChordChange({
-                            fretCount: Number(event.currentTarget.value),
-                        });
+                        const value = validatePosInput(event);
+
+                        if (value !== null) {
+                            onChordChange({
+                                fretCount: Number(event.currentTarget.value),
+                            });
+                        }
+                    }}
+                    onblur={(event) => {
+                        event.currentTarget.value = String(chord.fretCount);
                     }}
                 />
             </fieldset>
@@ -143,6 +179,7 @@
                 />
                 Capo Label
             </label>
+
             <label class="label">
                 <input
                     type="checkbox"

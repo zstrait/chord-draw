@@ -9,7 +9,7 @@ export function createDefaultChord(): Chord {
         startFret: 1,
         fretCount: 4,
         capoFret: null,
-        showFretLabel: false,
+        showFretLabel: true,
         ShowCapoLabel: false,
         stringCount: 6,
         strings: [
