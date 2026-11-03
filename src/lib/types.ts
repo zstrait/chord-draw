@@ -35,7 +35,9 @@ export interface Chord {
     showTuningLabel: boolean;
     startFret: number;
     fretCount: number;
-    capoIndicator: boolean;
+    capoFret: number | null;
+    showFretLabel: boolean;
+    ShowCapoLabel: boolean;
     stringCount: number;
     strings: StringNote[];
     barres: Barre[];

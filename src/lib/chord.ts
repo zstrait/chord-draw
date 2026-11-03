@@ -6,9 +6,11 @@ export function createDefaultChord(): Chord {
         tuning: { label: "Standard", notes: ["E", "A", "D", "G", "B", "E"] },
         showStringNoteLabels: false,
         showTuningLabel: false,
-        startFret: 0,
-        fretCount: 5,
-        capoIndicator: false,
+        startFret: 1,
+        fretCount: 4,
+        capoFret: null,
+        showFretLabel: false,
+        ShowCapoLabel: false,
         stringCount: 6,
         strings: [
             {
