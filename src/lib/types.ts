@@ -18,8 +18,9 @@ export interface Tuning {
 
 interface Styling {
     style: string;
+    chordColor: string; // all "color" fields are hex codes
     lineThickness: number;
-    lineColor: string; // all "color" fields are hex codes
+    lineColor: string;
     circleSize: number;
     circleColor: string;
     backgroundColor: string;

@@ -2,6 +2,7 @@
     import { PanelLeftClose } from "@lucide/svelte";
     import type { Chord } from "#lib/types.ts";
     import { tuningPresets } from "#lib/tunings.ts";
+    import { validatePositiveInput } from "#lib/utils.ts";
 
     type Props = {
         chord: Chord;
@@ -9,17 +10,6 @@
     };
 
     let { chord, onChordChange }: Props = $props();
-
-    function validatePosInput(event: Event): number | null {
-        const input = event.currentTarget as HTMLInputElement;
-        const value = input.valueAsNumber;
-
-        if (Number.isInteger(value) && value >= 1) {
-            return value;
-        }
-
-        return null;
-    }
 </script>
 
 <div class="flex flex-col">
@@ -109,7 +99,7 @@
                             return;
                         }
 
-                        const value = validatePosInput(event);
+                        const value = validatePositiveInput(event);
 
                         if (value !== null) {
                             onChordChange({
@@ -130,7 +120,7 @@
                     class="input w-21"
                     value={chord.startFret}
                     oninput={(event) => {
-                        const value = validatePosInput(event);
+                        const value = validatePositiveInput(event);
 
                         if (value !== null) {
                             onChordChange({ startFret: value });
@@ -150,7 +140,7 @@
                     min="1"
                     value={chord.fretCount}
                     oninput={(event) => {
-                        const value = validatePosInput(event);
+                        const value = validatePositiveInput(event);
 
                         if (value !== null) {
                             onChordChange({

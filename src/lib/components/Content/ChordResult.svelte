@@ -1,7 +1,11 @@
 <script lang="ts">
-    import { onMount } from "svelte";
     import type { Chord } from "#lib/types.ts";
-    import { SVGuitarChord, type Finger } from "svguitar";
+    import {
+        SVGuitarChord,
+        ChordStyle,
+        type Finger,
+        type Barre as SvgBarre,
+    } from "svguitar";
 
     let { heading, chord }: { heading: string; chord: Chord } = $props();
 
@@ -21,6 +25,28 @@
         });
 
         return fingers;
+    }
+
+    function barresToSvg(
+        barres: Chord["barres"],
+        stringCount: number,
+    ): SvgBarre[] {
+        const result: SvgBarre[] = [];
+
+        for (const barre of barres) {
+            if (barre.fret === null || barre.fret < 1) {
+                continue;
+            }
+
+            result.push({
+                fromString: stringCount - barre.startString,
+                toString: stringCount - barre.endString,
+                fret: barre.fret,
+                text: barre.markerText ?? undefined,
+            });
+        }
+
+        return result;
     }
 
     function formatBottomText(
@@ -52,22 +78,38 @@
             chord.capoFret,
             chord.ShowCapoLabel,
         );
+        const isCircleWhite: boolean = chord.styling.circleColor === "#FFFFFF";
 
         drawing
             .configure({
+                // Edit Menu
                 tuning: chord.showStringNoteLabels ? chord.tuning.notes : [],
                 frets: chord.fretCount,
                 // tuning label
                 watermark: text,
                 watermarkFontSize: 20,
-                // watermarkColor: "",
                 // watermarkFontFamily: "Arial, sans-serif",
                 position: chord.startFret,
                 noPosition: !chord.showFretLabel,
+
+                // Customize Menu
+                style:
+                    chord.styling.style === "handdrawn"
+                        ? ChordStyle.handdrawn
+                        : ChordStyle.normal,
+                color: chord.styling.chordColor,
+                strokeWidth: chord.styling.lineThickness,
+                fretColor: chord.styling.lineColor,
+                fingerSize: chord.styling.circleSize / 20,
+                fingerColor: chord.styling.circleColor,
+                fingerTextColor: isCircleWhite ? "#000000" : "#FFFFFF",
+                backgroundColor: chord.styling.backgroundColor,
+                titleFontSize: chord.styling.titleFontSize,
+                fingerTextSize: chord.styling.fingerFontSize,
             })
             .chord({
                 fingers: stringsToFingers(chord.strings),
-                barres: [],
+                barres: barresToSvg(chord.barres, chord.stringCount),
                 title: chord.title,
             })
             .draw();
