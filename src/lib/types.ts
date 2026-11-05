@@ -44,3 +44,13 @@ export interface Chord {
     barres: Barre[];
     styling: Styling;
 }
+
+export type HoverTarget = {
+    stringIndex: number;
+    fret: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    diameter: number;
+};

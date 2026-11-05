@@ -38,20 +38,13 @@ export function createDefaultChord(): Chord {
                 markerText: null,
             },
         ],
-        barres: [
-            {
-                fret: 1,
-                startString: 2,
-                endString: 5,
-                markerText: "1",
-            },
-        ],
+        barres: [],
         styling: {
             style: "normal",
             chordColor: "#000000",
             lineThickness: 2,
             lineColor: "#000000",
-            circleSize: 18,
+            circleSize: 20,
             circleColor: "#000000",
             backgroundColor: "transparent",
             titleFontSize: 32,

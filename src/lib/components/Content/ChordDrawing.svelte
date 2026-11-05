@@ -1,0 +1,261 @@
+<script lang="ts">
+    import type { Chord, HoverTarget } from "#lib/types.ts";
+    import ChordOverlay from "./ChordOverlay.svelte";
+    import {
+        SVGuitarChord,
+        ChordStyle,
+        type Finger,
+        type Barre as SvgBarre,
+    } from "svguitar";
+
+    let { heading, chord }: { heading: string; chord: Chord } = $props();
+
+    let container: HTMLDivElement;
+    let diagramWrapper: HTMLDivElement;
+
+    let hoverTargets = $state<HoverTarget[]>([]);
+    let showTargets = $state(false);
+
+    function measureTargets(
+        stringCount: number,
+        fretCount: number,
+        circleSize: number,
+    ) {
+        const svg = container.querySelector("svg");
+        const transform = svg?.getScreenCTM();
+
+        if (!svg || !transform) {
+            hoverTargets = [];
+            return;
+        }
+
+        const strings = Array.from(svg.querySelectorAll("line"))
+            .filter(
+                (line) =>
+                    line.x1.baseVal.value === line.x2.baseVal.value &&
+                    line.y2.baseVal.value > line.y1.baseVal.value,
+            )
+            .sort((a, b) => a.x1.baseVal.value - b.x1.baseVal.value);
+
+        if (strings.length !== stringCount || stringCount < 2) {
+            hoverTargets = [];
+            return;
+        }
+
+        const firstString = strings[0];
+        const left = firstString.x1.baseVal.value;
+        const right = strings[stringCount - 1].x1.baseVal.value;
+        const top = firstString.y1.baseVal.value;
+
+        const frets = Array.from(svg.querySelectorAll("line")).filter(
+            (line) =>
+                line.y1.baseVal.value === line.y2.baseVal.value &&
+                Math.abs(line.x1.baseVal.value - left) < 0.01 &&
+                Math.abs(line.x2.baseVal.value - right) < 0.01 &&
+                line.y1.baseVal.value > top,
+        );
+
+        if (!frets.length) {
+            hoverTargets = [];
+            return;
+        }
+
+        const bottom = Math.max(...frets.map((line) => line.y1.baseVal.value));
+        const stringSpacing = (right - left) / (stringCount - 1);
+        const fretSpacing = (bottom - top) / fretCount;
+        const wrapper = diagramWrapper.getBoundingClientRect();
+        const targets: HoverTarget[] = [];
+
+        for (let stringIndex = 0; stringIndex < stringCount; stringIndex++) {
+            for (let fret = 1; fret <= fretCount; fret++) {
+                const center = new DOMPoint(
+                    strings[stringIndex].x1.baseVal.value,
+                    top + (fret - 0.5) * fretSpacing,
+                ).matrixTransform(transform);
+
+                const width = stringSpacing * transform.a;
+                const height = fretSpacing * transform.d;
+
+                targets.push({
+                    stringIndex,
+                    fret,
+                    x: center.x - wrapper.left - width / 2,
+                    y: center.y - wrapper.top - height / 2,
+                    width,
+                    height,
+                    diameter: width * (circleSize / 20),
+                });
+            }
+        }
+
+        hoverTargets = targets;
+    }
+
+    function stringsToFingers(strings: Chord["strings"]): Finger[] {
+        const fingers: Finger[] = [];
+        strings.forEach((stringNote) => {
+            if (stringNote.fret != null) {
+                fingers.push([
+                    // svguitar strings go from low=6 to high=0, while mine are low=0 to high=6
+                    strings.length - strings.indexOf(stringNote),
+                    stringNote.fret === -1 ? "x" : stringNote.fret,
+                    stringNote.markerText ?? "",
+                ]);
+            }
+        });
+
+        return fingers;
+    }
+
+    function barresToSvg(
+        barres: Chord["barres"],
+        stringCount: number,
+    ): SvgBarre[] {
+        const result: SvgBarre[] = [];
+
+        for (const barre of barres) {
+            if (barre.fret === null || barre.fret < 1) {
+                continue;
+            }
+
+            result.push({
+                fromString: stringCount - barre.startString,
+                toString: stringCount - barre.endString,
+                fret: barre.fret,
+                text: barre.markerText ?? undefined,
+            });
+        }
+
+        return result;
+    }
+
+    function formatBottomText(
+        tuning: string,
+        showTuningLabel: boolean,
+        capo: number | null,
+        showCapoLabel: boolean,
+    ): string {
+        const text: string[] = [];
+        if (showTuningLabel) {
+            text.push(tuning);
+        }
+        if (showCapoLabel) {
+            if (capo == null) {
+                text.push("(No Capo)");
+            } else {
+                text.push(`(Capo at ${capo})`);
+            }
+        }
+
+        return text.join("\n");
+    }
+
+    $effect(() => {
+        const drawing = new SVGuitarChord(container);
+        const text: string = formatBottomText(
+            chord.tuning.label,
+            chord.showTuningLabel,
+            chord.capoFret,
+            chord.ShowCapoLabel,
+        );
+        const isCircleWhite: boolean = chord.styling.circleColor === "#FFFFFF";
+
+        drawing
+            .configure({
+                // Edit Menu
+                tuning: chord.showStringNoteLabels ? chord.tuning.notes : [],
+                frets: chord.fretCount,
+                // tuning label
+                watermark: text,
+                watermarkFontSize: 20,
+                // watermarkFontFamily: "Arial, sans-serif",
+                position: chord.startFret,
+                noPosition: !chord.showFretLabel,
+
+                // Customize Menu
+                style:
+                    chord.styling.style === "handdrawn"
+                        ? ChordStyle.handdrawn
+                        : ChordStyle.normal,
+                color: chord.styling.chordColor,
+                strokeWidth: chord.styling.lineThickness,
+                fretColor: chord.styling.lineColor,
+                fingerSize: chord.styling.circleSize / 20,
+                fingerColor: chord.styling.circleColor,
+                fingerTextColor: isCircleWhite ? "#000000" : "#FFFFFF",
+                backgroundColor: chord.styling.backgroundColor,
+                titleFontSize: chord.styling.titleFontSize,
+                fingerTextSize: chord.styling.fingerFontSize,
+            })
+            .chord({
+                fingers: stringsToFingers(chord.strings),
+                barres: barresToSvg(chord.barres, chord.stringCount),
+                title: chord.title,
+            })
+            .draw();
+
+        const stringCount = chord.stringCount;
+        const fretCount = chord.fretCount;
+        const circleSize = chord.styling.circleSize;
+        const isNormal = chord.styling.style !== "handdrawn";
+        let frame = 0;
+
+        function queueMeasurement() {
+            cancelAnimationFrame(frame);
+            frame = requestAnimationFrame(() => {
+                if (isNormal) {
+                    measureTargets(stringCount, fretCount, circleSize);
+                } else {
+                    hoverTargets = [];
+                }
+            });
+        }
+
+        // Keep targets aligned when the diagram resizes or SVGuitar redraws
+        // after its fonts finish loading. The overlay lives outside container.
+        const resizeObserver = new ResizeObserver(queueMeasurement);
+        resizeObserver.observe(diagramWrapper);
+
+        const mutationObserver = new MutationObserver(queueMeasurement);
+        mutationObserver.observe(container, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+        });
+
+        hoverTargets = [];
+        queueMeasurement();
+
+        return () => {
+            cancelAnimationFrame(frame);
+            resizeObserver.disconnect();
+            mutationObserver.disconnect();
+            drawing.remove();
+        };
+    });
+</script>
+
+<div>
+    <span class="text-xl font-bold pl-4">{heading}</span>
+    <label class="flex items-center gap-2 px-4 text-sm">
+        <input
+            type="checkbox"
+            class="checkbox checkbox-xs"
+            bind:checked={showTargets}
+        />
+        Show hover targets (draft)
+    </label>
+    {#if chord.styling.style === "handdrawn"}
+        <p class="px-4 text-sm">
+            Switch to Normal style to try the hover draft.
+        </p>
+    {/if}
+    <div
+        class="border border-green-500 w-110 h-140 rounded-xl flex flex-col justify-end pb-12"
+    >
+        <div class="relative" bind:this={diagramWrapper}>
+            <div bind:this={container}></div>
+            <ChordOverlay {hoverTargets} {showTargets} />
+        </div>
+    </div>
+</div>

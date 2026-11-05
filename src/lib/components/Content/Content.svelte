@@ -2,7 +2,7 @@
     import ContentHeader from "./ContentHeader.svelte";
     import type { Chord } from "#lib/types.ts";
     import ChordEditor from "./ChordEditor.svelte";
-    import ChordResult from "./ChordResult.svelte";
+    import ChordResult from "./ChordDrawing.svelte";
 
     type Props = {
         chord: Chord;
