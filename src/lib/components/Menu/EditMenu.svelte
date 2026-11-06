@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { PanelLeftClose } from "@lucide/svelte";
     import type { Chord } from "#lib/types.ts";
     import { tuningPresets } from "#lib/tunings.ts";
     import { validatePositiveInput } from "#lib/utils.ts";
@@ -55,11 +54,11 @@
             </select>
         </fieldset>
 
-        <div class="flex text-xs p-2 pb-0 gap-8">
-            <label class="label w-28">
+        <div class="grid grid-cols-2 gap-3 pt-2">
+            <label class="menu-check flex min-h-8 cursor-pointer items-center gap-2 text-xs">
                 <input
                     type="checkbox"
-                    class="checkbox checkbox-primary"
+                    class="checkbox checkbox-primary checkbox-sm rounded-md shadow-none"
                     checked={chord.showTuningLabel}
                     oninput={(event) => {
                         onChordChange({
@@ -70,10 +69,10 @@
                 Tuning Label
             </label>
 
-            <label class="label">
+            <label class="menu-check flex min-h-8 cursor-pointer items-center gap-2 text-xs">
                 <input
                     type="checkbox"
-                    class="checkbox checkbox-primary"
+                    class="checkbox checkbox-primary checkbox-sm rounded-md shadow-none"
                     checked={chord.showStringNoteLabels}
                     oninput={(event) => {
                         onChordChange({
@@ -85,7 +84,7 @@
             </label>
         </div>
 
-        <div class="flex justify-between gap-4 pt-2">
+        <div class="grid grid-cols-3 gap-3 pt-2">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Capo Fret</legend>
                 <input
@@ -123,7 +122,7 @@
                 <legend class="fieldset-legend">Starting Fret</legend>
                 <input
                     type="number"
-                    class="input w-21"
+                    class="input"
                     value={chord.startFret}
                     oninput={(event) => {
                         const value = validatePositiveInput(event);
@@ -142,10 +141,10 @@
             </fieldset>
 
             <fieldset class="fieldset">
-                <legend class="fieldset-legend">Number of Frets</legend>
+                <legend class="fieldset-legend">Frets</legend>
                 <input
                     type="number"
-                    class="input w-26"
+                    class="input"
                     min="1"
                     value={chord.fretCount}
                     oninput={(event) => {
@@ -167,11 +166,11 @@
             </fieldset>
         </div>
 
-        <div class="flex text-xs p-2 pb-0 gap-8">
-            <label class="label w-28">
+        <div class="grid grid-cols-2 gap-3 pt-2">
+            <label class="menu-check flex min-h-8 cursor-pointer items-center gap-2 text-xs">
                 <input
                     type="checkbox"
-                    class="checkbox checkbox-primary"
+                    class="checkbox checkbox-primary checkbox-sm rounded-md shadow-none"
                     checked={chord.ShowCapoLabel}
                     oninput={(event) => {
                         onChordChange({
@@ -182,10 +181,10 @@
                 Capo Label
             </label>
 
-            <label class="label">
+            <label class="menu-check flex min-h-8 cursor-pointer items-center gap-2 text-xs">
                 <input
                     type="checkbox"
-                    class="checkbox checkbox-primary"
+                    class="checkbox checkbox-primary checkbox-sm rounded-md shadow-none"
                     checked={chord.showFretLabel}
                     oninput={(event) => {
                         onChordChange({

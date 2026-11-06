@@ -45,7 +45,7 @@
 
 <div
     class="relative shrink-0 overflow-hidden transition-[height] duration-300 ease-in-out motion-reduce:transition-none"
-    style:height={isOpen ? "4.5rem" : "3rem"}
+    style:height={isOpen ? "4rem" : "3rem"}
 >
     {#if !isOpen}
         <button
@@ -77,66 +77,72 @@
 
     <div
         id="toolbar-actions"
-        class="relative z-10 flex h-18 items-center justify-between pl-4 pr-18 transition-[transform,opacity] duration-300 ease-in-out motion-reduce:transition-none"
+        class="relative z-10 flex h-16 items-center justify-between pl-4 pr-18 transition-[transform,opacity] duration-300 ease-in-out motion-reduce:transition-none"
         class:opacity-0={!isOpen}
         style:transform={isOpen ? "translateY(0)" : "translateY(100%)"}
         inert={!isOpen}
     >
-        <div class="flex">
+        <div class="flex items-center gap-3">
             <button
-                class="btn btn-square"
+                type="button"
+                class="toolbar-control btn btn-ghost btn-square"
+                aria-label="Reset chord"
                 onclick={(event) => {
                     onChordChange(createDefaultChord());
                 }}
             >
-                <Trash color="currentColor" />
+                <Trash size={24} color="currentColor" />
             </button>
-            <div class="divider divider-horizontal mx-2"></div>
-            <div class="flex gap-2">
+            <span class="h-6 w-px shrink-0 bg-white/25" aria-hidden="true"></span>
+            <div class="flex items-center gap-1">
                 <button
                     type="button"
-                    class="btn btn-square"
+                    class="toolbar-control btn btn-ghost btn-square"
                     onclick={onUndo}
                     disabled={!canUndo}
                     aria-label="Undo"
                 >
-                    <Undo2 color="currentColor" />
+                    <Undo2 size={24} color="currentColor" />
                 </button>
                 <button
                     type="button"
-                    class="btn btn-square"
+                    class="toolbar-control btn btn-ghost btn-square"
                     onclick={onRedo}
                     disabled={!canRedo}
                     aria-label="Redo"
                 >
-                    <Redo2 color="currentColor" />
+                    <Redo2 size={24} color="currentColor" />
                 </button>
             </div>
         </div>
 
-        <div class="flex">
-            <div class="flex gap-4">
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
                 <button
                     type="button"
-                    class="btn btn-square"
+                    class="toolbar-control btn btn-ghost btn-square"
                     onclick={() => onCopy(format, exportWidth)}
                     disabled={!canDownload}
                     aria-label="Copy chord"
                 >
-                    <Copy color="currentColor" />
+                    <Copy size={24} color="currentColor" />
                 </button>
 
                 <button
                     type="button"
-                    class="btn btn-primary btn-square"
+                    class="toolbar-control btn btn-ghost btn-square"
                     onclick={() => onDownload(format, exportWidth)}
                     disabled={!canDownload}
                     aria-label="Download chord"
                 >
-                    <Download color="currentColor" />
+                    <Download size={24} color="currentColor" />
                 </button>
 
-                <select bind:value={format} class="select w-20 shrink-0">
+                <select
+                    bind:value={format}
+                    class="toolbar-select select w-20 shrink-0"
+                    aria-label="Export format"
+                >
                     <option value="PNG">PNG</option>
                     <option value="SVG">SVG</option>
                 </select>
@@ -144,7 +150,7 @@
                 {#if format === "PNG"}
                     <select
                         bind:value={exportWidth}
-                        class="select w-25 shrink-0"
+                        class="toolbar-select select w-25 shrink-0"
                         aria-label="Export size"
                     >
                         <option value={512}>Small</option>
@@ -153,9 +159,9 @@
                     </select>
                 {/if}
             </div>
-            <div class="divider divider-horizontal mx-2"></div>
-            <button class="btn btn-square">
-                <Share color="currentColor" />
+            <span class="h-6 w-px shrink-0 bg-white/25" aria-hidden="true"></span>
+            <button type="button" class="toolbar-control btn btn-ghost btn-square" aria-label="Share chord">
+                <Share size={24} color="currentColor" />
             </button>
         </div>
     </div>
@@ -165,7 +171,7 @@
     >
         {#if isOpen}
             <span
-                class="absolute inset-y-4 left-0 w-0.5 bg-base-300"
+                class="absolute inset-y-5 left-0 w-px bg-white/25"
                 aria-hidden="true"
             ></span>
         {/if}
@@ -178,7 +184,7 @@
             aria-label={isOpen ? "Collapse toolbar" : "Expand toolbar"}
         >
             {#if isOpen}
-                <ChevronDown size={40} color="currentColor" class="shrink-0" />
+                <ChevronDown size={32} color="currentColor" class="shrink-0" />
             {:else}
                 <ChevronUp size={40} color="currentColor" class="shrink-0" />
             {/if}
@@ -187,6 +193,56 @@
 </div>
 
 <style>
+    .toolbar-control {
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 0.5rem;
+        color: white;
+        box-shadow: none;
+    }
+
+    .toolbar-control.btn-ghost {
+        background-color: transparent;
+        border-color: transparent;
+    }
+
+    .toolbar-control.btn-ghost:hover:not(:disabled) {
+        background-color: rgb(255 255 255 / 12%);
+    }
+
+    .toolbar-control:focus-visible {
+        outline-color: white;
+    }
+
+    .toolbar-control:disabled {
+        background-color: transparent;
+        border-color: transparent;
+        color: rgb(255 255 255 / 30%);
+    }
+
+    .toolbar-select {
+        height: 2.25rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        box-shadow: none;
+    }
+
+    .toolbar-select:focus-within {
+        outline-color: white;
+    }
+
+    @media (pointer: coarse) {
+        .toolbar-control {
+            width: 2.75rem;
+            height: 2.75rem;
+        }
+
+        .toolbar-select {
+            height: 2.75rem;
+            font-size: 1rem;
+        }
+    }
+
     .toolbar-background {
         transform: translateY(var(--toolbar-offset));
     }

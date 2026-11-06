@@ -45,17 +45,19 @@
 
 <div>
     <div class="flex justify-between items-center">
-        <span class="text-xl font-bold text-primary">Customize</span>
+        <span class="text-base font-semibold text-primary">Customize</span>
         <button
-            class="btn btn-square w-8 h-8"
+            type="button"
+            class="btn btn-ghost btn-circle btn-sm text-primary shadow-none"
+            aria-label="Reset customization"
             onclick={() => onChordChange(resetChordStyling())}
         >
-            <RotateCcw color="currentColor" />
+            <RotateCcw size={22} color="currentColor" />
         </button>
     </div>
     <div>
-        <div class="flex justify-between gap-4">
-            <fieldset class="fieldset w-55">
+        <div class="grid grid-cols-2 gap-3">
+            <fieldset class="fieldset">
                 <legend class="fieldset-legend">Style</legend>
                 <select
                     class="select"
@@ -74,7 +76,7 @@
                 </select>
             </fieldset>
 
-            <fieldset class="fieldset w-55">
+            <fieldset class="fieldset">
                 <legend class="fieldset-legend">Chord Color</legend>
                 <select
                     class="select"
@@ -98,7 +100,7 @@
             </fieldset>
         </div>
 
-        <div class="flex justify-between gap-4">
+        <div class="grid grid-cols-2 gap-3">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Line Thickness</legend>
                 <input
@@ -130,7 +132,7 @@
                 />
             </fieldset>
 
-            <fieldset class="fieldset w-55">
+            <fieldset class="fieldset">
                 <legend class="fieldset-legend">Line Color</legend>
                 <select
                     class="select"
@@ -152,7 +154,7 @@
             </fieldset>
         </div>
 
-        <div class="flex justify-between gap-4">
+        <div class="grid grid-cols-2 gap-3">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Circle Size</legend>
                 <input
@@ -184,7 +186,7 @@
                 />
             </fieldset>
 
-            <fieldset class="fieldset w-55">
+            <fieldset class="fieldset">
                 <legend class="fieldset-legend">Circle Color</legend>
                 <select
                     class="select"
@@ -229,7 +231,7 @@
         </fieldset>
     </div>
 
-    <div class="flex justify-between gap-4">
+    <div class="grid grid-cols-2 gap-3">
         <fieldset class="fieldset">
             <legend class="fieldset-legend">Title Font Size</legend>
             <input

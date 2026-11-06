@@ -108,6 +108,44 @@
         display: none;
     }
 
+    .sidebar-settings :global(.fieldset) {
+        min-width: 0;
+        padding-block: 0.375rem;
+    }
+
+    .sidebar-settings :global(.fieldset-legend) {
+        padding-block: 0.375rem;
+        font-weight: 500;
+    }
+
+    .sidebar-settings :global(.input),
+    .sidebar-settings :global(.select) {
+        width: 100%;
+        min-width: 0;
+        height: 2.25rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        box-shadow: none;
+    }
+
+    .sidebar-settings :global(.input:focus-within),
+    .sidebar-settings :global(.select:focus-within) {
+        border-color: var(--color-primary);
+        outline-color: var(--color-primary);
+    }
+
+    @media (pointer: coarse) {
+        .sidebar-settings :global(.input),
+        .sidebar-settings :global(.select) {
+            height: 2.75rem;
+            font-size: 1rem;
+        }
+
+        .sidebar-settings :global(.menu-check) {
+            min-height: 2.75rem;
+        }
+    }
+
     .sidebar-background {
         transform: translateX(var(--sidebar-offset));
     }
