@@ -9,12 +9,14 @@
         onNoteClick,
         onStringClick,
         onBarreCreate,
+        onMarkerContextMenu
     }: {
         hoverTargets: HoverTarget[];
         showTargets: boolean;
         onNoteClick: (stringIndex: number, fret: number) => void;
         onStringClick: (stringIndex: number) => void;
         onBarreCreate: (barre: Barre) => void;
+        onMarkerContextMenu: (event: MouseEvent, target: HoverTarget) => void;
     } = $props();
 
     let container: HTMLDivElement;
@@ -171,6 +173,7 @@
             onpointerup={endDrag}
             onpointercancel={cancelDrag}
             onlostpointercapture={cancelDrag}
+            oncontextmenu={(event) => onMarkerContextMenu(event, target)}
             onclick={(event) => handleClick(event, target)}
             style:left={`${target.x}px`}
             style:top={`${target.y}px`}
