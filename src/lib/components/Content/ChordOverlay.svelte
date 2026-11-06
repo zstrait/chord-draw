@@ -4,9 +4,11 @@
     let {
         hoverTargets,
         showTargets,
+        onNoteClick,
     }: {
         hoverTargets: HoverTarget[];
         showTargets: boolean;
+        onNoteClick: (stringIndex: number, fret: number) => void;
     } = $props();
 </script>
 
@@ -16,7 +18,8 @@
             type="button"
             class="hover-target"
             class:show-target={showTargets}
-            aria-label={`Preview string ${target.stringIndex + 1}, visible fret ${target.fret}`}
+            aria-label={`Toggle note on string ${target.stringIndex + 1}, visible fret ${target.fret}`}
+            onclick={() => onNoteClick(target.stringIndex, target.fret)}
             style:left={`${target.x}px`}
             style:top={`${target.y}px`}
             style:width={`${target.width}px`}
