@@ -5,7 +5,10 @@
 
     type Props = {
         chord: Chord;
-        onChordChange: (changes: Partial<Chord>) => void;
+        onChordChange: (
+            changes: Partial<Chord>,
+            input?: HTMLInputElement,
+        ) => void;
     };
 
     let { chord, onChordChange }: Props = $props();
@@ -14,5 +17,5 @@
 <div class="w-80 shrink-0 bg-blue-400 rounded-xl p-4">
     <EditMenu {chord} {onChordChange} />
     <div class="divider my-3"></div>
-    <CustomizeMenu {chord} {onChordChange}/>
+    <CustomizeMenu {chord} {onChordChange} />
 </div>

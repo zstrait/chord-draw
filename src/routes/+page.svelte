@@ -11,16 +11,28 @@
 
     let past = $state<Chord[]>([]);
     let future = $state<Chord[]>([]);
+    let groupedInput: HTMLInputElement | null = null;
 
-    function updateChord(changes: Partial<Chord>) {
-        past.push($state.snapshot(chord));
+    function updateChord(
+        changes: Partial<Chord>,
+        input: HTMLInputElement | null = null,
+    ) {
+        if (input === null || input !== groupedInput) {
+            past.push($state.snapshot(chord));
+        }
+
+        groupedInput = input;
         future = [];
 
         Object.assign(chord, changes);
-        console.log("Saved states:", past.length);
+    }
+
+    function endInputEdit() {
+        groupedInput = null;
     }
 
     function undo() {
+        endInputEdit();
         const previous = past.pop();
 
         if (previous === undefined) {
@@ -32,6 +44,7 @@
     }
 
     function redo() {
+        endInputEdit();
         const latest = future.pop();
 
         if (latest === undefined) {
@@ -44,6 +57,8 @@
 </script>
 
 <svelte:window
+    onfocusin={endInputEdit}
+    onfocusout={endInputEdit}
     onkeydown={(event) => {
         if (event.defaultPrevented || event.isComposing) {
             return;

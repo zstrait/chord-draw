@@ -6,7 +6,10 @@
 
     type Props = {
         chord: Chord;
-        onChordChange: (changes: Partial<Chord>) => void;
+        onChordChange: (
+            changes: Partial<Chord>,
+            input?: HTMLInputElement,
+        ) => void;
     };
 
     let { chord, onChordChange }: Props = $props();
@@ -106,14 +109,17 @@
                         const value = validatePositiveInput(event);
 
                         if (value !== null) {
-                            onChordChange({
-                                styling: {
-                                    ...chord.styling,
-                                    lineThickness: Number(
-                                        event.currentTarget.value,
-                                    ),
+                            onChordChange(
+                                {
+                                    styling: {
+                                        ...chord.styling,
+                                        lineThickness: Number(
+                                            event.currentTarget.value,
+                                        ),
+                                    },
                                 },
-                            });
+                                event.currentTarget,
+                            );
                         }
                     }}
                     onblur={(event) => {
@@ -157,14 +163,17 @@
                         const value = validatePositiveInput(event);
 
                         if (value !== null) {
-                            onChordChange({
-                                styling: {
-                                    ...chord.styling,
-                                    circleSize: Number(
-                                        event.currentTarget.value,
-                                    ),
+                            onChordChange(
+                                {
+                                    styling: {
+                                        ...chord.styling,
+                                        circleSize: Number(
+                                            event.currentTarget.value,
+                                        ),
+                                    },
                                 },
-                            });
+                                event.currentTarget,
+                            );
                         }
                     }}
                     onblur={(event) => {
@@ -231,14 +240,17 @@
                     const value = validatePositiveInput(event);
 
                     if (value !== null) {
-                        onChordChange({
-                            styling: {
-                                ...chord.styling,
-                                titleFontSize: Number(
-                                    event.currentTarget.value,
-                                ),
+                        onChordChange(
+                            {
+                                styling: {
+                                    ...chord.styling,
+                                    titleFontSize: Number(
+                                        event.currentTarget.value,
+                                    ),
+                                },
                             },
-                        });
+                            event.currentTarget,
+                        );
                     }
                 }}
                 onblur={(event) => {
@@ -259,14 +271,17 @@
                     const value = validatePositiveInput(event);
 
                     if (value !== null) {
-                        onChordChange({
-                            styling: {
-                                ...chord.styling,
-                                fingerFontSize: Number(
-                                    event.currentTarget.value,
-                                ),
+                        onChordChange(
+                            {
+                                styling: {
+                                    ...chord.styling,
+                                    fingerFontSize: Number(
+                                        event.currentTarget.value,
+                                    ),
+                                },
                             },
-                        });
+                            event.currentTarget,
+                        );
                     }
                 }}
                 onblur={(event) => {

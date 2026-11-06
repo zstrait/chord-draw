@@ -6,7 +6,10 @@
 
     type Props = {
         chord: Chord;
-        onChordChange: (changes: Partial<Chord>) => void;
+        onChordChange: (
+            changes: Partial<Chord>,
+            input?: HTMLInputElement,
+        ) => void;
     };
 
     let { chord, onChordChange }: Props = $props();
@@ -27,7 +30,10 @@
                 class="input"
                 value={chord.title}
                 oninput={(event) =>
-                    onChordChange({ title: event.currentTarget.value })}
+                    onChordChange(
+                        { title: event.currentTarget.value },
+                        event.currentTarget,
+                    )}
             />
         </fieldset>
 
@@ -95,16 +101,22 @@
                     value={chord.capoFret}
                     oninput={(event) => {
                         if (event.currentTarget.value === "") {
-                            onChordChange({ capoFret: null });
+                            onChordChange(
+                                { capoFret: null },
+                                event.currentTarget,
+                            );
                             return;
                         }
 
                         const value = validatePositiveInput(event);
 
                         if (value !== null) {
-                            onChordChange({
-                                capoFret: Number(event.currentTarget.value),
-                            });
+                            onChordChange(
+                                {
+                                    capoFret: Number(event.currentTarget.value),
+                                },
+                                event.currentTarget,
+                            );
                         }
                     }}
                     onblur={(event) => {
@@ -123,7 +135,10 @@
                         const value = validatePositiveInput(event);
 
                         if (value !== null) {
-                            onChordChange({ startFret: value });
+                            onChordChange(
+                                { startFret: value },
+                                event.currentTarget,
+                            );
                         }
                     }}
                     onblur={(event) => {
@@ -143,9 +158,12 @@
                         const value = validatePositiveInput(event);
 
                         if (value !== null) {
-                            onChordChange({
-                                fretCount: Number(event.currentTarget.value),
-                            });
+                            onChordChange(
+                                {
+                                    fretCount: Number(event.currentTarget.value),
+                                },
+                                event.currentTarget,
+                            );
                         }
                     }}
                     onblur={(event) => {
