@@ -90,16 +90,17 @@
                 <option value="SVG">SVG</option>
             </select>
 
-            <select
-                bind:value={exportWidth}
-                disabled={format === "SVG"}
-                class="select w-25 shrink-0"
-                aria-label="Export size"
-            >
-                <option value={512}>Small</option>
-                <option value={1024}>Medium</option>
-                <option value={2048}>Large</option>
-            </select>
+            {#if format === "PNG"}
+                <select
+                    bind:value={exportWidth}
+                    class="select w-25 shrink-0"
+                    aria-label="Export size"
+                >
+                    <option value={512}>Small</option>
+                    <option value={1024}>Medium</option>
+                    <option value={2048}>Large</option>
+                </select>
+            {/if}
         </div>
         <div class="divider divider-horizontal mx-2"></div>
         <button class="btn btn-square">
