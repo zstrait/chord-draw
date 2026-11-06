@@ -9,8 +9,37 @@
 
     let chord = $state(createDefaultChord());
 
+    let past = $state<Chord[]>([]);
+    let future = $state<Chord[]>([]);
+
     function updateChord(changes: Partial<Chord>) {
+        past.push($state.snapshot(chord));
+        future = [];
+
         Object.assign(chord, changes);
+        console.log("Saved states:", past.length);
+    }
+
+    function undo() {
+        const previous = past.pop();
+
+        if (previous === undefined) {
+            return;
+        }
+
+        future.push($state.snapshot(chord));
+        chord = previous;
+    }
+
+    function redo() {
+        const latest = future.pop();
+
+        if (latest === undefined) {
+            return;
+        }
+
+        past.push($state.snapshot(chord));
+        chord = latest;
     }
 </script>
 
@@ -32,6 +61,12 @@
     <div class="flex min-w-0 flex-1 flex-col">
         <Header />
         <Content {chord} onChordChange={updateChord} />
-        <Toolbar onChordChange={updateChord} />
+        <Toolbar
+            onChordChange={updateChord}
+            onUndo={undo}
+            canUndo={past.length > 0}
+            onRedo={redo}
+            canRedo={future.length > 0}
+        />
     </div>
 </div>

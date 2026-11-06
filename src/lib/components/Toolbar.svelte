@@ -14,9 +14,13 @@
 
     type Props = {
         onChordChange: (changes: Partial<Chord>) => void;
+        onUndo: () => void;
+        canUndo: boolean;
+        onRedo: () => void;
+        canRedo: boolean;
     };
 
-    let { onChordChange }: Props = $props();
+    let { onChordChange, onUndo, canUndo, onRedo, canRedo }: Props = $props();
 </script>
 
 <div class="h-18 bg-red-300 px-4 rounded-xl items-center flex justify-between">
@@ -31,10 +35,22 @@
         </button>
         <div class="divider divider-horizontal mx-2"></div>
         <div class="flex gap-2">
-            <button class="btn btn-square">
+            <button
+                type="button"
+                class="btn btn-square"
+                onclick={onUndo}
+                disabled={!canUndo}
+                aria-label="Undo"
+            >
                 <Undo2 color="#0a0a0a" />
             </button>
-            <button class="btn btn-square">
+            <button
+                type="button"
+                class="btn btn-square"
+                onclick={onRedo}
+                disabled={!canRedo}
+                aria-label="Undo"
+            >
                 <Redo2 color="#0a0a0a" />
             </button>
         </div>

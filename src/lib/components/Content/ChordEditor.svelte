@@ -22,8 +22,7 @@
     let showTargets = $state(false);
     let selectedMarker = $state<SelectedMarker | null>(null);
     let menuPosition = $state({ x: 0, y: 0 });
-
-    let menuContainer: HTMLDivElement | undefined;
+    let menuContainer = $state<HTMLDivElement>();
 
     function handleTargetsChange(targets: HoverTarget[]) {
         hoverTargets = targets;
