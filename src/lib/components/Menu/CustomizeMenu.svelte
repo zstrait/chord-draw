@@ -46,14 +46,16 @@
 <div>
     <div class="flex justify-between items-center">
         <span class="text-base font-semibold text-primary">Customize</span>
-        <button
-            type="button"
-            class="btn btn-ghost btn-circle btn-sm text-primary shadow-none"
-            aria-label="Reset customization"
-            onclick={() => onChordChange(resetChordStyling())}
-        >
-            <RotateCcw size={22} color="currentColor" />
-        </button>
+        <div class="reset-tooltip tooltip tooltip-left" data-tip="Reset styling">
+            <button
+                type="button"
+                class="btn btn-ghost btn-circle btn-sm text-primary shadow-none"
+                aria-label="Reset customization"
+                onclick={() => onChordChange(resetChordStyling())}
+            >
+                <RotateCcw size={22} color="currentColor" />
+            </button>
+        </div>
     </div>
     <div>
         <div class="grid grid-cols-2 gap-3">
@@ -295,3 +297,9 @@
         </fieldset>
     </div>
 </div>
+
+<style>
+    .reset-tooltip[data-tip]::before {
+        font-size: 0.8125rem;
+    }
+</style>

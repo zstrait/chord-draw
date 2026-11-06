@@ -16,18 +16,23 @@
 
 <div class="flex min-h-0 flex-col flex-1 overflow-auto borde p-2">
     <div class="flex justify-end">
-        <button
-            type="button"
-            class="btn btn-square"
-            aria-label={isMaximized ? "Restore panels" : "Maximize workspace"}
-            onclick={onMaximize}
+        <div
+            class="tooltip tooltip-left"
+            data-tip={isMaximized ? "Minimize" : "Maximize"}
         >
-            {#if isMaximized}
-                <Minimize2 color="currentColor" />
-            {:else}
-                <Maximize2 color="currentColor" />
-            {/if}
-        </button>
+            <button
+                type="button"
+                class="btn btn-square"
+                aria-label={isMaximized ? "Restore panels" : "Maximize workspace"}
+                onclick={onMaximize}
+            >
+                {#if isMaximized}
+                    <Minimize2 color="currentColor" />
+                {:else}
+                    <Maximize2 color="currentColor" />
+                {/if}
+            </button>
+        </div>
     </div>
     <div class="flex justify-center px-12 py-4 gap-24">
         <ChordEditor {chord} {onChordChange} {onSvgChange} />

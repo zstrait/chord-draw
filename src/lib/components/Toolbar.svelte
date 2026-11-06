@@ -44,7 +44,8 @@
 </script>
 
 <div
-    class="relative shrink-0 overflow-hidden transition-[height] duration-300 ease-in-out motion-reduce:transition-none"
+    class="relative shrink-0 transition-[height] duration-300 ease-in-out motion-reduce:transition-none"
+    class:overflow-hidden={!isOpen}
     style:height={isOpen ? "4rem" : "3rem"}
 >
     {#if !isOpen}
@@ -83,86 +84,102 @@
         inert={!isOpen}
     >
         <div class="flex items-center gap-3">
-            <button
-                type="button"
-                class="toolbar-control btn btn-ghost btn-square"
-                aria-label="Reset chord"
-                onclick={(event) => {
-                    onChordChange(createDefaultChord());
-                }}
-            >
-                <Trash size={24} color="currentColor" />
-            </button>
+            <div class="tooltip tooltip-top inline-flex shrink-0" data-tip="Clear">
+                <button
+                    type="button"
+                    class="toolbar-control btn btn-ghost btn-square"
+                    aria-label="Reset chord"
+                    onclick={(event) => {
+                        onChordChange(createDefaultChord());
+                    }}
+                >
+                    <Trash size={24} color="currentColor" />
+                </button>
+            </div>
             <span class="h-6 w-px shrink-0 bg-white/25" aria-hidden="true"></span>
             <div class="flex items-center gap-1">
-                <button
-                    type="button"
-                    class="toolbar-control btn btn-ghost btn-square"
-                    onclick={onUndo}
-                    disabled={!canUndo}
-                    aria-label="Undo"
-                >
-                    <Undo2 size={24} color="currentColor" />
-                </button>
-                <button
-                    type="button"
-                    class="toolbar-control btn btn-ghost btn-square"
-                    onclick={onRedo}
-                    disabled={!canRedo}
-                    aria-label="Redo"
-                >
-                    <Redo2 size={24} color="currentColor" />
-                </button>
+                <div class="tooltip tooltip-top inline-flex shrink-0" data-tip="Undo">
+                    <button
+                        type="button"
+                        class="toolbar-control btn btn-ghost btn-square"
+                        onclick={onUndo}
+                        disabled={!canUndo}
+                        aria-label="Undo"
+                    >
+                        <Undo2 size={24} color="currentColor" />
+                    </button>
+                </div>
+                <div class="tooltip tooltip-top inline-flex shrink-0" data-tip="Redo">
+                    <button
+                        type="button"
+                        class="toolbar-control btn btn-ghost btn-square"
+                        onclick={onRedo}
+                        disabled={!canRedo}
+                        aria-label="Redo"
+                    >
+                        <Redo2 size={24} color="currentColor" />
+                    </button>
+                </div>
             </div>
         </div>
 
         <div class="flex items-center gap-3">
             <div class="flex items-center gap-2">
-                <button
-                    type="button"
-                    class="toolbar-control btn btn-ghost btn-square"
-                    onclick={() => onCopy(format, exportWidth)}
-                    disabled={!canDownload}
-                    aria-label="Copy chord"
-                >
-                    <Copy size={24} color="currentColor" />
-                </button>
+                <div class="tooltip tooltip-top inline-flex shrink-0" data-tip="Copy">
+                    <button
+                        type="button"
+                        class="toolbar-control btn btn-ghost btn-square"
+                        onclick={() => onCopy(format, exportWidth)}
+                        disabled={!canDownload}
+                        aria-label="Copy chord"
+                    >
+                        <Copy size={24} color="currentColor" />
+                    </button>
+                </div>
 
-                <button
-                    type="button"
-                    class="toolbar-control btn btn-ghost btn-square"
-                    onclick={() => onDownload(format, exportWidth)}
-                    disabled={!canDownload}
-                    aria-label="Download chord"
-                >
-                    <Download size={24} color="currentColor" />
-                </button>
+                <div class="tooltip tooltip-top inline-flex shrink-0" data-tip="Download">
+                    <button
+                        type="button"
+                        class="toolbar-control btn btn-ghost btn-square"
+                        onclick={() => onDownload(format, exportWidth)}
+                        disabled={!canDownload}
+                        aria-label="Download chord"
+                    >
+                        <Download size={24} color="currentColor" />
+                    </button>
+                </div>
 
-                <select
-                    bind:value={format}
-                    class="toolbar-select select w-20 shrink-0"
-                    aria-label="Export format"
-                >
-                    <option value="PNG">PNG</option>
-                    <option value="SVG">SVG</option>
-                </select>
+                <div class="tooltip tooltip-top inline-flex shrink-0" data-tip="Export type">
+                    <select
+                        bind:value={format}
+                        class="toolbar-select select w-20 shrink-0"
+                        aria-label="Export format"
+                    >
+                        <option value="PNG">PNG</option>
+                        <option value="SVG">SVG</option>
+                    </select>
+                </div>
 
                 {#if format === "PNG"}
-                    <select
-                        bind:value={exportWidth}
-                        class="toolbar-select select w-25 shrink-0"
-                        aria-label="Export size"
-                    >
-                        <option value={512}>Small</option>
-                        <option value={1024}>Medium</option>
-                        <option value={2048}>Large</option>
-                    </select>
+                    <div class="tooltip tooltip-top inline-flex shrink-0" data-tip="Export size">
+                        <select
+                            bind:value={exportWidth}
+                            class="toolbar-select select w-25 shrink-0"
+                            aria-label="Export size"
+                        >
+                            <option value={512}>Small</option>
+                            <option value={1024}>Medium</option>
+                            <option value={2048}>Large</option>
+                        </select>
+                    </div>
                 {/if}
             </div>
             <span class="h-6 w-px shrink-0 bg-white/25" aria-hidden="true"></span>
-            <button type="button" class="toolbar-control btn btn-ghost btn-square" aria-label="Share chord">
-                <Share size={24} color="currentColor" />
-            </button>
+            <div class="tooltip tooltip-top inline-flex shrink-0" data-tip="Share">
+                <button type="button" class="toolbar-control btn btn-ghost btn-square" aria-label="Share chord">
+                    <Share size={24} color="currentColor" />
+                </button>
+            </div>
         </div>
     </div>
 
