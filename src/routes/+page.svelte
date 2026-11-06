@@ -45,11 +45,37 @@
 
 <svelte:window
     onkeydown={(event) => {
+        if (event.defaultPrevented || event.isComposing) {
+            return;
+        }
+
         if (
-            event.key === "Enter" &&
-            !event.isComposing &&
-            event.target instanceof HTMLInputElement
+            (event.metaKey || event.ctrlKey) &&
+            !event.altKey &&
+            event.key.toLowerCase() === "z"
         ) {
+            const target = event.target;
+
+            if (
+                target instanceof HTMLElement &&
+                (target.closest("input, textarea, select") ||
+                    target.isContentEditable)
+            ) {
+                return;
+            }
+
+            event.preventDefault();
+
+            if (event.shiftKey) {
+                redo();
+            } else {
+                undo();
+            }
+
+            return;
+        }
+
+        if (event.key === "Enter" && event.target instanceof HTMLInputElement) {
             event.preventDefault();
             event.target.blur();
         }
