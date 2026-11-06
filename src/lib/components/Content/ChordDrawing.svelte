@@ -1,6 +1,5 @@
 <script lang="ts">
     import type { Chord, HoverTarget } from "#lib/types.ts";
-    import ChordOverlay from "./ChordOverlay.svelte";
     import {
         SVGuitarChord,
         ChordStyle,
@@ -8,13 +7,12 @@
         type Barre as SvgBarre,
     } from "svguitar";
 
-    let { heading, chord }: { heading: string; chord: Chord } = $props();
+    let { chord, onTargetsChange }: {
+        chord: Chord;
+        onTargetsChange: (targets: HoverTarget[]) => void;
+    } = $props();
 
     let container: HTMLDivElement;
-    let diagramWrapper: HTMLDivElement;
-
-    let hoverTargets = $state<HoverTarget[]>([]);
-    let showTargets = $state(false);
 
     function measureTargets(
         stringCount: number,
@@ -25,7 +23,7 @@
         const transform = svg?.getScreenCTM();
 
         if (!svg || !transform) {
-            hoverTargets = [];
+            onTargetsChange([]);
             return;
         }
 
@@ -38,7 +36,7 @@
             .sort((a, b) => a.x1.baseVal.value - b.x1.baseVal.value);
 
         if (strings.length !== stringCount || stringCount < 2) {
-            hoverTargets = [];
+            onTargetsChange([]);
             return;
         }
 
@@ -56,14 +54,14 @@
         );
 
         if (!frets.length) {
-            hoverTargets = [];
+            onTargetsChange([]);
             return;
         }
 
         const bottom = Math.max(...frets.map((line) => line.y1.baseVal.value));
         const stringSpacing = (right - left) / (stringCount - 1);
         const fretSpacing = (bottom - top) / fretCount;
-        const wrapper = diagramWrapper.getBoundingClientRect();
+        const wrapper = container.getBoundingClientRect();
         const targets: HoverTarget[] = [];
 
         for (let stringIndex = 0; stringIndex < stringCount; stringIndex++) {
@@ -88,7 +86,7 @@
             }
         }
 
-        hoverTargets = targets;
+        onTargetsChange(targets);
     }
 
     function stringsToFingers(strings: Chord["strings"]): Finger[] {
@@ -206,7 +204,7 @@
                 if (isNormal) {
                     measureTargets(stringCount, fretCount, circleSize);
                 } else {
-                    hoverTargets = [];
+                    onTargetsChange([]);
                 }
             });
         }
@@ -214,7 +212,7 @@
         // Keep targets aligned when the diagram resizes or SVGuitar redraws
         // after its fonts finish loading. The overlay lives outside container.
         const resizeObserver = new ResizeObserver(queueMeasurement);
-        resizeObserver.observe(diagramWrapper);
+        resizeObserver.observe(container);
 
         const mutationObserver = new MutationObserver(queueMeasurement);
         mutationObserver.observe(container, {
@@ -223,7 +221,7 @@
             attributes: true,
         });
 
-        hoverTargets = [];
+        onTargetsChange([]);
         queueMeasurement();
 
         return () => {
@@ -235,27 +233,4 @@
     });
 </script>
 
-<div>
-    <span class="text-xl font-bold pl-4">{heading}</span>
-    <label class="flex items-center gap-2 px-4 text-sm">
-        <input
-            type="checkbox"
-            class="checkbox checkbox-xs"
-            bind:checked={showTargets}
-        />
-        Show hover targets (draft)
-    </label>
-    {#if chord.styling.style === "handdrawn"}
-        <p class="px-4 text-sm">
-            Switch to Normal style to try the hover draft.
-        </p>
-    {/if}
-    <div
-        class="border border-green-500 w-110 h-140 rounded-xl flex flex-col justify-end pb-12"
-    >
-        <div class="relative" bind:this={diagramWrapper}>
-            <div bind:this={container}></div>
-            <ChordOverlay {hoverTargets} {showTargets} />
-        </div>
-    </div>
-</div>
+<div bind:this={container}></div>
