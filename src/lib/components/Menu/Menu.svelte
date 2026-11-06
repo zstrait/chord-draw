@@ -88,7 +88,7 @@
 
         <div
             id="sidebar-settings"
-            class="relative z-10 min-h-0 flex-1 overflow-y-auto transition-opacity duration-300 motion-reduce:transition-none"
+            class="sidebar-settings relative z-10 min-h-0 flex-1 overflow-y-auto transition-opacity duration-300 motion-reduce:transition-none"
             class:opacity-0={!isOpen}
             inert={!isOpen}
         >
@@ -100,6 +100,14 @@
 </div>
 
 <style>
+    .sidebar-settings {
+        scrollbar-width: none;
+    }
+
+    .sidebar-settings::-webkit-scrollbar {
+        display: none;
+    }
+
     .sidebar-background {
         transform: translateX(var(--sidebar-offset));
     }
