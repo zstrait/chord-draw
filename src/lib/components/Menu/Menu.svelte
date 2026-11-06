@@ -18,19 +18,19 @@
 </script>
 
 <div
-    class="shrink-0 overflow-hidden transition-[width] duration-300 ease-in-out motion-reduce:transition-none"
-    style:width={isOpen ? "20rem" : "4rem"}
+    class="mb-2 shrink-0 overflow-hidden transition-[width] duration-300 ease-in-out motion-reduce:transition-none"
+    style:width={isOpen ? "20rem" : "3rem"}
 >
     <div
         class="relative flex h-full w-80 flex-col p-4 transition-transform duration-300 ease-in-out motion-reduce:transition-none"
         style:transform={isOpen
             ? "translateX(0)"
-            : "translateX(calc(4rem - 20rem))"}
+            : "translateX(calc(3rem - 20rem))"}
     >
         {#if !isOpen}
             <button
                 type="button"
-                class="sidebar-open absolute inset-y-0 right-0 z-20 w-16 cursor-pointer border-0 bg-transparent p-0"
+                class="sidebar-open absolute inset-y-0 right-0 z-20 w-12 cursor-pointer border-0 bg-transparent p-0"
                 tabindex="-1"
                 onclick={onToggle}
                 aria-label="Expand sidebar"
@@ -45,33 +45,43 @@
         {/if}
 
         <div
-            class="sidebar-background pointer-events-none absolute inset-0 rounded-xl bg-blue-400 transition-transform duration-300 ease-in-out motion-reduce:transition-none"
-            style:--sidebar-offset={isOpen
-                ? "0rem"
-                : "calc(1rem - 4rem)"}
+            class="sidebar-background pointer-events-none absolute inset-0 bg-[#CBD7E6] transition-[transform,border-radius] duration-300 ease-in-out motion-reduce:transition-none"
+            style:--sidebar-offset={isOpen ? "0rem" : "-2rem"}
+            style:border-radius={isOpen ? "0.75rem" : "0.75rem 1.5rem 0.75rem 0.75rem"}
         ></div>
 
         <div
-            class={`pointer-events-none absolute inset-x-0 top-0 h-16 bg-blue-400 ${isOpen ? "rounded-xl" : "rounded-r-full"}`}
+            class="sidebar-tab pointer-events-none absolute inset-x-0 top-0 h-16 bg-[#CBD7E6] transition-[border-radius] duration-300 ease-in-out motion-reduce:transition-none"
+            style:border-radius={isOpen ? "0.75rem" : "0 1.5rem 1.5rem 0"}
         ></div>
 
-        <div class="relative z-10 flex shrink-0 items-center justify-between">
-            <span class="text-xl font-bold" class:invisible={!isOpen}>
+        <div class="relative z-10 flex h-8 shrink-0 items-center pr-12">
+            <span class="text-xl font-bold text-primary" class:invisible={!isOpen}>
                 Edit Menu
             </span>
+        </div>
 
+        <div
+            class="absolute z-10 flex items-center justify-center transition-[top,right,width,height] duration-300 ease-in-out motion-reduce:transition-none"
+            style:top={isOpen ? "1rem" : "0rem"}
+            style:right={isOpen ? "1rem" : "0rem"}
+            style:width={isOpen ? "2rem" : "3rem"}
+            style:height={isOpen ? "2rem" : "4rem"}
+        >
             <button
                 type="button"
-                class="btn btn-ghost btn-circle w-8 h-8 border-0 bg-transparent shadow-none hover:bg-blue-500/20"
+                class="flex shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-primary transition-[width,height] duration-300 ease-in-ou focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none"
+                style:width={isOpen ? "2rem" : "3rem"}
+                style:height={isOpen ? "2rem" : "3rem"}
                 onclick={onToggle}
                 aria-expanded={isOpen}
                 aria-controls="sidebar-settings"
                 aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
             >
                 {#if isOpen}
-                    <ChevronLeft size={40} color="#0a0a0a" />
+                    <ChevronLeft size={32} color="currentColor" class="shrink-0" />
                 {:else}
-                    <ChevronRight size={40} color="#0a0a0a" />
+                    <ChevronRight size={40} color="currentColor" class="shrink-0" />
                 {/if}
             </button>
         </div>
@@ -92,6 +102,21 @@
 <style>
     .sidebar-background {
         transform: translateX(var(--sidebar-offset));
+    }
+
+    .sidebar-tab::after {
+        content: "";
+        position: absolute;
+        right: calc(3rem - 1rem - 0.5rem);
+        top: 100%;
+        width: 0.5rem;
+        height: 0.5rem;
+        background-color: inherit;
+        mask-image: radial-gradient(
+            circle at bottom right,
+            transparent calc(0.5rem - 0.5px),
+            #000 0.5rem
+        );
     }
 
     .sidebar-open:has(.sidebar-hover:hover) ~ .sidebar-background {

@@ -45,12 +45,12 @@
 
 <div>
     <div class="flex justify-between items-center">
-        <span class="text-xl font-bold">Customize</span>
+        <span class="text-xl font-bold text-primary">Customize</span>
         <button
             class="btn btn-square w-8 h-8"
             onclick={() => onChordChange(resetChordStyling())}
         >
-            <RotateCcw color="#0a0a0a" />
+            <RotateCcw color="currentColor" />
         </button>
     </div>
     <div>

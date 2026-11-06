@@ -6,13 +6,12 @@
     import MarkerMenu from "./MarkerMenu.svelte";
 
     type Props = {
-        heading: string;
         chord: Chord;
         onChordChange: (changes: Partial<Chord>) => void;
         onSvgChange: (svg: string) => void;
     };
 
-    let { heading, chord, onChordChange, onSvgChange }: Props = $props();
+    let { chord, onChordChange, onSvgChange }: Props = $props();
 
     type SelectedMarker = {
         kind: "note" | "barre";
@@ -20,7 +19,6 @@
     };
 
     let hoverTargets = $state<HoverTarget[]>([]);
-    let showTargets = $state(false);
     let selectedMarker = $state<SelectedMarker | null>(null);
     let menuPosition = $state({ x: 0, y: 0 });
     let menuContainer = $state<HTMLDivElement>();
@@ -202,22 +200,13 @@
 </script>
 
 <div>
-    <span class="text-xl font-bold pl-4">{heading}</span>
-    <label class="flex items-center gap-2 px-4 text-sm">
-        <input
-            type="checkbox"
-            class="checkbox checkbox-xs"
-            bind:checked={showTargets}
-        />
-        Show hover targets (draft)
-    </label>
     {#if chord.styling.style === "handdrawn"}
         <p class="px-4 text-sm">
-            Switch to Normal style to try the hover draft.
+            Switch to Normal style to edit the diagram.
         </p>
     {/if}
     <div
-        class="border border-green-500 w-110 h-140 rounded-xl flex flex-col justify-end pb-12"
+        class="bg-white border border-base-300 w-110 h-140 rounded-xl flex flex-col justify-end pb-12"
     >
         <div class="relative">
             <ChordDrawing
@@ -227,7 +216,6 @@
             />
             <ChordOverlay
                 {hoverTargets}
-                {showTargets}
                 onNoteClick={handleNoteClick}
                 onStringClick={handleStringClick}
                 onBarreCreate={handleBarreCreate}

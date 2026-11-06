@@ -14,6 +14,7 @@
     let future = $state<Chord[]>([]);
     let svg = $state("");
     let menuOpen = $state(true);
+    let toolbarOpen = $state(true);
     let groupedInput: HTMLInputElement | null = null;
 
     function handleSvgChange(value: string) {
@@ -129,7 +130,7 @@
     }}
 />
 
-<div class="flex h-dvh gap-4 p-2 pl-0">
+<div class="flex h-dvh gap-4 p-2 pl-0 pb-0">
     <Menu
         {chord}
         onChordChange={updateChord}
@@ -138,7 +139,10 @@
             menuOpen = !menuOpen;
         }}
     />
-    <div class="flex min-w-0 flex-1 flex-col">
+    <div
+        class="flex min-h-0 min-w-0 flex-1 flex-col transition-[padding-bottom] duration-300 ease-in-out motion-reduce:transition-none"
+        style:padding-bottom={toolbarOpen ? "0.5rem" : "0rem"}
+    >
         <Header />
         <Content
             {chord}
@@ -146,6 +150,10 @@
             onSvgChange={handleSvgChange}
         />
         <Toolbar
+            isOpen={toolbarOpen}
+            onToggle={() => {
+                toolbarOpen = !toolbarOpen;
+            }}
             onChordChange={updateChord}
             onUndo={undo}
             canUndo={past.length > 0}

@@ -59,7 +59,7 @@
             <label class="label w-28">
                 <input
                     type="checkbox"
-                    class="checkbox"
+                    class="checkbox checkbox-primary"
                     checked={chord.showTuningLabel}
                     oninput={(event) => {
                         onChordChange({
@@ -73,7 +73,7 @@
             <label class="label">
                 <input
                     type="checkbox"
-                    class="checkbox"
+                    class="checkbox checkbox-primary"
                     checked={chord.showStringNoteLabels}
                     oninput={(event) => {
                         onChordChange({
@@ -171,7 +171,7 @@
             <label class="label w-28">
                 <input
                     type="checkbox"
-                    class="checkbox"
+                    class="checkbox checkbox-primary"
                     checked={chord.ShowCapoLabel}
                     oninput={(event) => {
                         onChordChange({
@@ -185,7 +185,7 @@
             <label class="label">
                 <input
                     type="checkbox"
-                    class="checkbox"
+                    class="checkbox checkbox-primary"
                     checked={chord.showFretLabel}
                     oninput={(event) => {
                         onChordChange({

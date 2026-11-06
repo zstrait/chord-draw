@@ -12,13 +12,13 @@
     let { chord, onChordChange, onSvgChange }: Props = $props();
 </script>
 
-<div class="flex flex-col flex-1 border border-green-500 p-2">
+<div class="flex min-h-0 flex-col flex-1 overflow-auto borde p-2">
     <div class="flex justify-end">
         <button type="button" class="btn btn-square" aria-label="Fullscreen">
-            <Expand color="#0a0a0a" />
+            <Expand color="currentColor" />
         </button>
     </div>
     <div class="flex justify-center px-12 py-4 gap-24">
-        <ChordEditor heading="Editor" {chord} {onChordChange} {onSvgChange} />
+        <ChordEditor {chord} {onChordChange} {onSvgChange} />
     </div>
 </div>

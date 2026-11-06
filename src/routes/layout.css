@@ -1,2 +1,23 @@
 @import 'tailwindcss';
 @plugin 'daisyui';
+
+[data-theme='light'] {
+    --color-base-100: #ffffff;
+    --color-base-200: #f7f9fc;
+    --color-base-300: #aabcd1;
+    --color-base-content: #1e2d43;
+    --color-primary: #345f97;
+    --color-primary-content: #ffffff;
+}
+
+[data-theme='light'] :is(.input, .select, .btn:not(.btn-primary):not(.btn-ghost)) {
+    border-color: var(--color-base-300);
+}
+
+[data-theme='light'] .label {
+    color: var(--color-base-content);
+}
+
+[data-theme='light'] .divider {
+    --divider-color: var(--color-base-300);
+}

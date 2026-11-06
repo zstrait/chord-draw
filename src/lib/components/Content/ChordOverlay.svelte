@@ -5,14 +5,12 @@
 
     let {
         hoverTargets,
-        showTargets,
         onNoteClick,
         onStringClick,
         onBarreCreate,
         onMarkerContextMenu
     }: {
         hoverTargets: HoverTarget[];
-        showTargets: boolean;
         onNoteClick: (stringIndex: number, fret: number) => void;
         onStringClick: (stringIndex: number) => void;
         onBarreCreate: (barre: Barre) => void;
@@ -163,7 +161,6 @@
         <button
             type="button"
             class="hover-target"
-            class:show-target={showTargets}
             class:note-target={target.kind === "note"}
             aria-label={target.kind === "string"
                 ? `Cycle string ${target.stringIndex + 1} between open, muted, and blank`
@@ -208,12 +205,6 @@
         cursor: crosshair;
     }
 
-    .show-target {
-        outline: 1px dashed rgb(59 130 246 / 45%);
-        outline-offset: -1px;
-        background: rgb(59 130 246 / 5%);
-    }
-
     .note-target {
         touch-action: none;
         user-select: none;
@@ -226,9 +217,9 @@
         transform: translate(-50%, -50%);
         width: var(--diameter);
         height: var(--diameter);
-        border: 2px solid rgb(59 130 246 / 25%);
+        border: 2px solid rgb(82 109 146 / 25%);
         border-radius: 50%;
-        background: rgb(59 130 246 / 12%);
+        background: rgb(82 109 146 / 12%);
         opacity: 0;
         pointer-events: none;
     }
@@ -243,7 +234,7 @@
         height: 80%;
         border: 0;
         border-radius: 6px;
-        background: rgb(59 130 246 / 12%);
+        background: rgb(82 109 146 / 12%);
     }
 
     .dragging .hover-target .hover-circle {
@@ -253,9 +244,9 @@
     .barre-preview {
         position: absolute;
         pointer-events: none;
-        border: 2px solid rgb(59 130 246 / 25%);
+        border: 2px solid rgb(82 109 146 / 25%);
         border-radius: 999px;
-        background: rgb(59 130 246 / 12%);
+        background: rgb(82 109 146 / 12%);
     }
 
     .hover-target:focus-visible {
