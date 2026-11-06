@@ -18,6 +18,7 @@
         canUndo: boolean;
         onRedo: () => void;
         canRedo: boolean;
+        onCopy: (format: "SVG" | "PNG", width: number) => void;
         onDownload: (format: "SVG" | "PNG", width: number) => void;
         canDownload: boolean;
     };
@@ -28,6 +29,7 @@
         canUndo,
         onRedo,
         canRedo,
+        onCopy,
         onDownload,
         canDownload,
     }: Props = $props();
@@ -71,7 +73,13 @@
 
     <div class="flex">
         <div class="flex gap-4">
-            <button class="btn btn-square">
+            <button
+                type="button"
+                class="btn btn-square"
+                onclick={() => onCopy(format, exportWidth)}
+                disabled={!canDownload}
+                aria-label="Copy chord"
+            >
                 <Copy color="#0a0a0a" />
             </button>
 

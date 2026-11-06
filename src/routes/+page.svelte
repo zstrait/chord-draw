@@ -6,7 +6,7 @@
 
     import type { Chord } from "#lib/types.ts";
     import { createDefaultChord } from "#lib/chord.ts";
-    import { downloadSvg, downloadPng } from "#lib/export.ts";
+    import { downloadSvg, downloadPng, copySvg, copyPng } from "#lib/export.ts";
 
     let chord = $state(createDefaultChord());
 
@@ -73,6 +73,18 @@
             downloadPng(svg, width).catch(console.error);
         }
     }
+
+    function handleCopy(format: "SVG" | "PNG", width: number) {
+        if (svg === "") {
+            return;
+        }
+
+        if (format === "SVG") {
+            copySvg(svg).catch(console.error);
+        } else {
+            copyPng(svg, width).catch(console.error);
+        }
+    }
 </script>
 
 <svelte:window
@@ -131,6 +143,7 @@
             canUndo={past.length > 0}
             onRedo={redo}
             canRedo={future.length > 0}
+            onCopy={handleCopy}
             onDownload={handleDownload}
             canDownload={svg !== ""}
         />

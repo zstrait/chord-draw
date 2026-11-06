@@ -16,7 +16,7 @@ export function downloadSvg(svg: string) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export async function downloadPng(svg: string, width = 1024) {
+export async function svgToPng(svg: string, width = 1024): Promise<Blob> {
     const file = new Blob([svg], {
         type: "image/svg+xml;charset=utf-8",
     });
@@ -52,18 +52,35 @@ export async function downloadPng(svg: string, width = 1024) {
             throw new Error("Could not create the PNG file");
         }
 
-        const pngUrl = URL.createObjectURL(png);
-        const link = document.createElement("a");
-
-        link.href = pngUrl;
-        link.download = "chord.png";
-
-        document.body.append(link);
-        link.click();
-        link.remove();
-
-        setTimeout(() => URL.revokeObjectURL(pngUrl), 1000);
+        return png;
     } finally {
         URL.revokeObjectURL(url);
     }
+}
+
+export async function downloadPng(svg: string, width = 1024) {
+    const png = await svgToPng(svg, width);
+    const url = URL.createObjectURL(png);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "chord.png";
+
+    document.body.append(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export async function copySvg(svg: string) {
+    await navigator.clipboard.writeText(svg);
+}
+
+export async function copyPng(svg: string, width = 1024) {
+    const item = new ClipboardItem({
+        "image/png": svgToPng(svg, width),
+    });
+
+    await navigator.clipboard.write([item]);
 }
