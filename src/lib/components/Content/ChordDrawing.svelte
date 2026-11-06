@@ -202,6 +202,7 @@
         drawing
             .configure({
                 fixedDiagramPosition: true,
+                sidePadding: 0.12,
                 emptyStringIndicatorSize: stringIndicatorSize,
                 title: chord.title,
                 // Edit Menu
@@ -276,4 +277,17 @@
     });
 </script>
 
-<div bind:this={container}></div>
+<div class="drawing" bind:this={container}></div>
+
+<style>
+    .drawing {
+        width: 100%;
+        height: 100%;
+    }
+
+    .drawing :global(svg) {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+</style>

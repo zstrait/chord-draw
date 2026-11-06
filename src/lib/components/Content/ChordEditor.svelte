@@ -199,16 +199,16 @@
     }
 </script>
 
-<div>
+<div class="w-110 max-w-full shrink-0">
     {#if chord.styling.style === "handdrawn"}
         <p class="px-4 text-sm">
             Switch to Normal style to edit the diagram.
         </p>
     {/if}
     <div
-        class="bg-white border border-base-300 w-110 h-140 rounded-xl flex flex-col justify-end pb-12"
+        class="relative aspect-[11/14] w-full rounded-xl border border-base-300 bg-white"
     >
-        <div class="relative">
+        <div class="absolute inset-x-3 inset-y-4 sm:inset-y-6">
             <ChordDrawing
                 {chord}
                 onTargetsChange={handleTargetsChange}

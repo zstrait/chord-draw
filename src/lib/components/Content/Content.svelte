@@ -14,8 +14,8 @@
     let { chord, onChordChange, onSvgChange, onMaximize, isMaximized }: Props = $props();
 </script>
 
-<div class="flex min-h-0 flex-col flex-1 overflow-auto borde p-2">
-    <div class="flex justify-end">
+<div class="flex min-h-0 min-w-0 flex-col flex-1 overflow-auto p-2">
+    <div class="flex shrink-0 justify-end">
         <div
             class="tooltip tooltip-left"
             data-tip={isMaximized ? "Minimize" : "Maximize"}
@@ -34,7 +34,7 @@
             </button>
         </div>
     </div>
-    <div class="flex justify-center px-12 py-4 gap-24">
+    <div class="flex flex-1 items-center justify-center px-4 py-4">
         <ChordEditor {chord} {onChordChange} {onSvgChange} />
     </div>
 </div>
