@@ -6,12 +6,19 @@
 
     import type { Chord } from "#lib/types.ts";
     import { createDefaultChord } from "#lib/chord.ts";
+    import { downloadSvg, downloadPng } from "#lib/export.ts";
 
     let chord = $state(createDefaultChord());
 
     let past = $state<Chord[]>([]);
     let future = $state<Chord[]>([]);
+    let svg = $state("");
     let groupedInput: HTMLInputElement | null = null;
+
+    function handleSvgChange(value: string) {
+        svg = value;
+        console.log(value.slice(0, 200));
+    }
 
     function updateChord(
         changes: Partial<Chord>,
@@ -53,6 +60,18 @@
 
         past.push($state.snapshot(chord));
         chord = latest;
+    }
+
+    function handleDownload(format: "SVG" | "PNG", width: number) {
+        if (svg === "") {
+            return;
+        }
+
+        if (format === "SVG") {
+            downloadSvg(svg);
+        } else {
+            downloadPng(svg, width).catch(console.error);
+        }
     }
 </script>
 
@@ -101,13 +120,19 @@
     <Menu {chord} onChordChange={updateChord} />
     <div class="flex min-w-0 flex-1 flex-col">
         <Header />
-        <Content {chord} onChordChange={updateChord} />
+        <Content
+            {chord}
+            onChordChange={updateChord}
+            onSvgChange={handleSvgChange}
+        />
         <Toolbar
             onChordChange={updateChord}
             onUndo={undo}
             canUndo={past.length > 0}
             onRedo={redo}
             canRedo={future.length > 0}
+            onDownload={handleDownload}
+            canDownload={svg !== ""}
         />
     </div>
 </div>

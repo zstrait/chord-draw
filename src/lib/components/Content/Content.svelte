@@ -6,9 +6,10 @@
     type Props = {
         chord: Chord;
         onChordChange: (changes: Partial<Chord>) => void;
+        onSvgChange: (svg: string) => void;
     };
 
-    let { chord, onChordChange }: Props = $props();
+    let { chord, onChordChange, onSvgChange }: Props = $props();
 </script>
 
 <div class="flex flex-col flex-1 border border-green-500 p-2">
@@ -18,6 +19,6 @@
         </button>
     </div>
     <div class="flex justify-center px-12 py-4 gap-24">
-        <ChordEditor heading="Editor" {chord} {onChordChange} />
+        <ChordEditor heading="Editor" {chord} {onChordChange} {onSvgChange} />
     </div>
 </div>

@@ -10,9 +10,11 @@
     let {
         chord,
         onTargetsChange,
+        onSvgChange,
     }: {
         chord: Chord;
         onTargetsChange: (targets: HoverTarget[]) => void;
+        onSvgChange: (svg: string) => void;
     } = $props();
 
     let container: HTMLDivElement;
@@ -242,6 +244,8 @@
         function queueMeasurement() {
             cancelAnimationFrame(frame);
             frame = requestAnimationFrame(() => {
+                onSvgChange(drawing.toSvg());
+
                 if (isNormal) {
                     measureTargets(stringCount, fretCount, circleSize);
                 } else {
@@ -250,8 +254,6 @@
             });
         }
 
-        // Keep targets aligned when the diagram resizes or SVGuitar redraws
-        // after its fonts finish loading. The overlay lives outside container.
         const resizeObserver = new ResizeObserver(queueMeasurement);
         resizeObserver.observe(container);
 

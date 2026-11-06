@@ -9,9 +9,10 @@
         heading: string;
         chord: Chord;
         onChordChange: (changes: Partial<Chord>) => void;
+        onSvgChange: (svg: string) => void;
     };
 
-    let { heading, chord, onChordChange }: Props = $props();
+    let { heading, chord, onChordChange, onSvgChange }: Props = $props();
 
     type SelectedMarker = {
         kind: "note" | "barre";
@@ -219,7 +220,11 @@
         class="border border-green-500 w-110 h-140 rounded-xl flex flex-col justify-end pb-12"
     >
         <div class="relative">
-            <ChordDrawing {chord} onTargetsChange={handleTargetsChange} />
+            <ChordDrawing
+                {chord}
+                onTargetsChange={handleTargetsChange}
+                {onSvgChange}
+            />
             <ChordOverlay
                 {hoverTargets}
                 {showTargets}

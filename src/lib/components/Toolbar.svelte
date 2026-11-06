@@ -18,9 +18,22 @@
         canUndo: boolean;
         onRedo: () => void;
         canRedo: boolean;
+        onDownload: (format: "SVG" | "PNG", width: number) => void;
+        canDownload: boolean;
     };
 
-    let { onChordChange, onUndo, canUndo, onRedo, canRedo }: Props = $props();
+    let {
+        onChordChange,
+        onUndo,
+        canUndo,
+        onRedo,
+        canRedo,
+        onDownload,
+        canDownload,
+    }: Props = $props();
+
+    let format = $state<"SVG" | "PNG">("SVG");
+    let exportWidth = $state(1024);
 </script>
 
 <div class="h-18 bg-red-300 px-4 rounded-xl items-center flex justify-between">
@@ -62,19 +75,30 @@
                 <Copy color="#0a0a0a" />
             </button>
 
-            <button class="btn btn-square">
+            <button
+                type="button"
+                class="btn btn-square"
+                onclick={() => onDownload(format, exportWidth)}
+                disabled={!canDownload}
+                aria-label="Download chord"
+            >
                 <Download color="#0a0a0a" />
             </button>
 
-            <select defaultValue="PNG" class="select w-20 shrink-0">
-                <option>PNG</option>
-                <option>SVG</option>
+            <select bind:value={format} class="select w-20 shrink-0">
+                <option value="PNG">PNG</option>
+                <option value="SVG">SVG</option>
             </select>
 
-            <select defaultValue="Medium" class="select w-25 shrink-0">
-                <option>Small</option>
-                <option>Medium</option>
-                <option>Large</option>
+            <select
+                bind:value={exportWidth}
+                disabled={format === "SVG"}
+                class="select w-25 shrink-0"
+                aria-label="Export size"
+            >
+                <option value={512}>Small</option>
+                <option value={1024}>Medium</option>
+                <option value={2048}>Large</option>
             </select>
         </div>
         <div class="divider divider-horizontal mx-2"></div>
