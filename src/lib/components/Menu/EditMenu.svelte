@@ -16,12 +16,6 @@
 </script>
 
 <div class="flex flex-col">
-    <div class="flex justify-between items-center">
-        <span class="text-xl font-bold">Edit Menu</span>
-        <button class="btn btn-square w-8 h-8">
-            <PanelLeftClose color="#0a0a0a" />
-        </button>
-    </div>
     <div class="flex flex-col">
         <fieldset class="fieldset">
             <legend class="fieldset-legend">Title</legend>

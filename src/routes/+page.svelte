@@ -13,6 +13,7 @@
     let past = $state<Chord[]>([]);
     let future = $state<Chord[]>([]);
     let svg = $state("");
+    let menuOpen = $state(true);
     let groupedInput: HTMLInputElement | null = null;
 
     function handleSvgChange(value: string) {
@@ -129,7 +130,14 @@
 />
 
 <div class="flex h-dvh gap-4 p-2 pl-0">
-    <Menu {chord} onChordChange={updateChord} />
+    <Menu
+        {chord}
+        onChordChange={updateChord}
+        isOpen={menuOpen}
+        onToggle={() => {
+            menuOpen = !menuOpen;
+        }}
+    />
     <div class="flex min-w-0 flex-1 flex-col">
         <Header />
         <Content
