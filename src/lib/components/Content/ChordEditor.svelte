@@ -33,6 +33,21 @@
         });
     }
 
+    function handleStringClick(stringIndex: number) {
+        onChordChange({
+            strings: chord.strings.map((note, index) => {
+                if (index === stringIndex) {
+                    return {
+                        ...note,
+                        fret: note.fret === 0 ? -1 : note.fret === -1 ? null : 0,
+                    };
+                }
+
+                return note;
+            }),
+        });
+    }
+
 </script>
 
 <div>
@@ -59,6 +74,7 @@
                 {hoverTargets}
                 {showTargets}
                 onNoteClick={handleNoteClick}
+                onStringClick={handleStringClick}
             />
         </div>
     </div>

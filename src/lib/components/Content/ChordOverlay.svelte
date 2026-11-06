@@ -5,10 +5,12 @@
         hoverTargets,
         showTargets,
         onNoteClick,
+        onStringClick,
     }: {
         hoverTargets: HoverTarget[];
         showTargets: boolean;
         onNoteClick: (stringIndex: number, fret: number) => void;
+        onStringClick: (stringIndex: number) => void;
     } = $props();
 </script>
 
@@ -18,15 +20,26 @@
             type="button"
             class="hover-target"
             class:show-target={showTargets}
-            aria-label={`Toggle note on string ${target.stringIndex + 1}, visible fret ${target.fret}`}
-            onclick={() => onNoteClick(target.stringIndex, target.fret)}
+            aria-label={target.kind === "string"
+                ? `Cycle string ${target.stringIndex + 1} between open, muted, and blank`
+                : `Toggle note on string ${target.stringIndex + 1}, visible fret ${target.fret}`}
+            onclick={() => {
+                if (target.kind === "string") {
+                    onStringClick(target.stringIndex);
+                } else {
+                    onNoteClick(target.stringIndex, target.fret);
+                }
+            }}
             style:left={`${target.x}px`}
             style:top={`${target.y}px`}
             style:width={`${target.width}px`}
             style:height={`${target.height}px`}
             style:--diameter={`${target.diameter}px`}
         >
-            <span class="hover-circle"></span>
+            <span
+                class="hover-circle"
+                class:string-indicator={target.kind === "string"}
+            ></span>
         </button>
     {/each}
 </div>
@@ -54,9 +67,9 @@
         transform: translate(-50%, -50%);
         width: var(--diameter);
         height: var(--diameter);
-        border: 2px solid #2563eb;
+        border: 2px solid rgb(59 130 246 / 25%);
         border-radius: 50%;
-        background: rgb(59 130 246 / 30%);
+        background: rgb(59 130 246 / 12%);
         opacity: 0;
         pointer-events: none;
     }
@@ -64,6 +77,14 @@
     .hover-target:hover .hover-circle,
     .hover-target:focus-visible .hover-circle {
         opacity: 1;
+    }
+
+    .string-indicator {
+        width: 80%;
+        height: 80%;
+        border: 0;
+        border-radius: 6px;
+        background: rgb(59 130 246 / 12%);
     }
 
     .hover-target:focus-visible {

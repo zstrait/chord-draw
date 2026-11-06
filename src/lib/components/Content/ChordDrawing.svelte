@@ -7,12 +7,16 @@
         type Barre as SvgBarre,
     } from "svguitar";
 
-    let { chord, onTargetsChange }: {
+    let {
+        chord,
+        onTargetsChange,
+    }: {
         chord: Chord;
         onTargetsChange: (targets: HoverTarget[]) => void;
     } = $props();
 
     let container: HTMLDivElement;
+    const stringIndicatorSize = 0.6;
 
     function measureTargets(
         stringCount: number,
@@ -58,13 +62,47 @@
             return;
         }
 
+        const nut = Array.from(svg.querySelectorAll("line")).find(
+            (line) =>
+                line.y1.baseVal.value === line.y2.baseVal.value &&
+                line.y1.baseVal.value < top &&
+                line.x1.baseVal.value <= left &&
+                line.x2.baseVal.value >= right,
+        );
+
+        if (!nut) {
+            onTargetsChange([]);
+            return;
+        }
+
         const bottom = Math.max(...frets.map((line) => line.y1.baseVal.value));
         const stringSpacing = (right - left) / (stringCount - 1);
         const fretSpacing = (bottom - top) / fretCount;
+        const indicatorSize = stringSpacing * stringIndicatorSize;
+        const indicatorRowHeight = indicatorSize + 2 * (indicatorSize / 3);
+        const nutTop = 2 * nut.y1.baseVal.value - top;
         const wrapper = container.getBoundingClientRect();
         const targets: HoverTarget[] = [];
 
         for (let stringIndex = 0; stringIndex < stringCount; stringIndex++) {
+            const indicatorCenter = new DOMPoint(
+                strings[stringIndex].x1.baseVal.value,
+                nutTop - indicatorRowHeight / 2,
+            ).matrixTransform(transform);
+            const indicatorWidth = stringSpacing * transform.a;
+            const indicatorHeight = indicatorRowHeight * transform.d;
+
+            targets.push({
+                kind: "string",
+                stringIndex,
+                fret: 0,
+                x: indicatorCenter.x - wrapper.left - indicatorWidth / 2,
+                y: indicatorCenter.y - wrapper.top - indicatorHeight / 2,
+                width: indicatorWidth,
+                height: indicatorHeight,
+                diameter: indicatorSize * transform.a,
+            });
+
             for (let fret = 1; fret <= fretCount; fret++) {
                 const center = new DOMPoint(
                     strings[stringIndex].x1.baseVal.value,
@@ -75,6 +113,7 @@
                 const height = fretSpacing * transform.d;
 
                 targets.push({
+                    kind: "note",
                     stringIndex,
                     fret,
                     x: center.x - wrapper.left - width / 2,
@@ -160,6 +199,9 @@
 
         drawing
             .configure({
+                fixedDiagramPosition: true,
+                emptyStringIndicatorSize: stringIndicatorSize,
+                title: chord.title,
                 // Edit Menu
                 tuning: chord.showStringNoteLabels ? chord.tuning.notes : [],
                 frets: chord.fretCount,
@@ -188,7 +230,6 @@
             .chord({
                 fingers: stringsToFingers(chord.strings),
                 barres: barresToSvg(chord.barres, chord.stringCount),
-                title: chord.title,
             })
             .draw();
 

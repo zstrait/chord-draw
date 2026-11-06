@@ -46,6 +46,7 @@ export interface Chord {
 }
 
 export type HoverTarget = {
+    kind: "note" | "string";
     stringIndex: number;
     fret: number;
     x: number;

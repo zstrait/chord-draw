@@ -44,7 +44,7 @@ export function createDefaultChord(): Chord {
             chordColor: "#000000",
             lineThickness: 2,
             lineColor: "#000000",
-            circleSize: 20,
+            circleSize: 18,
             circleColor: "#000000",
             backgroundColor: "transparent",
             titleFontSize: 32,
