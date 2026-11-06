@@ -4,7 +4,7 @@ interface StringNote {
     markerText: string | null;
 }
 
-interface Barre {
+export interface Barre {
     fret: number | null;
     startString: number;
     endString: number;
@@ -44,6 +44,13 @@ export interface Chord {
     barres: Barre[];
     styling: Styling;
 }
+
+export type BarreDrag = {
+    fret: number;
+    startString: number;
+    endString: number;
+    hasDragged: boolean;
+};
 
 export type HoverTarget = {
     kind: "note" | "string";

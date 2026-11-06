@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Chord, HoverTarget } from "#lib/types.ts";
+    import type { Barre, Chord, HoverTarget } from "#lib/types.ts";
     import ChordDrawing from "./ChordDrawing.svelte";
     import ChordOverlay from "./ChordOverlay.svelte";
 
@@ -19,12 +19,22 @@
     }
 
     function handleNoteClick(stringIndex: number, fret: number) {
+        const barres = chord.barres.filter(
+            (barre) =>
+                barre.fret === null ||
+                barre.fret < fret ||
+                stringIndex < Math.min(barre.startString, barre.endString) ||
+                stringIndex > Math.max(barre.startString, barre.endString),
+        );
+        const replacesBarre = barres.length !== chord.barres.length;
+
         onChordChange({
+            barres,
             strings: chord.strings.map((note, index) => {
                 if (index === stringIndex) {
                     return {
                         ...note,
-                        fret: note.fret === fret ? null : fret,
+                        fret: !replacesBarre && note.fret === fret ? null : fret,
                     };
                 }
 
@@ -45,6 +55,38 @@
 
                 return note;
             }),
+        });
+    }
+
+    function handleBarreCreate(barre: Barre) {
+        const { fret, startString, endString } = barre;
+
+        if (fret === null || startString === endString) {
+            return;
+        }
+
+        onChordChange({
+            strings: chord.strings.map((note, index) => {
+                if (
+                    index >= startString &&
+                    index <= endString &&
+                    note.fret !== null &&
+                    note.fret <= fret
+                ) {
+                    return { ...note, fret: null };
+                }
+
+                return note;
+            }),
+            barres: [
+                ...chord.barres.filter(
+                    (barre) =>
+                        barre.fret !== fret ||
+                        Math.max(barre.startString, barre.endString) < startString ||
+                        Math.min(barre.startString, barre.endString) > endString,
+                ),
+                barre,
+            ],
         });
     }
 
@@ -75,6 +117,7 @@
                 {showTargets}
                 onNoteClick={handleNoteClick}
                 onStringClick={handleStringClick}
+                onBarreCreate={handleBarreCreate}
             />
         </div>
     </div>
