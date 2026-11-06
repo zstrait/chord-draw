@@ -148,6 +148,12 @@
             {chord}
             onChordChange={updateChord}
             onSvgChange={handleSvgChange}
+            isMaximized={!menuOpen && !toolbarOpen}
+            onMaximize={() => {
+                const openBoth = !menuOpen && !toolbarOpen;
+                menuOpen = openBoth;
+                toolbarOpen = openBoth;
+            }}
         />
         <Toolbar
             isOpen={toolbarOpen}
