@@ -12,6 +12,7 @@
 
     import type { Chord } from "#lib/types.ts";
     import { createDefaultChord } from "#lib/chord.ts";
+    import Dropdown from "./Dropdown.svelte";
 
     type Props = {
         isOpen: boolean;
@@ -41,6 +42,17 @@
 
     let format = $state<"SVG" | "PNG">("SVG");
     let exportWidth = $state(1024);
+
+    const formatOptions = [
+        { label: "PNG", value: "PNG" },
+        { label: "SVG", value: "SVG" },
+    ] as const;
+
+    const sizeOptions = [
+        { label: "Small", value: 512 },
+        { label: "Medium", value: 1024 },
+        { label: "Large", value: 2048 },
+    ];
 </script>
 
 <div
@@ -150,27 +162,30 @@
                 </div>
 
                 <div class="tooltip tooltip-top inline-flex shrink-0" data-tip="Export type">
-                    <select
-                        bind:value={format}
-                        class="toolbar-select select w-20 shrink-0"
-                        aria-label="Export format"
-                    >
-                        <option value="PNG">PNG</option>
-                        <option value="SVG">SVG</option>
-                    </select>
+                    <Dropdown
+                        label="Export type"
+                        value={format}
+                        options={formatOptions}
+                        onchange={(value) => {
+                            format = value;
+                        }}
+                        placement="top"
+                        class="w-20 shrink-0"
+                    />
                 </div>
 
                 {#if format === "PNG"}
                     <div class="tooltip tooltip-top inline-flex shrink-0" data-tip="Export size">
-                        <select
-                            bind:value={exportWidth}
-                            class="toolbar-select select w-25 shrink-0"
-                            aria-label="Export size"
-                        >
-                            <option value={512}>Small</option>
-                            <option value={1024}>Medium</option>
-                            <option value={2048}>Large</option>
-                        </select>
+                        <Dropdown
+                            label="Export size"
+                            value={exportWidth}
+                            options={sizeOptions}
+                            onchange={(value) => {
+                                exportWidth = value;
+                            }}
+                            placement="top"
+                            class="w-25 shrink-0"
+                        />
                     </div>
                 {/if}
             </div>
@@ -194,7 +209,7 @@
         {/if}
         <button
             type="button"
-            class="flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2"
+            class="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2"
             onclick={onToggle}
             aria-expanded={isOpen}
             aria-controls="toolbar-actions"
@@ -237,26 +252,10 @@
         color: rgb(255 255 255 / 30%);
     }
 
-    .toolbar-select {
-        height: 2.25rem;
-        border-radius: 0.5rem;
-        font-size: 0.875rem;
-        box-shadow: none;
-    }
-
-    .toolbar-select:focus-within {
-        outline-color: white;
-    }
-
     @media (pointer: coarse) {
         .toolbar-control {
             width: 2.75rem;
             height: 2.75rem;
-        }
-
-        .toolbar-select {
-            height: 2.75rem;
-            font-size: 1rem;
         }
     }
 

@@ -106,7 +106,7 @@
 
             if (
                 target instanceof HTMLElement &&
-                (target.closest("input, textarea, select") ||
+                (target.closest('input, textarea, select, [role="menu"], [aria-haspopup="menu"]') ||
                     target.isContentEditable)
             ) {
                 return;

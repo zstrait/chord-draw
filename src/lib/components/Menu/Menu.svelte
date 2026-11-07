@@ -70,9 +70,7 @@
         >
             <button
                 type="button"
-                class="flex shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-primary transition-[width,height] duration-300 ease-in-ou focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none"
-                style:width={isOpen ? "2rem" : "3rem"}
-                style:height={isOpen ? "2rem" : "3rem"}
+                class="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-primary hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2"
                 onclick={onToggle}
                 aria-expanded={isOpen}
                 aria-controls="sidebar-settings"
@@ -101,6 +99,8 @@
 
 <style>
     .sidebar-settings {
+        margin-inline: -0.25rem;
+        padding-inline: 0.25rem;
         scrollbar-width: none;
     }
 
@@ -118,8 +118,7 @@
         font-weight: 500;
     }
 
-    .sidebar-settings :global(.input),
-    .sidebar-settings :global(.select) {
+    .sidebar-settings :global(.input) {
         width: 100%;
         min-width: 0;
         height: 2.25rem;
@@ -128,15 +127,13 @@
         box-shadow: none;
     }
 
-    .sidebar-settings :global(.input:focus-within),
-    .sidebar-settings :global(.select:focus-within) {
+    .sidebar-settings :global(.input:focus-within) {
         border-color: var(--color-primary);
         outline-color: var(--color-primary);
     }
 
     @media (pointer: coarse) {
-        .sidebar-settings :global(.input),
-        .sidebar-settings :global(.select) {
+        .sidebar-settings :global(.input) {
             height: 2.75rem;
             font-size: 1rem;
         }

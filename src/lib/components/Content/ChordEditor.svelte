@@ -225,7 +225,7 @@
     </div>
     {#if selectedMarker !== null}
         <div
-            class="fixed z-50 w-max max-w-[calc(100vw-16px)] max-h-[calc(100dvh-16px)] overflow-auto"
+            class="fixed z-50 w-max max-w-[calc(100vw-16px)] max-h-[calc(100dvh-16px)]"
             style:left={`${menuPosition.x}px`}
             style:top={`${menuPosition.y}px`}
             bind:this={menuContainer}

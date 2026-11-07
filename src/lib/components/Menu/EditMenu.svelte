@@ -2,6 +2,15 @@
     import type { Chord } from "#lib/types.ts";
     import { tuningPresets } from "#lib/tunings.ts";
     import { validatePositiveInput } from "#lib/utils.ts";
+    import Dropdown from "../Dropdown.svelte";
+
+    const tuningOptions = [
+        ...tuningPresets.map((preset) => ({
+            label: preset.label,
+            value: preset.label,
+        })),
+        { label: "Custom...", value: "custom", disabled: true },
+    ];
 
     type Props = {
         chord: Chord;
@@ -32,26 +41,20 @@
 
         <fieldset class="fieldset">
             <legend class="fieldset-legend">Tuning</legend>
-            <select
-                class="select"
+            <Dropdown
+                label="Tuning"
                 value={chord.tuning.label}
-                onchange={(event) => {
+                options={tuningOptions}
+                onchange={(value) => {
                     const tuning = tuningPresets.find(
-                        (preset) => preset.label === event.currentTarget.value,
+                        (preset) => preset.label === value,
                     );
 
                     if (tuning) {
                         onChordChange({ tuning });
                     }
                 }}
-            >
-                <option>Standard</option>
-                <option>E♭ Standard</option>
-                <option>D Standard</option>
-                <option>Drop D</option>
-                <option>Drop C#</option>
-                <option disabled>Custom...</option>
-            </select>
+            />
         </fieldset>
 
         <div class="grid grid-cols-2 gap-3 pt-2">

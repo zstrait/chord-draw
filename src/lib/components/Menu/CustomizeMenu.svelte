@@ -3,6 +3,7 @@
     import type { Chord } from "#lib/types.ts";
     import { resetChordStyling } from "#lib/chord.ts";
     import { validatePositiveInput } from "#lib/utils.ts";
+    import Dropdown from "../Dropdown.svelte";
 
     type Props = {
         chord: Chord;
@@ -41,6 +42,20 @@
             hex: "#8AAE6E",
         },
     ];
+
+    const colorOptions = [
+        ...colorPresets.map((color) => ({
+            label: color.name,
+            value: color.hex,
+            color: color.hex,
+        })),
+        { label: "Custom...", value: "custom", disabled: true },
+    ];
+
+    const backgroundOptions = [
+        { label: "Transparent", value: "transparent", color: "transparent" },
+        ...colorOptions,
+    ];
 </script>
 
 <div>
@@ -61,44 +76,41 @@
         <div class="grid grid-cols-2 gap-3">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Style</legend>
-                <select
-                    class="select"
+                <Dropdown
+                    label="Style"
                     value={chord.styling.style}
-                    onchange={(event) => {
+                    options={[
+                        { label: "Normal", value: "normal" },
+                        { label: "Handdrawn", value: "handdrawn" },
+                    ]}
+                    onchange={(value) => {
                         onChordChange({
                             styling: {
                                 ...chord.styling,
-                                style: event.currentTarget.value,
+                                style: value,
                             },
                         });
                     }}
-                >
-                    <option value="normal">Normal</option>
-                    <option value="handdrawn">Handdrawn</option>
-                </select>
+                />
             </fieldset>
 
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Chord Color</legend>
-                <select
-                    class="select"
+                <Dropdown
+                    label="Chord color"
                     value={chord.styling.chordColor}
-                    onchange={(event) => {
+                    options={colorOptions}
+                    onchange={(value) => {
                         onChordChange({
                             styling: {
                                 ...chord.styling,
-                                chordColor: event.currentTarget.value,
-                                lineColor: event.currentTarget.value,
-                                circleColor: event.currentTarget.value,
+                                chordColor: value,
+                                lineColor: value,
+                                circleColor: value,
                             },
                         });
                     }}
-                >
-                    {#each colorPresets as color}
-                        <option value={color.hex}>{color.name}</option>
-                    {/each}
-                    <option disabled>Custom...</option>
-                </select>
+                />
             </fieldset>
         </div>
 
@@ -136,23 +148,19 @@
 
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Line Color</legend>
-                <select
-                    class="select"
+                <Dropdown
+                    label="Line color"
                     value={chord.styling.lineColor}
-                    onchange={(event) => {
+                    options={colorOptions}
+                    onchange={(value) => {
                         onChordChange({
                             styling: {
                                 ...chord.styling,
-                                lineColor: event.currentTarget.value,
+                                lineColor: value,
                             },
                         });
                     }}
-                >
-                    {#each colorPresets as color}
-                        <option value={color.hex}>{color.name}</option>
-                    {/each}
-                    <option disabled>Custom...</option>
-                </select>
+                />
             </fieldset>
         </div>
 
@@ -190,46 +198,37 @@
 
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Circle Color</legend>
-                <select
-                    class="select"
+                <Dropdown
+                    label="Circle color"
                     value={chord.styling.circleColor}
-                    onchange={(event) => {
+                    options={colorOptions}
+                    onchange={(value) => {
                         onChordChange({
                             styling: {
                                 ...chord.styling,
-                                circleColor: event.currentTarget.value,
+                                circleColor: value,
                             },
                         });
                     }}
-                >
-                    {#each colorPresets as color}
-                        <option value={color.hex}>{color.name}</option>
-                    {/each}
-                    <option disabled>Custom...</option>
-                </select>
+                />
             </fieldset>
         </div>
 
         <fieldset class="fieldset">
             <legend class="fieldset-legend">Background Color</legend>
-            <select
-                class="select"
+            <Dropdown
+                label="Background color"
                 value={chord.styling.backgroundColor}
-                onchange={(event) => {
+                options={backgroundOptions}
+                onchange={(value) => {
                     onChordChange({
                         styling: {
                             ...chord.styling,
-                            backgroundColor: event.currentTarget.value,
+                            backgroundColor: value,
                         },
                     });
                 }}
-            >
-                <option value={"transparent"}>Transparent</option>
-                {#each colorPresets as color}
-                    <option value={color.hex}>{color.name}</option>
-                {/each}
-                <option disabled>Custom...</option>
-            </select>
+            />
         </fieldset>
     </div>
 

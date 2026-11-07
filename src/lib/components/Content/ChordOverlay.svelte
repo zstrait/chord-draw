@@ -217,9 +217,9 @@
         transform: translate(-50%, -50%);
         width: var(--diameter);
         height: var(--diameter);
-        border: 2px solid rgb(82 109 146 / 25%);
+        border: 2px solid rgb(52 110 195 / 35%);
         border-radius: 50%;
-        background: rgb(82 109 146 / 12%);
+        background: rgb(52 110 195 / 16%);
         opacity: 0;
         pointer-events: none;
     }
@@ -234,7 +234,7 @@
         height: 80%;
         border: 0;
         border-radius: 6px;
-        background: rgb(82 109 146 / 12%);
+        background: rgb(52 110 195 / 16%);
     }
 
     .dragging .hover-target .hover-circle {
@@ -244,9 +244,9 @@
     .barre-preview {
         position: absolute;
         pointer-events: none;
-        border: 2px solid rgb(82 109 146 / 25%);
+        border: 2px solid rgb(52 110 195 / 35%);
         border-radius: 999px;
-        background: rgb(82 109 146 / 12%);
+        background: rgb(52 110 195 / 16%);
     }
 
     .hover-target:focus-visible {

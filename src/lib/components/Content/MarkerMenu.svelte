@@ -28,13 +28,13 @@
 
 <ul
     bind:this={menu}
-    class="grid grid-cols-2 gap-2 bg-base-100 rounded-box p-3 shadow"
+    class="marker-menu grid w-44 max-w-[calc(100vw-16px)] max-h-[calc(100dvh-16px)] grid-cols-2 gap-1.5 overflow-y-auto rounded-xl border border-base-300 bg-base-100 p-2.5 shadow-[0_6px_20px_rgb(30_45_67_/_16%)]"
 >
     {#each labels as label}
         <li>
             <button
                 type="button"
-                class="btn btn-ghost btn-sm w-full"
+                class="btn btn-ghost w-full rounded-lg border-primary/15 bg-primary/5 font-medium text-primary hover:bg-primary/15"
                 onclick={() => onSelect(label)}
             >
                 {label}
@@ -45,17 +45,17 @@
     <li>
         <button
             type="button"
-            class="btn btn-ghost btn-sm w-full"
+            class="btn btn-ghost w-full rounded-lg border-primary/15 bg-primary/5 font-medium text-primary hover:bg-primary/15"
             onclick={() => onSelect(null)}
         >
             None
         </button>
     </li>
 
-    <li class="col-span-2">
+    <li class="col-span-2 mt-1 border-t border-base-300/60 pt-2.5">
         <input
             type="text"
-            class="input input-sm w-full"
+            class="input w-full rounded-lg"
             aria-label="Custom marker text"
             placeholder="Custom text"
             bind:value={customText}
@@ -72,10 +72,37 @@
     <li class="col-span-2">
         <button
             type="button"
-            class="btn btn-primary btn-sm w-full"
+            class="btn btn-primary w-full rounded-lg font-medium"
             onclick={() => onSelect(customText.trim() || null)}
         >
             Apply
         </button>
     </li>
 </ul>
+
+<style>
+    .marker-menu .btn,
+    .marker-menu .input {
+        height: 2.25rem;
+        min-height: 2.25rem;
+        font-size: 0.875rem;
+        box-shadow: none;
+    }
+
+    .marker-menu .input:focus-within {
+        border-color: var(--color-primary);
+        outline-color: var(--color-primary);
+    }
+
+    @media (pointer: coarse) {
+        .marker-menu .btn,
+        .marker-menu .input {
+            height: 2.75rem;
+            min-height: 2.75rem;
+        }
+
+        .marker-menu .input {
+            font-size: 1rem;
+        }
+    }
+</style>
