@@ -165,6 +165,7 @@
         style:padding-bottom={toolbarOpen ? "0.5rem" : "0rem"}
     >
         <Header />
+        <div class="divider mt-0 mb-3.5 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5" aria-hidden="true"></div>
         <Content
             {chord}
             onChordChange={updateChord}
@@ -184,7 +185,7 @@
             >
                 {#if copied}
                     <div
-                        class="alert animate-none rounded-xl border-0 bg-base-content px-4 py-3 text-sm font-medium text-white shadow-lg"
+                        class="alert animate-none rounded-xl border-0 bg-neutral px-4 py-3 text-sm font-medium text-neutral-content shadow-lg"
                         in:toastSlide={{ x: 48 }}
                         out:toastSlide={{ x: 48 }}
                     >

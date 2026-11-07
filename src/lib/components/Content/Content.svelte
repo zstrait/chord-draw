@@ -16,7 +16,7 @@
 </script>
 
 <div class="relative flex min-h-0 min-w-0 flex-col flex-1 overflow-auto p-2">
-    <div class="absolute right-2 top-2 z-10 flex flex-col gap-2">
+    <div class="absolute right-2 top-2 z-10 flex flex-col gap-3">
         <div
             class="tooltip tooltip-left"
             data-tip={isMaximized ? "Minimize" : "Maximize"}

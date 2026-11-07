@@ -45,13 +45,13 @@
         {/if}
 
         <div
-            class="sidebar-background pointer-events-none absolute inset-0 bg-[#CBD7E6] transition-[transform,border-radius] duration-300 ease-in-out motion-reduce:transition-none"
+            class="sidebar-background pointer-events-none absolute inset-0 bg-[var(--sidebar-bg)] transition-[transform,border-radius] duration-300 ease-in-out motion-reduce:transition-none"
             style:--sidebar-offset={isOpen ? "0rem" : "-2rem"}
             style:border-radius={isOpen ? "0.75rem" : "0.75rem 1.5rem 0.75rem 0.75rem"}
         ></div>
 
         <div
-            class="sidebar-tab pointer-events-none absolute inset-x-0 top-0 h-16 bg-[#CBD7E6] transition-[border-radius] duration-300 ease-in-out motion-reduce:transition-none"
+            class="sidebar-tab pointer-events-none absolute inset-x-0 top-0 h-16 bg-[var(--sidebar-bg)] transition-[border-radius] duration-300 ease-in-out motion-reduce:transition-none"
             style:border-radius={isOpen ? "0.75rem" : "0 1.5rem 1.5rem 0"}
         ></div>
 
