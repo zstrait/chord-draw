@@ -1,8 +1,8 @@
 <script lang="ts">
     import type { Chord } from "#lib/types.ts";
     import { tuningPresets } from "#lib/tunings.ts";
-    import { validatePositiveInput } from "#lib/utils.ts";
     import Dropdown from "../Dropdown.svelte";
+    import NumberInput from "../NumberInput.svelte";
 
     const tuningOptions = [
         ...tuningPresets.map((preset) => ({
@@ -90,81 +90,33 @@
         <div class="grid grid-cols-3 gap-3 pt-2">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Capo Fret</legend>
-                <input
-                    type="number"
-                    class="input capo-fret"
+                <NumberInput
+                    label="Capo Fret"
                     placeholder="None"
                     value={chord.capoFret}
-                    oninput={(event) => {
-                        if (event.currentTarget.value === "") {
-                            onChordChange(
-                                { capoFret: null },
-                                event.currentTarget,
-                            );
-                            return;
-                        }
-
-                        const value = validatePositiveInput(event);
-
-                        if (value !== null) {
-                            onChordChange(
-                                {
-                                    capoFret: Number(event.currentTarget.value),
-                                },
-                                event.currentTarget,
-                            );
-                        }
-                    }}
-                    onblur={(event) => {
-                        event.currentTarget.value = String(chord.capoFret);
-                    }}
+                    max={24}
+                    onchange={(value, input) => onChordChange({ capoFret: value }, input)}
+                    onclear={(input) => onChordChange({ capoFret: null }, input)}
                 />
             </fieldset>
 
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Starting Fret</legend>
-                <input
-                    type="number"
-                    class="input"
+                <NumberInput
+                    label="Starting Fret"
                     value={chord.startFret}
-                    oninput={(event) => {
-                        const value = validatePositiveInput(event);
-
-                        if (value !== null) {
-                            onChordChange(
-                                { startFret: value },
-                                event.currentTarget,
-                            );
-                        }
-                    }}
-                    onblur={(event) => {
-                        event.currentTarget.value = String(chord.startFret);
-                    }}
+                    max={24}
+                    onchange={(value, input) => onChordChange({ startFret: value }, input)}
                 />
             </fieldset>
 
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Frets</legend>
-                <input
-                    type="number"
-                    class="input"
-                    min="1"
+                <NumberInput
+                    label="Frets"
                     value={chord.fretCount}
-                    oninput={(event) => {
-                        const value = validatePositiveInput(event);
-
-                        if (value !== null) {
-                            onChordChange(
-                                {
-                                    fretCount: Number(event.currentTarget.value),
-                                },
-                                event.currentTarget,
-                            );
-                        }
-                    }}
-                    onblur={(event) => {
-                        event.currentTarget.value = String(chord.fretCount);
-                    }}
+                    max={12}
+                    onchange={(value, input) => onChordChange({ fretCount: value }, input)}
                 />
             </fieldset>
         </div>
@@ -200,15 +152,3 @@
         </div>
     </div>
 </div>
-
-<style>
-    .capo-fret:placeholder-shown {
-        appearance: textfield;
-    }
-
-    .capo-fret:placeholder-shown::-webkit-inner-spin-button,
-    .capo-fret:placeholder-shown::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-</style>

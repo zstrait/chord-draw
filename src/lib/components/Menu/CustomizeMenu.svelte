@@ -2,9 +2,9 @@
     import { RotateCcw } from "@lucide/svelte";
     import type { Chord } from "#lib/types.ts";
     import { resetChordStyling } from "#lib/chord.ts";
-    import { validatePositiveInput } from "#lib/utils.ts";
     import Dropdown from "../Dropdown.svelte";
     import ColorPicker from "../ColorPicker.svelte";
+    import NumberInput from "../NumberInput.svelte";
 
     type Props = {
         chord: Chord;
@@ -154,32 +154,13 @@
         <div class="grid grid-cols-2 gap-3">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Line Thickness</legend>
-                <input
-                    type="number"
-                    class="input"
+                <NumberInput
+                    label="Line Thickness"
                     value={chord.styling.lineThickness}
-                    oninput={(event) => {
-                        const value = validatePositiveInput(event);
-
-                        if (value !== null) {
-                            onChordChange(
-                                {
-                                    styling: {
-                                        ...chord.styling,
-                                        lineThickness: Number(
-                                            event.currentTarget.value,
-                                        ),
-                                    },
-                                },
-                                event.currentTarget,
-                            );
-                        }
-                    }}
-                    onblur={(event) => {
-                        event.currentTarget.value = String(
-                            chord.styling.lineThickness,
-                        );
-                    }}
+                    max={10}
+                    onchange={(value, input) => onChordChange({
+                        styling: { ...chord.styling, lineThickness: value },
+                    }, input)}
                 />
             </fieldset>
 
@@ -197,32 +178,13 @@
         <div class="grid grid-cols-2 gap-3">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Circle Size</legend>
-                <input
-                    type="number"
-                    class="input"
+                <NumberInput
+                    label="Circle Size"
                     value={chord.styling.circleSize}
-                    oninput={(event) => {
-                        const value = validatePositiveInput(event);
-
-                        if (value !== null) {
-                            onChordChange(
-                                {
-                                    styling: {
-                                        ...chord.styling,
-                                        circleSize: Number(
-                                            event.currentTarget.value,
-                                        ),
-                                    },
-                                },
-                                event.currentTarget,
-                            );
-                        }
-                    }}
-                    onblur={(event) => {
-                        event.currentTarget.value = String(
-                            chord.styling.circleSize,
-                        );
-                    }}
+                    max={40}
+                    onchange={(value, input) => onChordChange({
+                        styling: { ...chord.styling, circleSize: value },
+                    }, input)}
                 />
             </fieldset>
 
@@ -251,63 +213,25 @@
     <div class="grid grid-cols-2 gap-3">
         <fieldset class="fieldset">
             <legend class="fieldset-legend">Title Font Size</legend>
-            <input
-                type="number"
-                class="input"
+            <NumberInput
+                label="Title Font Size"
                 value={chord.styling.titleFontSize}
-                oninput={(event) => {
-                    const value = validatePositiveInput(event);
-
-                    if (value !== null) {
-                        onChordChange(
-                            {
-                                styling: {
-                                    ...chord.styling,
-                                    titleFontSize: Number(
-                                        event.currentTarget.value,
-                                    ),
-                                },
-                            },
-                            event.currentTarget,
-                        );
-                    }
-                }}
-                onblur={(event) => {
-                    event.currentTarget.value = String(
-                        chord.styling.titleFontSize,
-                    );
-                }}
+                max={72}
+                onchange={(value, input) => onChordChange({
+                    styling: { ...chord.styling, titleFontSize: value },
+                }, input)}
             />
         </fieldset>
 
         <fieldset class="fieldset">
             <legend class="fieldset-legend">Finger Font Size</legend>
-            <input
-                type="number"
-                class="input"
+            <NumberInput
+                label="Finger Font Size"
                 value={chord.styling.fingerFontSize}
-                oninput={(event) => {
-                    const value = validatePositiveInput(event);
-
-                    if (value !== null) {
-                        onChordChange(
-                            {
-                                styling: {
-                                    ...chord.styling,
-                                    fingerFontSize: Number(
-                                        event.currentTarget.value,
-                                    ),
-                                },
-                            },
-                            event.currentTarget,
-                        );
-                    }
-                }}
-                onblur={(event) => {
-                    event.currentTarget.value = String(
-                        chord.styling.fingerFontSize,
-                    );
-                }}
+                max={48}
+                onchange={(value, input) => onChordChange({
+                    styling: { ...chord.styling, fingerFontSize: value },
+                }, input)}
             />
         </fieldset>
     </div>

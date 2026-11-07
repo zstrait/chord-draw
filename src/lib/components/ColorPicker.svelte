@@ -66,7 +66,7 @@
     }}
 >
     <form onsubmit={(event) => { event.preventDefault(); apply(); }}>
-        <h2 class="mb-3 text-sm font-medium text-primary">{label}</h2>
+        <h2 class="mb-3 text-base font-medium text-primary">{label}</h2>
         <HueyRoot bind:color>
             <div class="flex flex-col gap-3">
                 <SaturationArea colorFormat="hex" aria-label="Saturation and brightness" />
@@ -105,6 +105,10 @@
     .color-picker :global([huey-slider-track]) {
         --huey-slider-track-width: 100%;
         --huey-slider-track-height: 0.75rem;
+    }
+
+    .color-picker :global([huey-slider-thumb]) {
+        box-shadow: 0 0 0 2px white, 0 0 0 3px black;
     }
 
     .color-picker :global([huey-slider-thumb]:focus-visible) {
