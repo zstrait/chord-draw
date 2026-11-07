@@ -22,14 +22,14 @@
         >
             <button
                 type="button"
-                class="btn btn-square"
+                class="flex size-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-primary/5 p-0 text-primary hover:bg-primary/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 aria-label={isMaximized ? "Restore panels" : "Maximize workspace"}
                 onclick={onMaximize}
             >
                 {#if isMaximized}
-                    <Minimize2 color="currentColor" />
+                    <Minimize2 size={24} color="currentColor" />
                 {:else}
-                    <Maximize2 color="currentColor" />
+                    <Maximize2 size={24} color="currentColor" />
                 {/if}
             </button>
         </div>

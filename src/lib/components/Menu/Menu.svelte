@@ -56,7 +56,7 @@
         ></div>
 
         <div class="relative z-10 flex h-8 shrink-0 items-center pr-12">
-            <span class="text-xl font-bold text-primary" class:invisible={!isOpen}>
+            <span class="text-xl font-bold text-primary" aria-hidden={!isOpen}>
                 Edit Menu
             </span>
         </div>

@@ -13,6 +13,7 @@
     import type { Chord } from "#lib/types.ts";
     import { createDefaultChord } from "#lib/chord.ts";
     import Dropdown from "./Dropdown.svelte";
+    import { getPngSize } from "#lib/export.ts";
 
     type Props = {
         isOpen: boolean;
@@ -25,6 +26,7 @@
         onCopy: (format: "SVG" | "PNG", width: number) => void;
         onDownload: (format: "SVG" | "PNG", width: number) => void;
         canDownload: boolean;
+        svg: string;
     };
 
     let {
@@ -38,9 +40,10 @@
         onCopy,
         onDownload,
         canDownload,
+        svg,
     }: Props = $props();
 
-    let format = $state<"SVG" | "PNG">("SVG");
+    let format = $state<"SVG" | "PNG">("PNG");
     let exportWidth = $state(1024);
 
     const formatOptions = [
@@ -48,11 +51,19 @@
         { label: "SVG", value: "SVG" },
     ] as const;
 
-    const sizeOptions = [
+    const exportSizes = [
         { label: "Small", value: 512 },
         { label: "Medium", value: 1024 },
         { label: "Large", value: 2048 },
     ];
+
+    const sizeOptions = $derived(exportSizes.map((option) => {
+        const size = getPngSize(svg, option.value);
+        return {
+            ...option,
+            tooltip: size ? `${size.width} × ${size.height} px` : undefined,
+        };
+    }));
 </script>
 
 <div

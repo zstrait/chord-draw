@@ -16,6 +16,23 @@ export function downloadSvg(svg: string) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+export function getPngSize(svg: string, width: number) {
+    const viewBox = svg.match(/\bviewBox\s*=\s*["']([^"']+)["']/)?.[1]
+        .trim().split(/[\s,]+/).map(Number);
+
+    if (
+        !viewBox || viewBox.length !== 4 ||
+        !viewBox.every(Number.isFinite) || viewBox[2] <= 0 || viewBox[3] <= 0
+    ) {
+        return null;
+    }
+
+    return {
+        width,
+        height: Math.max(1, Math.round(width * viewBox[3] / viewBox[2])),
+    };
+}
+
 export async function svgToPng(svg: string, width = 1024): Promise<Blob> {
     const file = new Blob([svg], {
         type: "image/svg+xml;charset=utf-8",
@@ -32,7 +49,7 @@ export async function svgToPng(svg: string, width = 1024): Promise<Blob> {
         const canvas = document.createElement("canvas");
 
         canvas.width = width;
-        canvas.height = Math.round(
+        canvas.height = getPngSize(svg, width)?.height ?? Math.round(
             canvas.width * (image.naturalHeight / image.naturalWidth),
         );
 

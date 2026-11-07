@@ -156,6 +156,7 @@
             }}
         />
         <Toolbar
+            {svg}
             isOpen={toolbarOpen}
             onToggle={() => {
                 toolbarOpen = !toolbarOpen;

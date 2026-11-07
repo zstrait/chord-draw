@@ -6,6 +6,7 @@
         value: T;
         color?: string;
         disabled?: boolean;
+        tooltip?: string;
     };
 
     type Props = {
@@ -30,6 +31,8 @@
     let trigger: HTMLButtonElement;
     let menu: HTMLUListElement;
     let open = $state(false);
+    let tooltip: HTMLDivElement;
+    let tooltipText = $state("");
     let selected = $derived(options.find((option) => option.value === value));
     let search = "";
     let lastKeyTime = 0;
@@ -41,10 +44,25 @@
     }
 
     function close(restoreFocus = false) {
+        hideTooltip();
         menu.hidePopover();
         if (restoreFocus) {
             trigger.focus({ preventScroll: true });
         }
+    }
+
+    function hideTooltip() {
+        tooltip.hidePopover();
+    }
+
+    function showTooltip(event: MouseEvent | FocusEvent, text?: string) {
+        if (!text) return;
+        const button = event.currentTarget as HTMLButtonElement;
+        const bounds = button.getBoundingClientRect();
+        tooltipText = text;
+        tooltip.style.left = `${bounds.left}px`;
+        tooltip.style.top = `${bounds.top + bounds.height / 2}px`;
+        tooltip.showPopover();
     }
 
     function focusOption(button?: HTMLButtonElement) {
@@ -123,6 +141,7 @@
 
 <svelte:window onresize={() => { if (open) close(); }} />
 <svelte:document onscrollcapture={(event) => {
+    if (open) hideTooltip();
     if (open && event.target instanceof Node && !menu.contains(event.target)) {
         close();
     }
@@ -173,7 +192,10 @@
         role="menu"
         tabindex="-1"
         aria-label={label}
-        ontoggle={(event) => { open = event.newState === "open"; }}
+        ontoggle={(event) => {
+            open = event.newState === "open";
+            if (!open) hideTooltip();
+        }}
         onkeydown={handleKeydown}
     >
         {#each options as option (option.value)}
@@ -184,8 +206,13 @@
                     class:selected={option.value === value}
                     role="menuitemradio"
                     aria-checked={option.value === value}
+                    aria-label={option.tooltip ? `${option.label}: ${option.tooltip}` : undefined}
                     disabled={option.disabled}
                     tabindex="-1"
+                    onmouseenter={(event) => showTooltip(event, option.tooltip)}
+                    onmouseleave={hideTooltip}
+                    onfocus={(event) => showTooltip(event, option.tooltip)}
+                    onblur={hideTooltip}
                     onclick={() => {
                         if (option.value !== value) {
                             onchange(option.value);
@@ -209,9 +236,32 @@
             </li>
         {/each}
     </ul>
+    <div
+        bind:this={tooltip}
+        popover="manual"
+        class="option-tooltip tooltip tooltip-left tooltip-open"
+        data-tip={tooltipText}
+        aria-hidden="true"
+    ></div>
 </div>
 
 <style>
+    .option-tooltip {
+        position: fixed;
+        inset: auto;
+        width: 0;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        overflow: visible;
+        pointer-events: none;
+    }
+
+    .option-tooltip:not(:popover-open) {
+        display: none;
+    }
+
     .dropdown-trigger {
         display: flex;
         align-items: center;
