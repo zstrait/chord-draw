@@ -9,10 +9,12 @@
 
     let {
         chord,
+        rotation,
         onTargetsChange,
         onSvgChange,
     }: {
         chord: Chord;
+        rotation: number;
         onTargetsChange: (targets: HoverTarget[]) => void;
         onSvgChange: (svg: string) => void;
     } = $props();
@@ -26,7 +28,7 @@
         circleSize: number,
     ) {
         const svg = container.querySelector("svg");
-        const transform = svg?.getScreenCTM();
+        const transform = svg?.querySelector("line")?.getScreenCTM();
 
         if (!svg || !transform) {
             onTargetsChange([]);
@@ -85,49 +87,72 @@
         const nutTop = 2 * nut.y1.baseVal.value - top;
         const wrapper = container.getBoundingClientRect();
         const targets: HoverTarget[] = [];
+        const scale = Math.hypot(transform.a, transform.b);
+
+        function targetBounds(x: number, y: number, width: number, height: number) {
+            const start = new DOMPoint(x - width / 2, y - height / 2).matrixTransform(transform!);
+            const end = new DOMPoint(x + width / 2, y + height / 2).matrixTransform(transform!);
+            return {
+                x: Math.min(start.x, end.x) - wrapper.left,
+                y: Math.min(start.y, end.y) - wrapper.top,
+                width: Math.abs(end.x - start.x),
+                height: Math.abs(end.y - start.y),
+            };
+        }
 
         for (let stringIndex = 0; stringIndex < stringCount; stringIndex++) {
-            const indicatorCenter = new DOMPoint(
-                strings[stringIndex].x1.baseVal.value,
-                nutTop - indicatorRowHeight / 2,
-            ).matrixTransform(transform);
-            const indicatorWidth = stringSpacing * transform.a;
-            const indicatorHeight = indicatorRowHeight * transform.d;
-
             targets.push({
                 kind: "string",
                 stringIndex,
                 fret: 0,
-                x: indicatorCenter.x - wrapper.left - indicatorWidth / 2,
-                y: indicatorCenter.y - wrapper.top - indicatorHeight / 2,
-                width: indicatorWidth,
-                height: indicatorHeight,
-                diameter: indicatorSize * transform.a,
+                ...targetBounds(
+                    strings[stringIndex].x1.baseVal.value,
+                    nutTop - indicatorRowHeight / 2,
+                    stringSpacing,
+                    indicatorRowHeight,
+                ),
+                diameter: indicatorSize * scale,
             });
 
             for (let fret = 1; fret <= fretCount; fret++) {
-                const center = new DOMPoint(
-                    strings[stringIndex].x1.baseVal.value,
-                    top + (fret - 0.5) * fretSpacing,
-                ).matrixTransform(transform);
-
-                const width = stringSpacing * transform.a;
-                const height = fretSpacing * transform.d;
-
                 targets.push({
                     kind: "note",
                     stringIndex,
                     fret,
-                    x: center.x - wrapper.left - width / 2,
-                    y: center.y - wrapper.top - height / 2,
-                    width,
-                    height,
-                    diameter: width * (circleSize / 20),
+                    ...targetBounds(
+                        strings[stringIndex].x1.baseVal.value,
+                        top + (fret - 0.5) * fretSpacing,
+                        stringSpacing,
+                        fretSpacing,
+                    ),
+                    diameter: stringSpacing * scale * (circleSize / 20),
                 });
             }
         }
 
         onTargetsChange(targets);
+    }
+
+    function rotateDrawing(angle: number) {
+        const svg = container.querySelector("svg");
+        if (!angle || !svg || svg.querySelector("[data-chord-rotation]")) return;
+
+        const { x, y, width, height } = svg.viewBox.baseVal;
+        const transforms: Record<number, string> = {
+            90: `matrix(0 1 -1 0 ${height + y} ${-x})`,
+            180: `matrix(-1 0 0 -1 ${width + x} ${height + y})`,
+            270: `matrix(0 -1 1 0 ${-y} ${width + x})`,
+        };
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        group.setAttribute("data-chord-rotation", String(angle));
+        group.setAttribute("transform", transforms[angle]);
+        for (const child of Array.from(svg.children)) {
+            if (child.getAttribute("width") === "100%") child.setAttribute("width", String(width));
+            if (child.getAttribute("height") === "100%") child.setAttribute("height", String(height));
+            group.append(child);
+        }
+        svg.append(group);
+        svg.setAttribute("viewBox", angle % 180 ? `0 0 ${height} ${width}` : `0 0 ${width} ${height}`);
     }
 
     function stringsToFingers(strings: Chord["strings"]): Finger[] {
@@ -240,11 +265,13 @@
         const fretCount = chord.fretCount;
         const circleSize = chord.styling.circleSize;
         const isNormal = chord.styling.style !== "handdrawn";
+        const angle = rotation;
         let frame = 0;
 
         function queueMeasurement() {
             cancelAnimationFrame(frame);
             frame = requestAnimationFrame(() => {
+                rotateDrawing(angle);
                 onSvgChange(drawing.toSvg());
 
                 if (isNormal) {

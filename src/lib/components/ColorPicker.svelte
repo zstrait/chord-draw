@@ -53,7 +53,7 @@
     role="dialog"
     tabindex="-1"
     aria-label={`Custom ${label.toLowerCase()}`}
-    class="color-picker w-64 max-w-[calc(100vw-16px)] max-h-[calc(100dvh-16px)] overflow-y-auto rounded-xl border border-base-300 bg-base-100 p-3 text-base-content shadow-[0_6px_20px_rgb(30_45_67_/_16%)]"
+    class="color-picker w-64 max-w-[calc(100vw-16px)] max-h-[calc(100dvh-16px)] overflow-y-auto rounded-xl border border-base-300 bg-base-100 p-3 text-base-content shadow-[0_6px_20px_rgb(30_45_67_/16%)]"
     ontoggle={(event) => {
         if (event.newState === "closed") onClose();
     }}

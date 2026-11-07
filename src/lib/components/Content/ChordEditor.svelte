@@ -7,11 +7,12 @@
 
     type Props = {
         chord: Chord;
+        rotation: number;
         onChordChange: (changes: Partial<Chord>) => void;
         onSvgChange: (svg: string) => void;
     };
 
-    let { chord, onChordChange, onSvgChange }: Props = $props();
+    let { chord, rotation, onChordChange, onSvgChange }: Props = $props();
 
     type SelectedMarker = {
         kind: "note" | "barre";
@@ -199,18 +200,20 @@
     }
 </script>
 
-<div class="w-110 max-w-full shrink-0">
+<div class="max-w-full shrink-0" style:width={rotation % 180 ? "35rem" : "27.5rem"}>
     {#if chord.styling.style === "handdrawn"}
         <p class="px-4 text-sm">
             Switch to Normal style to edit the diagram.
         </p>
     {/if}
     <div
-        class="relative aspect-[11/14] w-full rounded-xl border border-base-300 bg-white"
+        class="relative w-full rounded-xl border border-base-300 bg-white"
+        style:aspect-ratio={rotation % 180 ? "14 / 11" : "11 / 14"}
     >
         <div class="absolute inset-x-3 inset-y-4 sm:inset-y-6">
             <ChordDrawing
                 {chord}
+                {rotation}
                 onTargetsChange={handleTargetsChange}
                 {onSvgChange}
             />

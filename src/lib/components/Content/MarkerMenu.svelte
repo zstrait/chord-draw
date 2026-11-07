@@ -28,7 +28,7 @@
 
 <ul
     bind:this={menu}
-    class="marker-menu grid w-44 max-w-[calc(100vw-16px)] max-h-[calc(100dvh-16px)] grid-cols-2 gap-1.5 overflow-y-auto rounded-xl border border-base-300 bg-base-100 p-2.5 shadow-[0_6px_20px_rgb(30_45_67_/_16%)]"
+    class="marker-menu grid w-44 max-w-[calc(100vw-16px)] max-h-[calc(100dvh-16px)] grid-cols-2 gap-1.5 overflow-y-auto rounded-xl border border-base-300 bg-base-100 p-2.5 shadow-[0_6px_20px_rgb(30_45_67_/16%)]"
 >
     {#each labels as label}
         <li>
