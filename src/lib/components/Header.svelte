@@ -5,7 +5,7 @@
 <header
     class=" p-2 items-center flex h-14 justify-between"
 >
-    <span class="text-primary">ChordDraw</span>
+    <span class="brand text-2xl text-primary">ChordDraw</span>
 
     <div class="flex gap-50 items-center">
         <div class="flex gap-4">
@@ -19,3 +19,9 @@
         </button>
     </div>
 </header>
+
+<style>
+    .brand {
+        font-family: "Rock Salt", cursive;
+    }
+</style>

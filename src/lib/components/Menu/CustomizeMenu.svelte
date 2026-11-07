@@ -4,6 +4,7 @@
     import { resetChordStyling } from "#lib/chord.ts";
     import { validatePositiveInput } from "#lib/utils.ts";
     import Dropdown from "../Dropdown.svelte";
+    import ColorPicker from "../ColorPicker.svelte";
 
     type Props = {
         chord: Chord;
@@ -13,7 +14,19 @@
         ) => void;
     };
 
+    type ColorField = "chordColor" | "lineColor" | "circleColor" | "backgroundColor";
+
     let { chord, onChordChange }: Props = $props();
+    let colorFields = $state<Partial<Record<ColorField, HTMLFieldSetElement>>>({});
+    let picker = $state<{ field: ColorField; anchor: HTMLElement } | null>(null);
+    let customColors = $state<Partial<Record<ColorField, string>>>({});
+
+    const colorLabels: Record<ColorField, string> = {
+        chordColor: "Chord color",
+        lineColor: "Line color",
+        circleColor: "Circle color",
+        backgroundColor: "Background color",
+    };
 
     type Color = {
         name: string;
@@ -43,19 +56,52 @@
         },
     ];
 
-    const colorOptions = [
-        ...colorPresets.map((color) => ({
-            label: color.name,
-            value: color.hex,
-            color: color.hex,
-        })),
-        { label: "Custom...", value: "custom", disabled: true },
-    ];
+    function getColorOptions(field: ColorField) {
+        const options = [
+            ...colorPresets.map((color) => ({
+                label: color.name,
+                value: color.hex,
+                color: color.hex,
+            })),
+            { label: "Custom...", value: "custom", color: customColors[field], reselect: true },
+        ];
 
-    const backgroundOptions = [
-        { label: "Transparent", value: "transparent", color: "transparent" },
-        ...colorOptions,
-    ];
+        return field === "backgroundColor"
+            ? [{ label: "Transparent", value: "transparent", color: "transparent" }, ...options]
+            : options;
+    }
+
+    function getColorValue(value: string) {
+        return value === "transparent" || colorPresets.some((color) => color.hex === value)
+            ? value
+            : "custom";
+    }
+
+    function changeColor(field: ColorField, value: string) {
+        if (value === "custom") {
+            const anchor = colorFields[field];
+            if (anchor) picker = { field, anchor };
+            return;
+        }
+
+        const styling = { ...chord.styling, [field]: value };
+        if (field === "chordColor") {
+            styling.lineColor = value;
+            styling.circleColor = value;
+        }
+        onChordChange({ styling });
+    }
+
+    function applyCustomColor(value: string) {
+        if (!picker) return;
+        const field = picker.field;
+        customColors[field] = value;
+        if (field === "chordColor") {
+            customColors.lineColor = value;
+            customColors.circleColor = value;
+        }
+        changeColor(field, value);
+    }
 </script>
 
 <div>
@@ -94,22 +140,13 @@
                 />
             </fieldset>
 
-            <fieldset class="fieldset">
+            <fieldset class="fieldset" bind:this={colorFields.chordColor}>
                 <legend class="fieldset-legend">Chord Color</legend>
                 <Dropdown
                     label="Chord color"
-                    value={chord.styling.chordColor}
-                    options={colorOptions}
-                    onchange={(value) => {
-                        onChordChange({
-                            styling: {
-                                ...chord.styling,
-                                chordColor: value,
-                                lineColor: value,
-                                circleColor: value,
-                            },
-                        });
-                    }}
+                    value={getColorValue(chord.styling.chordColor)}
+                    options={getColorOptions("chordColor")}
+                    onchange={(value) => changeColor("chordColor", value)}
                 />
             </fieldset>
         </div>
@@ -146,20 +183,13 @@
                 />
             </fieldset>
 
-            <fieldset class="fieldset">
+            <fieldset class="fieldset" bind:this={colorFields.lineColor}>
                 <legend class="fieldset-legend">Line Color</legend>
                 <Dropdown
                     label="Line color"
-                    value={chord.styling.lineColor}
-                    options={colorOptions}
-                    onchange={(value) => {
-                        onChordChange({
-                            styling: {
-                                ...chord.styling,
-                                lineColor: value,
-                            },
-                        });
-                    }}
+                    value={getColorValue(chord.styling.lineColor)}
+                    options={getColorOptions("lineColor")}
+                    onchange={(value) => changeColor("lineColor", value)}
                 />
             </fieldset>
         </div>
@@ -196,38 +226,24 @@
                 />
             </fieldset>
 
-            <fieldset class="fieldset">
+            <fieldset class="fieldset" bind:this={colorFields.circleColor}>
                 <legend class="fieldset-legend">Circle Color</legend>
                 <Dropdown
                     label="Circle color"
-                    value={chord.styling.circleColor}
-                    options={colorOptions}
-                    onchange={(value) => {
-                        onChordChange({
-                            styling: {
-                                ...chord.styling,
-                                circleColor: value,
-                            },
-                        });
-                    }}
+                    value={getColorValue(chord.styling.circleColor)}
+                    options={getColorOptions("circleColor")}
+                    onchange={(value) => changeColor("circleColor", value)}
                 />
             </fieldset>
         </div>
 
-        <fieldset class="fieldset">
+        <fieldset class="fieldset" bind:this={colorFields.backgroundColor}>
             <legend class="fieldset-legend">Background Color</legend>
             <Dropdown
                 label="Background color"
-                value={chord.styling.backgroundColor}
-                options={backgroundOptions}
-                onchange={(value) => {
-                    onChordChange({
-                        styling: {
-                            ...chord.styling,
-                            backgroundColor: value,
-                        },
-                    });
-                }}
+                value={getColorValue(chord.styling.backgroundColor)}
+                options={getColorOptions("backgroundColor")}
+                onchange={(value) => changeColor("backgroundColor", value)}
             />
         </fieldset>
     </div>
@@ -296,6 +312,22 @@
         </fieldset>
     </div>
 </div>
+
+{#if picker}
+    {#key picker.field}
+        <ColorPicker
+            label={colorLabels[picker.field]}
+            value={customColors[picker.field] ?? (
+                chord.styling[picker.field] === "transparent"
+                    ? "#FFFFFF"
+                    : chord.styling[picker.field]
+            )}
+            anchor={picker.anchor}
+            onApply={applyCustomColor}
+            onClose={() => { picker = null; }}
+        />
+    {/key}
+{/if}
 
 <style>
     .reset-tooltip[data-tip]::before {

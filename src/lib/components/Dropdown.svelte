@@ -6,6 +6,7 @@
         value: T;
         color?: string;
         disabled?: boolean;
+        reselect?: boolean;
         tooltip?: string;
     };
 
@@ -214,7 +215,7 @@
                     onfocus={(event) => showTooltip(event, option.tooltip)}
                     onblur={hideTooltip}
                     onclick={() => {
-                        if (option.value !== value) {
+                        if (option.value !== value || option.reselect) {
                             onchange(option.value);
                         }
                         close(true);
