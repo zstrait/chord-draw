@@ -23,26 +23,18 @@
 >
     <span class="brand text-2xl text-primary">ChordDraw</span>
 
-    <div class="flex gap-50 items-center">
-        <div class="flex gap-4">
-            <a href="/" class="underline text-primary">Chord Diagram</a>
-            |
-            <a href="/">Chord Chart</a>
-        </div>
-
-        <button
-            type="button"
-            class="flex size-9 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-primary hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-            onclick={toggleTheme}
-        >
-            {#if darkMode}
-                <Sun size={24} color="currentColor" aria-hidden="true" />
-            {:else}
-                <Moon size={24} color="currentColor" aria-hidden="true" />
-            {/if}
-        </button>
-    </div>
+    <button
+        type="button"
+        class="flex size-9 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-primary hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        onclick={toggleTheme}
+    >
+        {#if darkMode}
+            <Sun size={24} color="currentColor" aria-hidden="true" />
+        {:else}
+            <Moon size={24} color="currentColor" aria-hidden="true" />
+        {/if}
+    </button>
 </header>
 
 <style>
