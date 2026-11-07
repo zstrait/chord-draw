@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { onDestroy } from "svelte";
+    import { fly } from "svelte/transition";
     import Header from "#lib/components/Header.svelte";
     import Menu from "#lib/components/Menu/Menu.svelte";
     import Content from "#lib/components/Content/Content.svelte";
@@ -15,7 +17,18 @@
     let svg = $state("");
     let menuOpen = $state(true);
     let toolbarOpen = $state(true);
+    let copied = $state(false);
+    let copyToastTimer: ReturnType<typeof setTimeout> | undefined;
     let groupedInput: HTMLInputElement | null = null;
+
+    onDestroy(() => clearTimeout(copyToastTimer));
+
+    function toastSlide(node: Element, { x }: { x: number }) {
+        return fly(node, {
+            x,
+            duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 200,
+        });
+    }
 
     function handleSvgChange(value: string) {
         svg = value;
@@ -76,15 +89,23 @@
         }
     }
 
-    function handleCopy(format: "SVG" | "PNG", width: number) {
+    async function handleCopy(format: "SVG" | "PNG", width: number) {
         if (svg === "") {
             return;
         }
 
-        if (format === "SVG") {
-            copySvg(svg).catch(console.error);
-        } else {
-            copyPng(svg, width).catch(console.error);
+        try {
+            if (format === "SVG") {
+                await copySvg(svg);
+            } else {
+                await copyPng(svg, width);
+            }
+
+            copied = true;
+            clearTimeout(copyToastTimer);
+            copyToastTimer = setTimeout(() => { copied = false; }, 2000);
+        } catch (error) {
+            console.error(error);
         }
     }
 </script>
@@ -155,20 +176,37 @@
                 toolbarOpen = openBoth;
             }}
         />
-        <Toolbar
-            {svg}
-            isOpen={toolbarOpen}
-            onToggle={() => {
-                toolbarOpen = !toolbarOpen;
-            }}
-            onChordChange={updateChord}
-            onUndo={undo}
-            canUndo={past.length > 0}
-            onRedo={redo}
-            canRedo={future.length > 0}
-            onCopy={handleCopy}
-            onDownload={handleDownload}
-            canDownload={svg !== ""}
-        />
+        <div class="relative shrink-0">
+            <div
+                class="toast toast-end pointer-events-none absolute right-0 bottom-full z-50 mb-3 p-0"
+                role="status"
+                aria-live="polite"
+            >
+                {#if copied}
+                    <div
+                        class="alert animate-none rounded-xl border-0 bg-base-content px-4 py-3 text-sm font-medium text-white shadow-lg"
+                        in:toastSlide={{ x: 48 }}
+                        out:toastSlide={{ x: 48 }}
+                    >
+                        <span>Copied!</span>
+                    </div>
+                {/if}
+            </div>
+            <Toolbar
+                {svg}
+                isOpen={toolbarOpen}
+                onToggle={() => {
+                    toolbarOpen = !toolbarOpen;
+                }}
+                onChordChange={updateChord}
+                onUndo={undo}
+                canUndo={past.length > 0}
+                onRedo={redo}
+                canRedo={future.length > 0}
+                onCopy={handleCopy}
+                onDownload={handleDownload}
+                canDownload={svg !== ""}
+            />
+        </div>
     </div>
 </div>

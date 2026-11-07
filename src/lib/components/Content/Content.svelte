@@ -34,7 +34,7 @@
                 {/if}
             </button>
         </div>
-        <div class="tooltip tooltip-left" data-tip="Rotate clockwise">
+        <div class="tooltip tooltip-left" data-tip="Rotate">
             <button
                 type="button"
                 class="flex size-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-primary/5 p-0 text-primary hover:bg-primary/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
