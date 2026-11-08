@@ -11,6 +11,7 @@
     import { downloadSvg, downloadPng, copySvg, copyPng } from "#lib/export.ts";
 
     let chord = $state(createDefaultChord());
+    let stylingPreview = $state<Chord["styling"] | null>(null);
 
     let past = $state<Chord[]>([]);
     let future = $state<Chord[]>([]);
@@ -159,6 +160,7 @@
     <Menu
         {chord}
         onChordChange={updateChord}
+        onStylingPreview={(styling) => { stylingPreview = styling; }}
         isOpen={menuOpen}
         onToggle={() => {
             menuOpen = !menuOpen;
@@ -171,7 +173,7 @@
         <Header />
         <div class="divider mt-0 mb-3.5 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5" aria-hidden="true"></div>
         <Content
-            {chord}
+            chord={stylingPreview ? { ...chord, styling: stylingPreview } : chord}
             onChordChange={updateChord}
             onSvgChange={handleSvgChange}
             isMaximized={!menuOpen && !toolbarOpen}

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount, tick, untrack } from "svelte";
+    import { onDestroy, onMount, tick, untrack } from "svelte";
     import {
         HueyRoot,
         SaturationArea,
@@ -10,25 +10,47 @@
         type HueyRootProps,
     } from "@hueycolor/svelte";
 
-    let { label, value, anchor, onApply, onClose }: {
+    let { label, value, anchor, onApply, onClose, onPreview }: {
         label: string;
         value: string;
         anchor: HTMLElement;
         onApply: (value: string) => void;
         onClose: () => void;
+        onPreview: (value: string | null) => void;
     } = $props();
 
     let popup: HTMLDivElement;
     let color = $state<HueyRootProps["color"]>(hueyColor(untrack(() => value)));
+    let finished = false;
+
+    $effect(() => {
+        const value = hueyColor(color).toHexString().toUpperCase();
+        untrack(() => onPreview(value));
+    });
+
+    onDestroy(() => onPreview(null));
 
     function close() {
         popup.hidePopover();
         anchor.querySelector("button")?.focus({ preventScroll: true });
     }
 
+    function save() {
+        if (finished) return;
+        finished = true;
+        const hex = popup.querySelector<HTMLInputElement>('[huey-input="hex"]')?.value ?? "";
+        const current = /^#?(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex) ? hex : color;
+        onApply(hueyColor(current).toHexString().toUpperCase());
+    }
+
+    function cancel() {
+        finished = true;
+        close();
+    }
+
     async function apply() {
         await tick();
-        onApply(hueyColor(color).toHexString().toUpperCase());
+        save();
         close();
     }
 
@@ -45,7 +67,15 @@
     });
 </script>
 
-<svelte:window onresize={position} />
+<svelte:window
+    onresize={position}
+    onkeydown={(event) => {
+        if (event.key === "Escape" && !event.defaultPrevented && !finished) {
+            event.preventDefault();
+            cancel();
+        }
+    }}
+/>
 
 <div
     bind:this={popup}
@@ -54,6 +84,9 @@
     tabindex="-1"
     aria-label={`Custom ${label.toLowerCase()}`}
     class="color-picker w-64 max-w-[calc(100vw-16px)] max-h-[calc(100dvh-16px)] overflow-y-auto rounded-xl border border-base-300 bg-base-100 p-3 text-base-content shadow-[0_6px_20px_rgb(30_45_67_/16%)]"
+    onbeforetoggle={(event) => {
+        if (event.newState === "closed") save();
+    }}
     ontoggle={(event) => {
         if (event.newState === "closed") onClose();
     }}
@@ -61,7 +94,7 @@
         event.stopPropagation();
         if (event.key === "Escape") {
             event.preventDefault();
-            close();
+            cancel();
         }
     }}
 >
@@ -78,7 +111,7 @@
             </div>
         </HueyRoot>
         <div class="mt-3 flex justify-end gap-2">
-            <button type="button" class="btn btn-ghost btn-sm rounded-lg font-medium shadow-none" onclick={close}>Cancel</button>
+            <button type="button" class="btn btn-ghost btn-sm rounded-lg font-medium shadow-none" onclick={cancel}>Cancel</button>
             <button type="submit" class="btn btn-primary btn-sm rounded-lg font-medium shadow-none">Apply</button>
         </div>
     </form>

@@ -10,11 +10,12 @@
             changes: Partial<Chord>,
             input?: HTMLInputElement,
         ) => void;
+        onStylingPreview: (styling: Chord["styling"] | null) => void;
         isOpen: boolean;
         onToggle: () => void;
     };
 
-    let { chord, onChordChange, isOpen, onToggle }: Props = $props();
+    let { chord, onChordChange, onStylingPreview, isOpen, onToggle }: Props = $props();
 </script>
 
 <div
@@ -92,7 +93,7 @@
         >
             <EditMenu {chord} {onChordChange} />
             <div class="divider my-3"></div>
-            <CustomizeMenu {chord} {onChordChange} />
+            <CustomizeMenu {chord} {onChordChange} {onStylingPreview} />
         </div>
     </div>
 </div>

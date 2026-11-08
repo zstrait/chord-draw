@@ -237,7 +237,7 @@
 
 <div class="max-w-full shrink-0" style:width={rotation % 180 ? "35rem" : "27.5rem"}>
     <div
-        class="relative w-full rounded-xl border border-base-300 bg-white"
+        class="relative w-full rounded-xl border border-base-300 bg-white shadow-[0_4px_16px_rgb(30_45_67_/8%)]"
         style:aspect-ratio={rotation % 180 ? "14 / 11" : "11 / 14"}
     >
         <div class="absolute inset-x-3 inset-y-4 sm:inset-y-6">

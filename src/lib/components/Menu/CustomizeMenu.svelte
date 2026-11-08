@@ -12,11 +12,12 @@
             changes: Partial<Chord>,
             input?: HTMLInputElement,
         ) => void;
+        onStylingPreview: (styling: Chord["styling"] | null) => void;
     };
 
     type ColorField = "chordColor" | "lineColor" | "circleColor" | "backgroundColor";
 
-    let { chord, onChordChange }: Props = $props();
+    let { chord, onChordChange, onStylingPreview }: Props = $props();
     let colorFields = $state<Partial<Record<ColorField, HTMLFieldSetElement>>>({});
     let picker = $state<{ field: ColorField; anchor: HTMLElement } | null>(null);
     let customColors = $state<Partial<Record<ColorField, string>>>({});
@@ -77,6 +78,15 @@
             : "custom";
     }
 
+    function colorStyling(field: ColorField, value: string) {
+        const styling = { ...chord.styling, [field]: value };
+        if (field === "chordColor") {
+            styling.lineColor = value;
+            styling.circleColor = value;
+        }
+        return styling;
+    }
+
     function changeColor(field: ColorField, value: string) {
         if (value === "custom") {
             const anchor = colorFields[field];
@@ -84,12 +94,7 @@
             return;
         }
 
-        const styling = { ...chord.styling, [field]: value };
-        if (field === "chordColor") {
-            styling.lineColor = value;
-            styling.circleColor = value;
-        }
-        onChordChange({ styling });
+        onChordChange({ styling: colorStyling(field, value) });
     }
 
     function applyCustomColor(value: string) {
@@ -248,6 +253,9 @@
             )}
             anchor={picker.anchor}
             onApply={applyCustomColor}
+            onPreview={(value) => onStylingPreview(
+                value !== null && picker ? colorStyling(picker.field, value) : null,
+            )}
             onClose={() => { picker = null; }}
         />
     {/key}
