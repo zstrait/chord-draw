@@ -12,7 +12,6 @@
     };
 
     let { chord, onChordChange, onSvgChange, onMaximize, isMaximized }: Props = $props();
-    let rotation = $state(0);
 </script>
 
 <div class="relative flex min-h-0 min-w-0 flex-col flex-1 overflow-auto p-2">
@@ -39,13 +38,18 @@
                 type="button"
                 class="flex size-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-primary/5 p-0 text-primary hover:bg-primary/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 aria-label="Rotate drawing 90 degrees clockwise"
-                onclick={() => { rotation = (rotation + 90) % 360; }}
+                onclick={() => onChordChange({ rotation: (chord.rotation + 90) % 360 })}
             >
-                <RotateCwSquare size={24} color="currentColor" />
+                <RotateCwSquare
+                    size={24}
+                    color="currentColor"
+                    class="origin-center"
+                    style={`transform: rotate(${chord.rotation}deg)`}
+                />
             </button>
         </div>
     </div>
     <div class="flex flex-1 items-center justify-center px-4 py-4">
-        <ChordEditor {chord} {rotation} {onChordChange} {onSvgChange} />
+        <ChordEditor {chord} rotation={chord.rotation} {onChordChange} {onSvgChange} />
     </div>
 </div>

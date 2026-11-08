@@ -32,6 +32,7 @@ interface Styling {
 export interface Chord {
     // id: string,  // will eventually use as a content hash
     title: string;
+    rotation: number;
     tuning: Tuning;
     customTuning: Tuning | null;
     showStringNoteLabels: boolean;

@@ -110,7 +110,7 @@
         <div class="reset-tooltip tooltip tooltip-left" data-tip="Reset styling">
             <button
                 type="button"
-                class="btn btn-ghost btn-circle btn-sm text-primary shadow-none"
+                class="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-primary hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2"
                 aria-label="Reset customization"
                 onclick={() => onChordChange(resetChordStyling())}
             >

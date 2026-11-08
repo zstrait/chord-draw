@@ -3,6 +3,7 @@ import type { Chord } from "./types";
 export function createDefaultChord(): Chord {
     return {
         title: "",
+        rotation: 0,
         tuning: { label: "Standard", notes: ["E", "A", "D", "G", "B", "E"] },
         customTuning: null,
         showStringNoteLabels: false,

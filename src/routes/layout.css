@@ -61,3 +61,11 @@
     line-height: 1.5;
     box-shadow: 0 3px 8px rgb(30 45 67 / 20%);
 }
+
+[data-theme='dark'] .tooltip {
+    --tt-bg: var(--color-primary);
+}
+
+[data-theme='dark'] .tooltip[data-tip]::before {
+    color: var(--color-primary-content);
+}
