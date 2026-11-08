@@ -25,6 +25,7 @@
         canRedo: boolean;
         onCopy: (format: "SVG" | "PNG", width: number) => void;
         onDownload: (format: "SVG" | "PNG", width: number) => void;
+        onShare: () => void;
         canDownload: boolean;
         svg: string;
     };
@@ -39,6 +40,7 @@
         canRedo,
         onCopy,
         onDownload,
+        onShare,
         canDownload,
         svg,
     }: Props = $props();
@@ -202,7 +204,7 @@
             </div>
             <span class="h-6 w-px shrink-0 bg-white/25" aria-hidden="true"></span>
             <div class="tooltip tooltip-top inline-flex shrink-0" data-tip="Share">
-                <button type="button" class="toolbar-control btn btn-ghost btn-square" aria-label="Share chord">
+                <button type="button" class="toolbar-control btn btn-ghost btn-square" aria-label="Share chord" onclick={onShare}>
                     <Share size={24} color="currentColor" />
                 </button>
             </div>

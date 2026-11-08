@@ -64,7 +64,14 @@
                 value: color.hex,
                 color: color.hex,
             })),
-            { label: "Custom...", value: "custom", color: customColors[field], reselect: true },
+            {
+                label: "Custom...",
+                value: "custom",
+                color: customColors[field] ?? (
+                    getColorValue(chord.styling[field]) === "custom" ? chord.styling[field] : undefined
+                ),
+                reselect: true,
+            },
         ];
 
         return field === "backgroundColor"

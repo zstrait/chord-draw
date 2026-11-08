@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onDestroy } from "svelte";
+    import { onDestroy, untrack } from "svelte";
     import { fly } from "svelte/transition";
     import Header from "#lib/components/Header.svelte";
     import Menu from "#lib/components/Menu/Menu.svelte";
@@ -7,10 +7,12 @@
     import Toolbar from "#lib/components/Toolbar.svelte";
 
     import type { Chord } from "#lib/types.ts";
-    import { createDefaultChord } from "#lib/chord.ts";
+    import type { PageProps } from "./$types";
+    import { encodeChord } from "#lib/share.ts";
     import { downloadSvg, downloadPng, copySvg, copyPng } from "#lib/export.ts";
 
-    let chord = $state(createDefaultChord());
+    let { data }: PageProps = $props();
+    let chord = $state(untrack(() => $state.snapshot(data.chord)));
     let stylingPreview = $state<Chord["styling"] | null>(null);
 
     let past = $state<Chord[]>([]);
@@ -18,11 +20,43 @@
     let svg = $state("");
     let menuOpen = $state(true);
     let toolbarOpen = $state(true);
-    let copied = $state(false);
+    let copyMessage = $state("");
     let copyToastTimer: ReturnType<typeof setTimeout> | undefined;
     let groupedInput: HTMLInputElement | null = null;
 
     onDestroy(() => clearTimeout(copyToastTimer));
+
+    $effect.pre(() => {
+        const initial = data.chord;
+        untrack(() => {
+            chord = $state.snapshot(initial);
+            past = [];
+            future = [];
+            groupedInput = null;
+            stylingPreview = null;
+            copyMessage = "";
+            clearTimeout(copyToastTimer);
+        });
+    });
+
+    function showCopyToast(message: string) {
+        copyMessage = message;
+        clearTimeout(copyToastTimer);
+        copyToastTimer = setTimeout(() => { copyMessage = ""; }, 2000);
+    }
+
+    async function handleShare() {
+        const url = new URL(window.location.href);
+        url.search = encodeChord(chord).toString();
+        url.hash = "";
+        try {
+            await navigator.clipboard.writeText(url.href);
+            showCopyToast("Link copied!");
+        } catch (error) {
+            console.error(error);
+            showCopyToast("Couldn’t copy link");
+        }
+    }
 
     function toastSlide(node: Element, { x }: { x: number }) {
         return fly(node, {
@@ -106,9 +140,7 @@
                 await copyPng(svg, width);
             }
 
-            copied = true;
-            clearTimeout(copyToastTimer);
-            copyToastTimer = setTimeout(() => { copied = false; }, 2000);
+            showCopyToast("Copied!");
         } catch (error) {
             console.error(error);
         }
@@ -156,6 +188,7 @@
     }}
 />
 
+{#key data.chord}
 <div class="flex h-dvh gap-4 p-2 pl-0 pb-0">
     <Menu
         {chord}
@@ -189,13 +222,13 @@
                 role="status"
                 aria-live="polite"
             >
-                {#if copied}
+                {#if copyMessage}
                     <div
                         class="alert animate-none rounded-xl border-0 bg-neutral px-4 py-3 text-sm font-medium text-neutral-content shadow-lg"
                         in:toastSlide={{ x: 48 }}
                         out:toastSlide={{ x: 48 }}
                     >
-                        <span>Copied!</span>
+                        <span>{copyMessage}</span>
                     </div>
                 {/if}
             </div>
@@ -212,8 +245,10 @@
                 canRedo={future.length > 0}
                 onCopy={handleCopy}
                 onDownload={handleDownload}
+                onShare={handleShare}
                 canDownload={svg !== ""}
             />
         </div>
     </div>
 </div>
+{/key}
