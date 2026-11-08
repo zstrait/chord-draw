@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { Moon, Sun } from "@lucide/svelte";
+    import { asset } from "$app/paths";
 
     let darkMode = $state(false);
 
@@ -44,7 +45,7 @@
             aria-label="View ChordDraw on GitHub (opens in a new tab)"
         >
             <img
-                src={darkMode ? "/icons/git-logo-dark.svg" : "/icons/git-logo-light.svg"}
+                src={asset(darkMode ? "icons/git-logo-dark.svg" : "icons/git-logo-light.svg")}
                 width="26"
                 height="26"
                 alt=""
