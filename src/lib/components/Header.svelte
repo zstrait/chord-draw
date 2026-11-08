@@ -23,18 +23,34 @@
 >
     <span class="brand text-2xl text-primary">ChordDraw</span>
 
-    <button
-        type="button"
-        class="flex size-9 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-primary hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-        onclick={toggleTheme}
-    >
-        {#if darkMode}
-            <Sun size={24} color="currentColor" aria-hidden="true" />
-        {:else}
-            <Moon size={24} color="currentColor" aria-hidden="true" />
-        {/if}
-    </button>
+    <div class="flex items-center gap-2">
+        <button
+            type="button"
+            class="flex size-9 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-primary hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            onclick={toggleTheme}
+        >
+            {#if darkMode}
+                <Sun size={24} color="currentColor" aria-hidden="true" />
+            {:else}
+                <Moon size={24} color="currentColor" aria-hidden="true" />
+            {/if}
+        </button>
+        <a
+            href="https://github.com/zstrait/chord-draw"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex size-9 items-center justify-center rounded-full hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            aria-label="View ChordDraw on GitHub (opens in a new tab)"
+        >
+            <img
+                src={darkMode ? "/icons/git-logo-dark.svg" : "/icons/git-logo-light.svg"}
+                width="26"
+                height="26"
+                alt=""
+            />
+        </a>
+    </div>
 </header>
 
 <style>
