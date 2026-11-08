@@ -5,7 +5,7 @@
 
     type Props = {
         chord: Chord;
-        onChordChange: (changes: Partial<Chord>) => void;
+        onChordChange: (changes: Partial<Chord>, input?: HTMLInputElement) => void;
         onSvgChange: (svg: string) => void;
         onMaximize: () => void;
         isMaximized: boolean;

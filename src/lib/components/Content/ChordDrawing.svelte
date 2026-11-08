@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Chord, HoverTarget } from "#lib/types.ts";
+    import type { Chord, HoverTarget, TitleTarget } from "#lib/types.ts";
     import {
         SVGuitarChord,
         ChordStyle,
@@ -10,17 +10,56 @@
     let {
         chord,
         rotation,
+        editingTitle,
         onTargetsChange,
+        onTitleTargetChange,
         onSvgChange,
     }: {
         chord: Chord;
         rotation: number;
+        editingTitle: boolean;
         onTargetsChange: (targets: HoverTarget[]) => void;
+        onTitleTargetChange: (target: TitleTarget | null) => void;
         onSvgChange: (svg: string) => void;
     } = $props();
 
     let container: HTMLDivElement;
     const stringIndicatorSize = 0.6;
+
+    function measureTitle(fontSize: number, angle: number) {
+        const svg = container.querySelector("svg");
+        const group = svg?.querySelector<SVGGElement>("[data-chord-rotation]");
+        const transform = (group ?? svg)?.getScreenCTM();
+        const svgTransform = svg?.getScreenCTM();
+        if (!svg || !transform || !svgTransform) {
+            onTitleTargetChange(null);
+            return;
+        }
+
+        const title = svg.querySelector<SVGTextElement>("text.title");
+        const style = title ? getComputedStyle(title) : null;
+        const size = style ? parseFloat(style.fontSize) : fontSize;
+        const viewBox = svg.viewBox.baseVal;
+        const sourceCenter = new DOMPoint(
+            viewBox.x + viewBox.width / 2,
+            viewBox.y + viewBox.height / 2,
+        ).matrixTransform(svgTransform).matrixTransform(transform.inverse());
+        const center = new DOMPoint(
+            sourceCenter.x,
+            5 + size * 0.6,
+        ).matrixTransform(transform);
+        const scale = Math.hypot(transform.a, transform.b);
+        const bounds = container.getBoundingClientRect();
+
+        onTitleTargetChange({
+            x: center.x - bounds.left,
+            y: center.y - bounds.top,
+            width: (angle % 180 ? viewBox.height : viewBox.width) * scale * 0.9,
+            height: Math.max(28, size * 1.2 * scale + 8),
+            fontSize: Math.max(12, size * scale),
+            fontFamily: style?.fontFamily ?? "Arial, sans-serif",
+        });
+    }
 
     function measureTargets(
         stringCount: number,
@@ -229,7 +268,7 @@
                 fixedDiagramPosition: true,
                 sidePadding: 0.12,
                 emptyStringIndicatorSize: stringIndicatorSize,
-                title: chord.title,
+                title: chord.title || undefined,
                 // Edit Menu
                 tuning: chord.showStringNoteLabels ? chord.tuning.notes : [],
                 frets: chord.fretCount,
@@ -266,6 +305,7 @@
         const circleSize = chord.styling.circleSize;
         const isNormal = chord.styling.style !== "handdrawn";
         const angle = rotation;
+        const titleFontSize = chord.styling.titleFontSize;
         let frame = 0;
 
         function queueMeasurement() {
@@ -273,6 +313,7 @@
             frame = requestAnimationFrame(() => {
                 rotateDrawing(angle);
                 onSvgChange(drawing.toSvg());
+                measureTitle(titleFontSize, angle);
 
                 if (isNormal) {
                     measureTargets(stringCount, fretCount, circleSize);
@@ -304,7 +345,7 @@
     });
 </script>
 
-<div class="drawing" bind:this={container}></div>
+<div class="drawing" class:editing-title={editingTitle} bind:this={container}></div>
 
 <style>
     .drawing {
@@ -316,5 +357,9 @@
         display: block;
         width: 100%;
         height: 100%;
+    }
+
+    .editing-title :global(text.title) {
+        visibility: hidden;
     }
 </style>

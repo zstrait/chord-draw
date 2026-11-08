@@ -62,3 +62,12 @@ export type HoverTarget = {
     height: number;
     diameter: number;
 };
+
+export type TitleTarget = {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    fontSize: number;
+    fontFamily: string;
+};

@@ -40,6 +40,7 @@
         input: HTMLInputElement | null = null,
     ) {
         if (input === null || input !== groupedInput) {
+            endInputEdit();
             past.push($state.snapshot(chord));
         }
 
@@ -50,6 +51,9 @@
     }
 
     function endInputEdit() {
+        if (groupedInput && JSON.stringify(past.at(-1)) === JSON.stringify(chord)) {
+            past.pop();
+        }
         groupedInput = null;
     }
 

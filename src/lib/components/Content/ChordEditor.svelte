@@ -1,6 +1,6 @@
 <script lang="ts">
     import { tick } from "svelte";
-    import type { Barre, Chord, HoverTarget } from "#lib/types.ts";
+    import type { Barre, Chord, HoverTarget, TitleTarget } from "#lib/types.ts";
     import ChordDrawing from "./ChordDrawing.svelte";
     import ChordOverlay from "./ChordOverlay.svelte";
     import MarkerMenu from "./MarkerMenu.svelte";
@@ -8,7 +8,7 @@
     type Props = {
         chord: Chord;
         rotation: number;
-        onChordChange: (changes: Partial<Chord>) => void;
+        onChordChange: (changes: Partial<Chord>, input?: HTMLInputElement) => void;
         onSvgChange: (svg: string) => void;
     };
 
@@ -23,6 +23,27 @@
     let selectedMarker = $state<SelectedMarker | null>(null);
     let menuPosition = $state({ x: 0, y: 0 });
     let menuContainer = $state<HTMLDivElement>();
+    let titleTarget = $state<TitleTarget | null>(null);
+    let editingTitle = $state(false);
+    let titleInput = $state<HTMLInputElement>();
+    let originalTitle = "";
+
+    async function startTitleEdit() {
+        originalTitle = chord.title;
+        selectedMarker = null;
+        editingTitle = true;
+        await tick();
+        titleInput?.focus({ preventScroll: true });
+        titleInput?.select();
+    }
+
+    function finishTitleEdit(apply = true) {
+        if (!editingTitle) return;
+        editingTitle = false;
+        if (!apply && chord.title !== originalTitle) {
+            onChordChange({ title: originalTitle }, titleInput);
+        }
+    }
 
     function handleTargetsChange(targets: HoverTarget[]) {
         hoverTargets = targets;
@@ -200,10 +221,14 @@
     }
 </script>
 
+<svelte:window onpointerdown={(event) => {
+    if (editingTitle && event.target !== titleInput) finishTitleEdit();
+}} />
+
 <div class="max-w-full shrink-0" style:width={rotation % 180 ? "35rem" : "27.5rem"}>
     {#if chord.styling.style === "handdrawn"}
         <p class="px-4 text-sm">
-            Switch to Normal style to edit the diagram.
+            Switch to Normal style to edit notes and barres.
         </p>
     {/if}
     <div
@@ -214,9 +239,54 @@
             <ChordDrawing
                 {chord}
                 {rotation}
+                {editingTitle}
                 onTargetsChange={handleTargetsChange}
+                onTitleTargetChange={(target) => { titleTarget = target; }}
                 {onSvgChange}
             />
+            {#if titleTarget}
+                <div
+                    class="absolute"
+                    class:z-20={editingTitle}
+                    style:left={`${titleTarget.x}px`}
+                    style:top={`${titleTarget.y}px`}
+                    style:width={`${titleTarget.width}px`}
+                    style:height={`${titleTarget.height}px`}
+                    style:transform={`translate(-50%, -50%) rotate(${rotation}deg)`}
+                >
+                    {#if editingTitle}
+                        <input
+                            bind:this={titleInput}
+                            value={chord.title}
+                            type="text"
+                            class="input h-full w-full rounded-md border-primary bg-base-100 px-2 text-center text-base-content shadow-none"
+                            style:font-size={`${titleTarget.fontSize}px`}
+                            style:font-family={titleTarget.fontFamily}
+                            aria-label="Chord title"
+                            oninput={(event) => onChordChange(
+                                { title: event.currentTarget.value },
+                                event.currentTarget,
+                            )}
+                            onblur={() => finishTitleEdit()}
+                            onkeydown={(event) => {
+                                if (event.isComposing) return;
+                                if (event.key === "Enter" || event.key === "Escape") {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    finishTitleEdit(event.key === "Enter");
+                                }
+                            }}
+                        />
+                    {:else}
+                        <button
+                            type="button"
+                            class="h-full w-full cursor-text rounded-md border-0 bg-transparent p-0 hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-primary"
+                            aria-label={chord.title ? "Edit chord title" : "Add chord title"}
+                            onclick={startTitleEdit}
+                        ></button>
+                    {/if}
+                </div>
+            {/if}
             <ChordOverlay
                 {hoverTargets}
                 onNoteClick={handleNoteClick}
