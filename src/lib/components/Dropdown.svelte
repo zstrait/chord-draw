@@ -3,6 +3,7 @@
 
     type Option = {
         label: string;
+        selectedLabel?: string;
         value: T;
         color?: string;
         disabled?: boolean;
@@ -35,6 +36,7 @@
     let tooltip: HTMLDivElement;
     let tooltipText = $state("");
     let selected = $derived(options.find((option) => option.value === value));
+    let selectedLabel = $derived(selected?.selectedLabel ?? selected?.label ?? value);
     let search = "";
     let lastKeyTime = 0;
 
@@ -153,7 +155,7 @@
         bind:this={trigger}
         type="button"
         class="dropdown-trigger"
-        aria-label={`${label}: ${selected?.label ?? value}`}
+        aria-label={`${label}: ${selectedLabel}`}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={menuId}
@@ -181,7 +183,7 @@
                 aria-hidden="true"
             ></span>
         {/if}
-        <span class="min-w-0 flex-1 truncate">{selected?.label ?? value}</span>
+        <span class="min-w-0 flex-1 truncate">{selectedLabel}</span>
         <ChevronDown size={14} class="shrink-0" aria-hidden="true" />
     </button>
 

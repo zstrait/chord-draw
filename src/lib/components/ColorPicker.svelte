@@ -30,9 +30,11 @@
 
     onDestroy(() => onPreview(null));
 
-    function close() {
+    function close(restoreFocus = true) {
         popup.hidePopover();
-        anchor.querySelector("button")?.focus({ preventScroll: true });
+        const trigger = anchor.querySelector("button");
+        if (restoreFocus) trigger?.focus({ preventScroll: true });
+        else trigger?.blur();
     }
 
     function save() {
@@ -48,10 +50,10 @@
         close();
     }
 
-    async function apply() {
+    async function apply(restoreFocus = true) {
         await tick();
         save();
-        close();
+        close(restoreFocus);
     }
 
     function position() {
@@ -95,6 +97,9 @@
         if (event.key === "Escape") {
             event.preventDefault();
             cancel();
+        } else if (event.key === "Enter" && !event.isComposing) {
+            event.preventDefault();
+            apply(false);
         }
     }}
 >

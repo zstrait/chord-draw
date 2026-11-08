@@ -66,6 +66,7 @@
             })),
             {
                 label: "Custom...",
+                selectedLabel: "Custom",
                 value: "custom",
                 color: customColors[field] ?? (
                     getColorValue(chord.styling[field]) === "custom" ? chord.styling[field] : undefined
