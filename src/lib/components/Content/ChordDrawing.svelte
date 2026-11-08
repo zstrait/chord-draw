@@ -26,6 +26,10 @@
     } = $props();
 
     let container: HTMLDivElement;
+    const diagramWidth = 400;
+    const sidePadding = 0.12;
+    const fretSize = 1.5;
+    const nutWidth = 10;
     const stringIndicatorSize = 0.6;
 
     function measureTitle(fontSize: number, angle: number) {
@@ -92,7 +96,7 @@
                 y: center.y - bounds.top,
                 width: stringIndex === null
                     ? width * scale * 0.9
-                    : Math.max(28, 400 * 0.76 / (stringCount - 1) * scale * 0.95),
+                    : Math.max(28, diagramWidth * (1 - 2 * sidePadding) / (stringCount - 1) * scale * 0.95),
                 height: Math.max(28, size * 1.2 * scale + 8),
                 fontSize: Math.max(12, size * scale),
                 fontFamily: style.fontFamily,
@@ -109,69 +113,45 @@
         onTuningTargetsChange(targets);
     }
 
+    function measureGrid(stringCount: number, fretCount: number, topFretSize: number) {
+        const svg = container.querySelector("svg");
+        if (!svg || stringCount < 2 || fretCount < 1) return null;
+
+        const stringSpacing = diagramWidth * (1 - 2 * sidePadding) / (stringCount - 1);
+        const fretSpacing = stringSpacing * fretSize;
+        const tuning = svg.querySelector<SVGTextElement>(`text.tuning-${stringCount - 1}`);
+        const caption = svg.querySelector<SVGTextElement>("text.watermark");
+        const viewBox = svg.viewBox.baseVal;
+        const bottom = viewBox.height + 2 * viewBox.y - fretSpacing / 10
+            - (tuning?.getBBox().height ?? 0)
+            - 2 * (caption?.getBBox().height ?? 0);
+        const top = bottom - fretSpacing * fretCount;
+
+        return {
+            left: diagramWidth * sidePadding,
+            top,
+            nutTop: top - topFretSize,
+            stringSpacing,
+            fretSpacing,
+        };
+    }
+
     function measureTargets(
         stringCount: number,
         fretCount: number,
         circleSize: number,
+        grid: ReturnType<typeof measureGrid>,
     ) {
         const svg = container.querySelector("svg");
-        const transform = svg?.querySelector("line")?.getScreenCTM();
-
-        if (!svg || !transform) {
+        const transform = (svg?.querySelector<SVGGElement>("[data-chord-rotation]") ?? svg)?.getScreenCTM();
+        if (!svg || !transform || !grid) {
             onTargetsChange([]);
             return;
         }
 
-        const strings = Array.from(svg.querySelectorAll("line"))
-            .filter(
-                (line) =>
-                    line.x1.baseVal.value === line.x2.baseVal.value &&
-                    line.y2.baseVal.value > line.y1.baseVal.value,
-            )
-            .sort((a, b) => a.x1.baseVal.value - b.x1.baseVal.value);
-
-        if (strings.length !== stringCount || stringCount < 2) {
-            onTargetsChange([]);
-            return;
-        }
-
-        const firstString = strings[0];
-        const left = firstString.x1.baseVal.value;
-        const right = strings[stringCount - 1].x1.baseVal.value;
-        const top = firstString.y1.baseVal.value;
-
-        const frets = Array.from(svg.querySelectorAll("line")).filter(
-            (line) =>
-                line.y1.baseVal.value === line.y2.baseVal.value &&
-                Math.abs(line.x1.baseVal.value - left) < 0.01 &&
-                Math.abs(line.x2.baseVal.value - right) < 0.01 &&
-                line.y1.baseVal.value > top,
-        );
-
-        if (!frets.length) {
-            onTargetsChange([]);
-            return;
-        }
-
-        const nut = Array.from(svg.querySelectorAll("line")).find(
-            (line) =>
-                line.y1.baseVal.value === line.y2.baseVal.value &&
-                line.y1.baseVal.value < top &&
-                line.x1.baseVal.value <= left &&
-                line.x2.baseVal.value >= right,
-        );
-
-        if (!nut) {
-            onTargetsChange([]);
-            return;
-        }
-
-        const bottom = Math.max(...frets.map((line) => line.y1.baseVal.value));
-        const stringSpacing = (right - left) / (stringCount - 1);
-        const fretSpacing = (bottom - top) / fretCount;
+        const { left, top, nutTop, stringSpacing, fretSpacing } = grid;
         const indicatorSize = stringSpacing * stringIndicatorSize;
         const indicatorRowHeight = indicatorSize + 2 * (indicatorSize / 3);
-        const nutTop = 2 * nut.y1.baseVal.value - top;
         const wrapper = container.getBoundingClientRect();
         const targets: HoverTarget[] = [];
         const scale = Math.hypot(transform.a, transform.b);
@@ -193,7 +173,7 @@
                 stringIndex,
                 fret: 0,
                 ...targetBounds(
-                    strings[stringIndex].x1.baseVal.value,
+                    left + stringIndex * stringSpacing,
                     nutTop - indicatorRowHeight / 2,
                     stringSpacing,
                     indicatorRowHeight,
@@ -207,7 +187,7 @@
                     stringIndex,
                     fret,
                     ...targetBounds(
-                        strings[stringIndex].x1.baseVal.value,
+                        left + stringIndex * stringSpacing,
                         top + (fret - 0.5) * fretSpacing,
                         stringSpacing,
                         fretSpacing,
@@ -314,7 +294,10 @@
         drawing
             .configure({
                 fixedDiagramPosition: true,
-                sidePadding: 0.12,
+                sidePadding,
+                fretSize,
+                nutWidth,
+                strings: chord.stringCount,
                 emptyStringIndicatorSize: stringIndicatorSize,
                 title: chord.title || undefined,
                 // Edit Menu
@@ -351,16 +334,23 @@
         const stringCount = chord.stringCount;
         const fretCount = chord.fretCount;
         const circleSize = chord.styling.circleSize;
-        const isNormal = chord.styling.style !== "handdrawn";
+        const topFretSize = chord.startFret > 1 || !chord.showFretLabel
+            ? chord.styling.lineThickness
+            : nutWidth;
         const angle = rotation;
         const titleFontSize = chord.styling.titleFontSize;
         const customTuning = chord.tuning.custom;
         const showTuningLabel = chord.showTuningLabel;
+        let grid: ReturnType<typeof measureGrid> = null;
         let frame = 0;
 
         function queueMeasurement() {
             cancelAnimationFrame(frame);
             frame = requestAnimationFrame(() => {
+                const svg = container.querySelector("svg");
+                if (svg && !svg.querySelector("[data-chord-rotation]")) {
+                    grid = measureGrid(stringCount, fretCount, topFretSize);
+                }
                 rotateDrawing(angle);
                 onSvgChange(drawing.toSvg());
                 measureTitle(titleFontSize, angle);
@@ -370,11 +360,7 @@
                     onTuningTargetsChange([]);
                 }
 
-                if (isNormal) {
-                    measureTargets(stringCount, fretCount, circleSize);
-                } else {
-                    onTargetsChange([]);
-                }
+                measureTargets(stringCount, fretCount, circleSize, grid);
             });
         }
 

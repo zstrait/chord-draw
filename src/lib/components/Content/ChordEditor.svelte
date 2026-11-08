@@ -236,11 +236,6 @@
 }} />
 
 <div class="max-w-full shrink-0" style:width={rotation % 180 ? "35rem" : "27.5rem"}>
-    {#if chord.styling.style === "handdrawn"}
-        <p class="px-4 text-sm">
-            Switch to Normal style to edit notes and barres.
-        </p>
-    {/if}
     <div
         class="relative w-full rounded-xl border border-base-300 bg-white"
         style:aspect-ratio={rotation % 180 ? "14 / 11" : "11 / 14"}
