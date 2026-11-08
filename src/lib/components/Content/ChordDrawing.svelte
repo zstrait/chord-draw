@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Chord, HoverTarget, TitleTarget } from "#lib/types.ts";
+    import type { Chord, HoverTarget, TitleTarget, TuningTarget } from "#lib/types.ts";
     import {
         SVGuitarChord,
         ChordStyle,
@@ -13,6 +13,7 @@
         editingTitle,
         onTargetsChange,
         onTitleTargetChange,
+        onTuningTargetsChange,
         onSvgChange,
     }: {
         chord: Chord;
@@ -20,6 +21,7 @@
         editingTitle: boolean;
         onTargetsChange: (targets: HoverTarget[]) => void;
         onTitleTargetChange: (target: TitleTarget | null) => void;
+        onTuningTargetsChange: (targets: TuningTarget[]) => void;
         onSvgChange: (svg: string) => void;
     } = $props();
 
@@ -59,6 +61,52 @@
             fontSize: Math.max(12, size * scale),
             fontFamily: style?.fontFamily ?? "Arial, sans-serif",
         });
+    }
+
+    function measureTuningTargets(stringCount: number, angle: number, showLabel: boolean) {
+        const svg = container.querySelector("svg");
+        const transform = (svg?.querySelector<SVGGElement>("[data-chord-rotation]") ?? svg)?.getScreenCTM();
+        if (!svg || !transform) {
+            onTuningTargetsChange([]);
+            return;
+        }
+
+        const bounds = container.getBoundingClientRect();
+        const scale = Math.hypot(transform.a, transform.b);
+        const viewBox = svg.viewBox.baseVal;
+        const width = angle % 180 ? viewBox.height : viewBox.width;
+        const targets: TuningTarget[] = [];
+
+        function addTarget(text: SVGGraphicsElement, stringIndex: number | null) {
+            const box = text.getBBox();
+            const style = getComputedStyle(text);
+            const size = parseFloat(style.fontSize);
+            const center = new DOMPoint(
+                box.x + box.width / 2,
+                box.y + size * 0.6,
+            ).matrixTransform(transform!);
+
+            targets.push({
+                stringIndex,
+                x: center.x - bounds.left,
+                y: center.y - bounds.top,
+                width: stringIndex === null
+                    ? width * scale * 0.9
+                    : Math.max(28, 400 * 0.76 / (stringCount - 1) * scale * 0.95),
+                height: Math.max(28, size * 1.2 * scale + 8),
+                fontSize: Math.max(12, size * scale),
+                fontFamily: style.fontFamily,
+            });
+        }
+
+        for (let index = 0; index < stringCount; index++) {
+            const note = svg.querySelector<SVGTextElement>(`text.tuning-${index}`);
+            if (note) addTarget(note, index);
+        }
+        const caption = svg.querySelector<SVGTextElement>("text.watermark");
+        const label = caption?.querySelector<SVGTSpanElement>("tspan") ?? caption;
+        if (showLabel && label) addTarget(label, null);
+        onTuningTargetsChange(targets);
     }
 
     function measureTargets(
@@ -250,13 +298,13 @@
             }
         }
 
-        return text.join("\n");
+        return text.join(" ");
     }
 
     $effect(() => {
         const drawing = new SVGuitarChord(container);
         const text: string = formatBottomText(
-            chord.tuning.label,
+            chord.tuning.label || "\u00a0",
             chord.showTuningLabel,
             chord.capoFret,
             chord.ShowCapoLabel,
@@ -306,6 +354,8 @@
         const isNormal = chord.styling.style !== "handdrawn";
         const angle = rotation;
         const titleFontSize = chord.styling.titleFontSize;
+        const customTuning = chord.tuning.custom;
+        const showTuningLabel = chord.showTuningLabel;
         let frame = 0;
 
         function queueMeasurement() {
@@ -314,6 +364,11 @@
                 rotateDrawing(angle);
                 onSvgChange(drawing.toSvg());
                 measureTitle(titleFontSize, angle);
+                if (customTuning) {
+                    measureTuningTargets(stringCount, angle, showTuningLabel);
+                } else {
+                    onTuningTargetsChange([]);
+                }
 
                 if (isNormal) {
                     measureTargets(stringCount, fretCount, circleSize);

@@ -14,6 +14,7 @@ export interface Barre {
 export interface Tuning {
     label: string;
     notes: string[];
+    custom?: boolean;
 }
 
 interface Styling {
@@ -32,6 +33,7 @@ export interface Chord {
     // id: string,  // will eventually use as a content hash
     title: string;
     tuning: Tuning;
+    customTuning: Tuning | null;
     showStringNoteLabels: boolean;
     showTuningLabel: boolean;
     startFret: number;
@@ -70,4 +72,8 @@ export type TitleTarget = {
     height: number;
     fontSize: number;
     fontFamily: string;
+};
+
+export type TuningTarget = TitleTarget & {
+    stringIndex: number | null;
 };

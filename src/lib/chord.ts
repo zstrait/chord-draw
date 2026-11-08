@@ -4,6 +4,7 @@ export function createDefaultChord(): Chord {
     return {
         title: "",
         tuning: { label: "Standard", notes: ["E", "A", "D", "G", "B", "E"] },
+        customTuning: null,
         showStringNoteLabels: false,
         showTuningLabel: false,
         startFret: 1,

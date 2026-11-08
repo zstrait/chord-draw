@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Chord } from "#lib/types.ts";
-    import { tuningPresets } from "#lib/tunings.ts";
+    import { selectTuning, tuningPresets } from "#lib/tunings.ts";
     import Dropdown from "../Dropdown.svelte";
     import NumberInput from "../NumberInput.svelte";
 
@@ -9,7 +9,7 @@
             label: preset.label,
             value: preset.label,
         })),
-        { label: "Custom...", value: "custom", disabled: true },
+        { label: "Custom...", value: "custom", reselect: true },
     ];
 
     type Props = {
@@ -43,17 +43,9 @@
             <legend class="fieldset-legend">Tuning</legend>
             <Dropdown
                 label="Tuning"
-                value={chord.tuning.label}
+                value={chord.tuning.custom ? "custom" : chord.tuning.label}
                 options={tuningOptions}
-                onchange={(value) => {
-                    const tuning = tuningPresets.find(
-                        (preset) => preset.label === value,
-                    );
-
-                    if (tuning) {
-                        onChordChange({ tuning });
-                    }
-                }}
+                onchange={(value) => onChordChange(selectTuning(chord, value))}
             />
         </fieldset>
 

@@ -1,9 +1,11 @@
 <script lang="ts">
     import { tick } from "svelte";
-    import type { Barre, Chord, HoverTarget, TitleTarget } from "#lib/types.ts";
+    import type { Barre, Chord, HoverTarget, TitleTarget, TuningTarget } from "#lib/types.ts";
+    import { normalizeTuningNote } from "#lib/tunings.ts";
     import ChordDrawing from "./ChordDrawing.svelte";
     import ChordOverlay from "./ChordOverlay.svelte";
     import MarkerMenu from "./MarkerMenu.svelte";
+    import TuningInput from "./TuningInput.svelte";
 
     type Props = {
         chord: Chord;
@@ -24,9 +26,17 @@
     let menuPosition = $state({ x: 0, y: 0 });
     let menuContainer = $state<HTMLDivElement>();
     let titleTarget = $state<TitleTarget | null>(null);
+    let tuningTargets = $state<TuningTarget[]>([]);
+    let tuningInputs = $state<(ReturnType<typeof TuningInput> | undefined)[]>([]);
     let editingTitle = $state(false);
     let titleInput = $state<HTMLInputElement>();
     let originalTitle = "";
+
+    function tuningNavigation(index: number | null, direction: number) {
+        const next = index === null ? -1 : index + direction;
+        if (next < 0 || next >= chord.stringCount) return;
+        return () => { tuningInputs[next]?.start(); };
+    }
 
     async function startTitleEdit() {
         originalTitle = chord.title;
@@ -242,6 +252,7 @@
                 {editingTitle}
                 onTargetsChange={handleTargetsChange}
                 onTitleTargetChange={(target) => { titleTarget = target; }}
+                onTuningTargetsChange={(targets) => { tuningTargets = targets; }}
                 {onSvgChange}
             />
             {#if titleTarget}
@@ -286,6 +297,34 @@
                         ></button>
                     {/if}
                 </div>
+            {/if}
+            {#if chord.tuning.custom}
+                {#each tuningTargets as target (target.stringIndex)}
+                    <TuningInput
+                        bind:this={tuningInputs[target.stringIndex ?? chord.stringCount]}
+                        {target}
+                        {rotation}
+                        value={target.stringIndex === null
+                            ? chord.tuning.label
+                            : chord.tuning.notes[target.stringIndex]}
+                        label={target.stringIndex === null
+                            ? "Tuning name"
+                            : `String ${target.stringIndex + 1} tuning note`}
+                        normalize={target.stringIndex === null ? undefined : normalizeTuningNote}
+                        onstart={() => { selectedMarker = null; }}
+                        onnext={tuningNavigation(target.stringIndex, 1)}
+                        onprevious={tuningNavigation(target.stringIndex, -1)}
+                        onchange={(value, input) => onChordChange({
+                            tuning: target.stringIndex === null
+                                ? { ...chord.tuning, label: value }
+                                : {
+                                    ...chord.tuning,
+                                    notes: chord.tuning.notes.map((note, index) =>
+                                        index === target.stringIndex ? value : note),
+                                },
+                        }, input)}
+                    />
+                {/each}
             {/if}
             <ChordOverlay
                 {hoverTargets}
