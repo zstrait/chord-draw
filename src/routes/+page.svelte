@@ -21,6 +21,9 @@
     let menuOpen = $state(true);
     let toolbarOpen = $state(true);
     let copyMessage = $state("");
+    let toastAboveTooltip = $state(false);
+    let nextCopyToast: { message: string; aboveTooltip: boolean } | null = null;
+    let toastExiting = false;
     let copyToastTimer: ReturnType<typeof setTimeout> | undefined;
     let groupedInput: HTMLInputElement | null = null;
 
@@ -35,14 +38,34 @@
             groupedInput = null;
             stylingPreview = null;
             copyMessage = "";
+            nextCopyToast = null;
+            toastExiting = false;
             clearTimeout(copyToastTimer);
         });
     });
 
-    function showCopyToast(message: string) {
-        copyMessage = message;
+    function showCopyToast(message: string, aboveTooltip = false) {
+        nextCopyToast = { message, aboveTooltip };
         clearTimeout(copyToastTimer);
-        copyToastTimer = setTimeout(() => { copyMessage = ""; }, 2000);
+        if (copyMessage) {
+            hideCopyToast();
+        } else if (!toastExiting) {
+            showNextCopyToast();
+        }
+    }
+
+    function hideCopyToast() {
+        toastExiting = true;
+        copyMessage = "";
+    }
+
+    function showNextCopyToast() {
+        toastExiting = false;
+        if (!nextCopyToast) return;
+        copyMessage = nextCopyToast.message;
+        toastAboveTooltip = nextCopyToast.aboveTooltip;
+        nextCopyToast = null;
+        copyToastTimer = setTimeout(hideCopyToast, 2000);
     }
 
     async function handleShare() {
@@ -51,10 +74,10 @@
         url.hash = "";
         try {
             await navigator.clipboard.writeText(url.href);
-            showCopyToast("Link copied!");
+            showCopyToast("Link copied!", true);
         } catch (error) {
             console.error(error);
-            showCopyToast("Couldn’t copy link");
+            showCopyToast("Couldn’t copy link", true);
         }
     }
 
@@ -218,7 +241,8 @@
         />
         <div class="relative shrink-0">
             <div
-                class="toast toast-end pointer-events-none absolute right-0 bottom-full z-50 mb-3 p-0"
+                class="toast toast-end pointer-events-none absolute right-0 bottom-full z-50 p-0"
+                style:margin-bottom={toastAboveTooltip ? "calc(2.5rem - 2px)" : "0.75rem"}
                 role="status"
                 aria-live="polite"
             >
@@ -227,6 +251,7 @@
                         class="alert animate-none rounded-xl border-0 bg-neutral px-4 py-3 text-sm font-medium text-neutral-content shadow-lg"
                         in:toastSlide={{ x: 48 }}
                         out:toastSlide={{ x: 48 }}
+                        onoutroend={showNextCopyToast}
                     >
                         <span>{copyMessage}</span>
                     </div>
