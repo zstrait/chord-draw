@@ -8,10 +8,12 @@
 
     import type { Chord } from "#lib/types.ts";
     import type { PageProps } from "./$types";
-    import { encodeChord } from "#lib/share.ts";
+    import { encodeChord, decodeChord } from "#lib/share.ts";
     import { downloadSvg, downloadPng, copySvg, copyPng } from "#lib/export.ts";
 
     let { data }: PageProps = $props();
+    const autosaveKey = "chorddraw-chord-v1";
+    let autosaveReady = $state(false);
     let chord = $state(untrack(() => $state.snapshot(data.chord)));
     let stylingPreview = $state<Chord["styling"] | null>(null);
 
@@ -31,8 +33,15 @@
 
     $effect.pre(() => {
         const initial = data.chord;
+        const shared = data.hasSharedChord;
         untrack(() => {
             chord = $state.snapshot(initial);
+            if (!shared) {
+                try {
+                    const saved = localStorage.getItem(autosaveKey);
+                    if (saved !== null) chord = decodeChord(new URLSearchParams(saved));
+                } catch {}
+            }
             past = [];
             future = [];
             groupedInput = null;
@@ -41,7 +50,16 @@
             nextCopyToast = null;
             toastExiting = false;
             clearTimeout(copyToastTimer);
+            autosaveReady = true;
         });
+    });
+
+    $effect(() => {
+        if (!autosaveReady) return;
+        const saved = encodeChord(chord).toString();
+        try {
+            localStorage.setItem(autosaveKey, saved);
+        } catch {}
     });
 
     function showCopyToast(message: string, aboveTooltip = false) {

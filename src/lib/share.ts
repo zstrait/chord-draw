@@ -49,6 +49,13 @@ function color(value: string | null): string | null {
     return `#${hex.length === 3 ? [...hex].map((digit) => digit + digit).join("") : hex}`.toUpperCase();
 }
 
+export function hasChordParams(params: URLSearchParams): boolean {
+    return [
+        "title", "strings", "labels", "barre", "tuning", "tuningNotes", "tuningName", "style", "rotation",
+        ...Object.keys(numbers), ...Object.keys(flags), ...Object.keys(sizes), ...Object.keys(colors),
+    ].some((name) => params.has(name));
+}
+
 export function encodeChord(chord: Chord): URLSearchParams {
     const defaults = createDefaultChord();
     const params = new URLSearchParams();
