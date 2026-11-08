@@ -197,7 +197,7 @@
                                 exportWidth = value;
                             }}
                             placement="top"
-                            class="w-25 shrink-0"
+                            class="w-26 shrink-0"
                         />
                     </div>
                 {/if}

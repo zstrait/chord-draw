@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { Chord, HoverTarget, TitleTarget, TuningTarget } from "#lib/types.ts";
+    import { trimSvg } from "#lib/export.ts";
     import {
         SVGuitarChord,
         ChordStyle,
@@ -341,6 +342,7 @@
         const titleFontSize = chord.styling.titleFontSize;
         const customTuning = chord.tuning.custom;
         const showTuningLabel = chord.showTuningLabel;
+        const compactTitle = !!chord.title && !chord.strings.some(({ fret }) => fret === 0 || fret === -1);
         let grid: ReturnType<typeof measureGrid> = null;
         let frame = 0;
 
@@ -352,7 +354,11 @@
                     grid = measureGrid(stringCount, fretCount, topFretSize);
                 }
                 rotateDrawing(angle);
-                onSvgChange(drawing.toSvg());
+                const title = svg?.querySelector<SVGTextElement>("text.title")?.getBBox();
+                const titleOffset = compactTitle && grid && title
+                    ? Math.max(0, grid.nutTop - title.y - title.height - 12)
+                    : 0;
+                if (svg) onSvgChange(trimSvg(svg, titleOffset));
                 measureTitle(titleFontSize, angle);
                 if (customTuning) {
                     measureTuningTargets(stringCount, angle, showTuningLabel);

@@ -49,7 +49,7 @@ export function createDefaultChord(): Chord {
             circleSize: 18,
             circleColor: "#000000",
             backgroundColor: "transparent",
-            titleFontSize: 32,
+            titleFontSize: 36,
             fingerFontSize: 20,
         },
     };

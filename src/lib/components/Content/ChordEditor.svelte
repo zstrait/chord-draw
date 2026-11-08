@@ -1,6 +1,12 @@
 <script lang="ts">
     import { tick } from "svelte";
-    import type { Barre, Chord, HoverTarget, TitleTarget, TuningTarget } from "#lib/types.ts";
+    import type {
+        Barre,
+        Chord,
+        HoverTarget,
+        TitleTarget,
+        TuningTarget,
+    } from "#lib/types.ts";
     import { normalizeTuningNote } from "#lib/tunings.ts";
     import ChordDrawing from "./ChordDrawing.svelte";
     import ChordOverlay from "./ChordOverlay.svelte";
@@ -10,7 +16,10 @@
     type Props = {
         chord: Chord;
         rotation: number;
-        onChordChange: (changes: Partial<Chord>, input?: HTMLInputElement) => void;
+        onChordChange: (
+            changes: Partial<Chord>,
+            input?: HTMLInputElement,
+        ) => void;
         onSvgChange: (svg: string) => void;
     };
 
@@ -27,7 +36,9 @@
     let menuContainer = $state<HTMLDivElement>();
     let titleTarget = $state<TitleTarget | null>(null);
     let tuningTargets = $state<TuningTarget[]>([]);
-    let tuningInputs = $state<(ReturnType<typeof TuningInput> | undefined)[]>([]);
+    let tuningInputs = $state<(ReturnType<typeof TuningInput> | undefined)[]>(
+        [],
+    );
     let editingTitle = $state(false);
     let titleInput = $state<HTMLInputElement>();
     let originalTitle = "";
@@ -35,7 +46,9 @@
     function tuningNavigation(index: number | null, direction: number) {
         const next = index === null ? -1 : index + direction;
         if (next < 0 || next >= chord.stringCount) return;
-        return () => { tuningInputs[next]?.start(); };
+        return () => {
+            tuningInputs[next]?.start();
+        };
     }
 
     async function startTitleEdit() {
@@ -231,23 +244,34 @@
     }
 </script>
 
-<svelte:window onpointerdown={(event) => {
-    if (editingTitle && event.target !== titleInput) finishTitleEdit();
-}} />
+<svelte:window
+    onpointerdown={(event) => {
+        if (editingTitle && event.target !== titleInput) finishTitleEdit();
+    }}
+/>
 
-<div class="max-w-full shrink-0" style:width={rotation % 180 ? "35rem" : "27.5rem"}>
+<div
+    class="max-w-full shrink-0"
+    style:width={rotation % 180 ? "35rem" : "27.5rem"}
+>
     <div
         class="relative w-full rounded-xl border border-base-300 bg-white shadow-[0_4px_16px_rgb(30_45_67_/8%)]"
         style:aspect-ratio={rotation % 180 ? "14 / 11" : "11 / 14"}
     >
-        <div class="absolute inset-x-3 inset-y-4 sm:inset-y-6">
+        <div
+            class="absolute inset-x-3 top-[10px] bottom-[18px] sm:top-[16px] sm:bottom-[26px]"
+        >
             <ChordDrawing
                 {chord}
                 {rotation}
                 {editingTitle}
                 onTargetsChange={handleTargetsChange}
-                onTitleTargetChange={(target) => { titleTarget = target; }}
-                onTuningTargetsChange={(targets) => { tuningTargets = targets; }}
+                onTitleTargetChange={(target) => {
+                    titleTarget = target;
+                }}
+                onTuningTargetsChange={(targets) => {
+                    tuningTargets = targets;
+                }}
                 {onSvgChange}
             />
             {#if titleTarget}
@@ -269,14 +293,18 @@
                             style:font-size={`${titleTarget.fontSize}px`}
                             style:font-family={titleTarget.fontFamily}
                             aria-label="Chord title"
-                            oninput={(event) => onChordChange(
-                                { title: event.currentTarget.value },
-                                event.currentTarget,
-                            )}
+                            oninput={(event) =>
+                                onChordChange(
+                                    { title: event.currentTarget.value },
+                                    event.currentTarget,
+                                )}
                             onblur={() => finishTitleEdit()}
                             onkeydown={(event) => {
                                 if (event.isComposing) return;
-                                if (event.key === "Enter" || event.key === "Escape") {
+                                if (
+                                    event.key === "Enter" ||
+                                    event.key === "Escape"
+                                ) {
                                     event.preventDefault();
                                     event.stopPropagation();
                                     finishTitleEdit(event.key === "Enter");
@@ -287,7 +315,9 @@
                         <button
                             type="button"
                             class="h-full w-full cursor-text rounded-md border-0 bg-transparent p-0 hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-primary"
-                            aria-label={chord.title ? "Edit chord title" : "Add chord title"}
+                            aria-label={chord.title
+                                ? "Edit chord title"
+                                : "Add chord title"}
                             onclick={startTitleEdit}
                         ></button>
                     {/if}
@@ -296,7 +326,11 @@
             {#if chord.tuning.custom}
                 {#each tuningTargets as target (target.stringIndex)}
                     <TuningInput
-                        bind:this={tuningInputs[target.stringIndex ?? chord.stringCount]}
+                        bind:this={
+                            tuningInputs[
+                                target.stringIndex ?? chord.stringCount
+                            ]
+                        }
                         {target}
                         {rotation}
                         value={target.stringIndex === null
@@ -305,19 +339,33 @@
                         label={target.stringIndex === null
                             ? "Tuning name"
                             : `String ${target.stringIndex + 1} tuning note`}
-                        normalize={target.stringIndex === null ? undefined : normalizeTuningNote}
-                        onstart={() => { selectedMarker = null; }}
+                        normalize={target.stringIndex === null
+                            ? undefined
+                            : normalizeTuningNote}
+                        onstart={() => {
+                            selectedMarker = null;
+                        }}
                         onnext={tuningNavigation(target.stringIndex, 1)}
                         onprevious={tuningNavigation(target.stringIndex, -1)}
-                        onchange={(value, input) => onChordChange({
-                            tuning: target.stringIndex === null
-                                ? { ...chord.tuning, label: value }
-                                : {
-                                    ...chord.tuning,
-                                    notes: chord.tuning.notes.map((note, index) =>
-                                        index === target.stringIndex ? value : note),
+                        onchange={(value, input) =>
+                            onChordChange(
+                                {
+                                    tuning:
+                                        target.stringIndex === null
+                                            ? { ...chord.tuning, label: value }
+                                            : {
+                                                  ...chord.tuning,
+                                                  notes: chord.tuning.notes.map(
+                                                      (note, index) =>
+                                                          index ===
+                                                          target.stringIndex
+                                                              ? value
+                                                              : note,
+                                                  ),
+                                              },
                                 },
-                        }, input)}
+                                input,
+                            )}
                     />
                 {/each}
             {/if}
