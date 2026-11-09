@@ -1,7 +1,7 @@
 import type { Chord, Tuning } from "./types.ts";
 
 export function normalizeTuningNote(value: string): string | null {
-    const note = /^([a-g])\s*(#|♯|b|♭|flat)?$/i.exec(value.trim());
+    const note = /^([a-g])\s*(#|♯|s|b|♭|flat)?$/i.exec(value.trim());
     if (!note) return null;
     const accidental = note[2];
     return note[1].toUpperCase() + (accidental

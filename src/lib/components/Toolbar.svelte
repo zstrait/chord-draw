@@ -91,13 +91,13 @@
     {/if}
 
     <div
-        class="toolbar-background pointer-events-none absolute inset-0 bg-[var(--toolbar-bg)] transition-[transform,border-radius] duration-300 ease-in-out motion-reduce:transition-none"
+        class="toolbar-background pointer-events-none absolute inset-0 transition-[transform,border-radius] duration-300 ease-in-out motion-reduce:transition-none"
         style:--toolbar-offset={isOpen ? "0rem" : "calc(100% - 1rem)"}
         style:border-radius={isOpen ? "0.75rem" : "0.75rem 1.5rem 0 0"}
     ></div>
 
     <div
-        class="toolbar-tab pointer-events-none absolute inset-y-0 right-0 w-16 bg-[var(--toolbar-bg)] transition-[border-radius] duration-300 ease-in-out motion-reduce:transition-none"
+        class="toolbar-tab pointer-events-none absolute inset-y-0 right-0 w-16 transition-[border-radius] duration-300 ease-in-out motion-reduce:transition-none"
         style:border-radius={isOpen ? "0.75rem" : "1.5rem 1.5rem 0 0"}
     ></div>
 
@@ -238,6 +238,11 @@
 </div>
 
 <style>
+    .toolbar-background,
+    .toolbar-tab {
+        background-color: var(--toolbar-bg);
+    }
+
     .toolbar-control {
         width: 2.25rem;
         height: 2.25rem;
