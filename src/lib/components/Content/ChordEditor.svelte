@@ -252,9 +252,12 @@
         if (!bounds) return;
         const x = event.clientX - bounds.left;
         const y = event.clientY - bounds.top;
-        const target = hoverTargets.find((target) =>
-            x >= target.x && x <= target.x + target.width &&
-            y >= target.y && y <= target.y + target.height,
+        const target = hoverTargets.find(
+            (target) =>
+                x >= target.x &&
+                x <= target.x + target.width &&
+                y >= target.y &&
+                y <= target.y + target.height,
         );
         if (target) handleMarkerContextMenu(event, target);
     }
@@ -330,7 +333,10 @@
     style:width={rotation % 180 ? "35rem" : "27.5rem"}
 >
     <div
-        class="relative w-full rounded-xl border border-base-300 bg-white shadow-[0_4px_16px_rgb(30_45_67_/8%)]"
+        class="relative w-full rounded-xl border border-base-300 shadow-[0_4px_16px_rgb(30_45_67_/8%)]"
+        style:background-color={chord.styling.backgroundColor === "transparent"
+            ? "#FFFFFF"
+            : chord.styling.backgroundColor}
         style:aspect-ratio={rotation % 180 ? "14 / 11" : "11 / 14"}
     >
         <div
