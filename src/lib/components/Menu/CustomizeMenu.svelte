@@ -12,15 +12,16 @@
             changes: Partial<Chord>,
             input?: HTMLInputElement,
         ) => void;
-        onStylingPreview: (styling: Chord["styling"] | null) => void;
+        onChordPreview: (changes: Partial<Chord> | null) => void;
     };
 
     type ColorField = "chordColor" | "lineColor" | "circleColor" | "backgroundColor";
 
-    let { chord, onChordChange, onStylingPreview }: Props = $props();
+    let { chord, onChordChange, onChordPreview }: Props = $props();
     let colorFields = $state<Partial<Record<ColorField, HTMLFieldSetElement>>>({});
     let picker = $state<{ field: ColorField; anchor: HTMLElement } | null>(null);
     let customColors = $state<Partial<Record<ColorField, string>>>({});
+    let hasMarkerColors = $derived([...chord.strings, ...chord.barres].some((marker) => marker.color !== undefined));
 
     const colorLabels: Record<ColorField, string> = {
         chordColor: "Chord color",
@@ -63,6 +64,7 @@
                 label: color.name,
                 value: color.hex,
                 color: color.hex,
+                reselect: hasMarkerColors && (field === "circleColor" || field === "chordColor"),
             })),
             {
                 label: "Custom...",
@@ -86,13 +88,18 @@
             : "custom";
     }
 
-    function colorStyling(field: ColorField, value: string) {
+    function colorChanges(field: ColorField, value: string): Partial<Chord> {
         const styling = { ...chord.styling, [field]: value };
         if (field === "chordColor") {
             styling.lineColor = value;
             styling.circleColor = value;
         }
-        return styling;
+        const changes: Partial<Chord> = { styling };
+        if (field === "circleColor" || field === "chordColor") {
+            changes.strings = chord.strings.map((note) => ({ ...note, color: undefined }));
+            changes.barres = chord.barres.map((barre) => ({ ...barre, color: undefined }));
+        }
+        return changes;
     }
 
     function changeColor(field: ColorField, value: string) {
@@ -102,7 +109,7 @@
             return;
         }
 
-        onChordChange({ styling: colorStyling(field, value) });
+        onChordChange(colorChanges(field, value));
     }
 
     function applyCustomColor(value: string) {
@@ -125,7 +132,7 @@
                 type="button"
                 class="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-primary hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2"
                 aria-label="Reset customization"
-                onclick={() => onChordChange(resetChordStyling())}
+                onclick={() => onChordChange(resetChordStyling(chord))}
             >
                 <RotateCcw size={22} color="currentColor" />
             </button>
@@ -261,8 +268,8 @@
             )}
             anchor={picker.anchor}
             onApply={applyCustomColor}
-            onPreview={(value) => onStylingPreview(
-                value !== null && picker ? colorStyling(picker.field, value) : null,
+            onPreview={(value) => onChordPreview(
+                value !== null && picker ? colorChanges(picker.field, value) : null,
             )}
             onClose={() => { picker = null; }}
         />

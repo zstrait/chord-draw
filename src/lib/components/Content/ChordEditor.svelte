@@ -32,8 +32,37 @@
 
     let hoverTargets = $state<HoverTarget[]>([]);
     let selectedMarker = $state<SelectedMarker | null>(null);
+    let currentMarker = $derived(
+        selectedMarker === null
+            ? undefined
+            : selectedMarker.kind === "note"
+              ? chord.strings[selectedMarker.index]
+              : chord.barres[selectedMarker.index],
+    );
+    let colorPreview = $state<string | null>(null);
+    let lastMarkerColor = $state<string | null>(null);
+    let drawingChord = $derived.by(() => {
+        const color = colorPreview;
+        const marker = selectedMarker;
+        if (color === null || marker === null) return chord;
+        if (marker.kind === "note") {
+            return {
+                ...chord,
+                strings: chord.strings.map((note, index) =>
+                    index === marker.index ? { ...note, color } : note,
+                ),
+            };
+        }
+        return {
+            ...chord,
+            barres: chord.barres.map((barre, index) =>
+                index === marker.index ? { ...barre, color } : barre,
+            ),
+        };
+    });
     let menuPosition = $state({ x: 0, y: 0 });
     let menuContainer = $state<HTMLDivElement>();
+    let drawingArea = $state<HTMLDivElement>();
     let titleTarget = $state<TitleTarget | null>(null);
     let tuningTargets = $state<TuningTarget[]>([]);
     let tuningInputs = $state<(ReturnType<typeof TuningInput> | undefined)[]>(
@@ -93,6 +122,7 @@
                         ...note,
                         fret: nextFret,
                         markerText: null,
+                        color: undefined,
                     };
                 }
 
@@ -109,6 +139,7 @@
                         ...note,
                         fret:
                             note.fret === 0 ? -1 : note.fret === -1 ? null : 0,
+                        color: undefined,
                     };
                 }
 
@@ -132,7 +163,12 @@
                     note.fret !== null &&
                     note.fret <= fret
                 ) {
-                    return { ...note, fret: null, markerText: null };
+                    return {
+                        ...note,
+                        fret: null,
+                        markerText: null,
+                        color: undefined,
+                    };
                 }
 
                 return note;
@@ -211,10 +247,27 @@
         }
     }
 
+    function handleOutsideContextMenu(event: MouseEvent) {
+        const bounds = drawingArea?.getBoundingClientRect();
+        if (!bounds) return;
+        const x = event.clientX - bounds.left;
+        const y = event.clientY - bounds.top;
+        const target = hoverTargets.find((target) =>
+            x >= target.x && x <= target.x + target.width &&
+            y >= target.y && y <= target.y + target.height,
+        );
+        if (target) handleMarkerContextMenu(event, target);
+    }
+
     function handleMarkerSelect(text: string | null) {
         const marker = selectedMarker;
 
         if (marker === null) {
+            return;
+        }
+
+        if (!currentMarker || currentMarker.markerText === text) {
+            selectedMarker = null;
             return;
         }
 
@@ -242,6 +295,28 @@
 
         selectedMarker = null;
     }
+
+    function handleMarkerColor(color: string | null) {
+        const marker = selectedMarker;
+        if (marker === null || !currentMarker) return;
+        if (color !== null) lastMarkerColor = color;
+        if (currentMarker.color === (color ?? undefined)) return;
+        const update = <T extends { color?: string }>(
+            item: T,
+            index: number,
+        ): T => {
+            if (index !== marker.index) return item;
+            const updated = { ...item };
+            if (color === null) delete updated.color;
+            else updated.color = color;
+            return updated;
+        };
+        onChordChange(
+            marker.kind === "note"
+                ? { strings: chord.strings.map(update) }
+                : { barres: chord.barres.map(update) },
+        );
+    }
 </script>
 
 <svelte:window
@@ -260,9 +335,10 @@
     >
         <div
             class="absolute inset-x-3 top-[10px] bottom-[18px] sm:top-[16px] sm:bottom-[26px]"
+            bind:this={drawingArea}
         >
             <ChordDrawing
-                {chord}
+                chord={drawingChord}
                 {rotation}
                 {editingTitle}
                 onTargetsChange={handleTargetsChange}
@@ -378,19 +454,30 @@
             />
         </div>
     </div>
-    {#if selectedMarker !== null}
+    {#if selectedMarker !== null && currentMarker}
         <div
             class="fixed z-50 w-max max-w-[calc(100vw-16px)] max-h-[calc(100dvh-16px)]"
             style:left={`${menuPosition.x}px`}
             style:top={`${menuPosition.y}px`}
             bind:this={menuContainer}
         >
-            <MarkerMenu
-                onSelect={handleMarkerSelect}
-                onClose={() => {
-                    selectedMarker = null;
-                }}
-            />
+            {#key selectedMarker}
+                <MarkerMenu
+                    text={currentMarker.markerText}
+                    color={lastMarkerColor ??
+                        currentMarker.color ??
+                        chord.styling.circleColor}
+                    onColorChange={handleMarkerColor}
+                    onColorPreview={(value) => {
+                        colorPreview = value;
+                    }}
+                    onSelect={handleMarkerSelect}
+                    onOutsideContextMenu={handleOutsideContextMenu}
+                    onClose={() => {
+                        selectedMarker = null;
+                    }}
+                />
+            {/key}
         </div>
     {/if}
 </div>

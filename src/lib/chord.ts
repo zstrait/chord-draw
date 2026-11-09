@@ -55,8 +55,10 @@ export function createDefaultChord(): Chord {
     };
 }
 
-export function resetChordStyling(): Partial<Chord> {
+export function resetChordStyling(chord: Chord): Partial<Chord> {
     return {
         styling: createDefaultChord().styling,
+        strings: chord.strings.map((note) => ({ ...note, color: undefined })),
+        barres: chord.barres.map((barre) => ({ ...barre, color: undefined })),
     };
 }

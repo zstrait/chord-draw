@@ -2,6 +2,7 @@
 interface StringNote {
     fret: number | null;
     markerText: string | null;
+    color?: string;
 }
 
 export interface Barre {
@@ -9,6 +10,7 @@ export interface Barre {
     startString: number;
     endString: number;
     markerText: string | null;
+    color?: string;
 }
 
 export interface Tuning {

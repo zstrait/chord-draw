@@ -231,7 +231,14 @@
                     // svguitar strings go from low=6 to high=0, while mine are low=0 to high=6
                     strings.length - strings.indexOf(stringNote),
                     stringNote.fret === -1 ? "x" : stringNote.fret,
-                    stringNote.markerText ?? "",
+                    {
+                        text: stringNote.markerText ?? "",
+                        color: stringNote.color,
+                        strokeColor: stringNote.color,
+                        textColor: stringNote.color
+                            ? stringNote.color === "#FFFFFF" ? "#000000" : "#FFFFFF"
+                            : undefined,
+                    },
                 ]);
             }
         });
@@ -255,6 +262,11 @@
                 toString: stringCount - barre.endString,
                 fret: barre.fret,
                 text: barre.markerText ?? undefined,
+                color: barre.color,
+                strokeColor: barre.color,
+                textColor: barre.color
+                    ? barre.color === "#FFFFFF" ? "#000000" : "#FFFFFF"
+                    : undefined,
             });
         }
 

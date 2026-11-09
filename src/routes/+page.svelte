@@ -13,9 +13,13 @@
 
     let { data }: PageProps = $props();
     const autosaveKey = "chorddraw-chord-v1";
+    const historyKey = "chorddraw-history-v1";
+    const historyLimit = 50;
     let autosaveReady = $state(false);
+    let sessionSource = $state<string | null>(null);
+    let firstLoad = true;
     let chord = $state(untrack(() => $state.snapshot(data.chord)));
-    let stylingPreview = $state<Chord["styling"] | null>(null);
+    let chordPreview = $state<Partial<Chord> | null>(null);
 
     let past = $state<Chord[]>([]);
     let future = $state<Chord[]>([]);
@@ -44,8 +48,14 @@
             }
             past = [];
             future = [];
+            sessionSource = shared ? encodeChord(initial).toString() : null;
+            const navigation = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+            if (!shared || (firstLoad && navigation?.type === "reload")) {
+                restoreHistory(sessionSource);
+            }
+            firstLoad = false;
             groupedInput = null;
-            stylingPreview = null;
+            chordPreview = null;
             copyMessage = "";
             nextCopyToast = null;
             toastExiting = false;
@@ -60,7 +70,47 @@
         try {
             localStorage.setItem(autosaveKey, saved);
         } catch {}
+        const history = JSON.stringify({
+            source: sessionSource,
+            chord: saved,
+            past: past.slice(-historyLimit).map((entry) => encodeChord(entry).toString()),
+            future: future.slice(-historyLimit).map((entry) => encodeChord(entry).toString()),
+        });
+        try {
+            sessionStorage.setItem(historyKey, history);
+        } catch {
+            try {
+                sessionStorage.removeItem(historyKey);
+            } catch {}
+        }
     });
+
+    function restoreHistory(source: string | null) {
+        try {
+            const saved = JSON.parse(sessionStorage.getItem(historyKey) ?? "null");
+            if (!saved || saved.source !== source || typeof saved.chord !== "string" ||
+                !Array.isArray(saved.past) || !saved.past.every((entry: unknown) => typeof entry === "string") ||
+                !Array.isArray(saved.future) || !saved.future.every((entry: unknown) => typeof entry === "string")) return;
+
+            function decode(value: string) {
+                const restored = decodeChord(new URLSearchParams(value));
+                if (encodeChord(restored).toString() !== value) throw new Error("Invalid saved chord");
+                return restored;
+            }
+
+            const current = decode(saved.chord);
+            const previous = saved.past.slice(-historyLimit).map(decode);
+            const next = saved.future.slice(-historyLimit).map(decode);
+            chord = current;
+            past = previous;
+            future = next;
+        } catch {}
+    }
+
+    function remember(stack: Chord[]) {
+        stack.push($state.snapshot(chord));
+        if (stack.length > historyLimit) stack.shift();
+    }
 
     function showCopyToast(message: string, aboveTooltip = false) {
         nextCopyToast = { message, aboveTooltip };
@@ -117,7 +167,7 @@
     ) {
         if (input === null || input !== groupedInput) {
             endInputEdit();
-            past.push($state.snapshot(chord));
+            remember(past);
         }
 
         groupedInput = input;
@@ -141,7 +191,7 @@
             return;
         }
 
-        future.push($state.snapshot(chord));
+        remember(future);
         chord = previous;
     }
 
@@ -153,7 +203,7 @@
             return;
         }
 
-        past.push($state.snapshot(chord));
+        remember(past);
         chord = latest;
     }
 
@@ -234,7 +284,7 @@
     <Menu
         {chord}
         onChordChange={updateChord}
-        onStylingPreview={(styling) => { stylingPreview = styling; }}
+        onChordPreview={(changes) => { chordPreview = changes; }}
         isOpen={menuOpen}
         onToggle={() => {
             menuOpen = !menuOpen;
@@ -247,7 +297,7 @@
         <Header />
         <div class="divider mt-0 mb-3.5 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5" aria-hidden="true"></div>
         <Content
-            chord={stylingPreview ? { ...chord, styling: stylingPreview } : chord}
+            chord={chordPreview ? { ...chord, ...chordPreview } : chord}
             onChordChange={updateChord}
             onSvgChange={handleSvgChange}
             isMaximized={!menuOpen && !toolbarOpen}

@@ -51,7 +51,7 @@ function color(value: string | null): string | null {
 
 export function hasChordParams(params: URLSearchParams): boolean {
     return [
-        "title", "strings", "labels", "barre", "tuning", "tuningNotes", "tuningName", "style", "rotation",
+        "title", "strings", "labels", "noteColors", "barre", "barreColors", "tuning", "tuningNotes", "tuningName", "style", "rotation",
         ...Object.keys(numbers), ...Object.keys(flags), ...Object.keys(sizes), ...Object.keys(colors),
     ].some((name) => params.has(name));
 }
@@ -72,9 +72,18 @@ export function encodeChord(chord: Chord): URLSearchParams {
         const denseLabels = JSON.stringify(labels);
         params.set("labels", sparseLabels.length < denseLabels.length ? sparseLabels : denseLabels);
     }
+    const noteColors = Object.fromEntries(chord.strings.flatMap((note, index) =>
+        note.color && note.fret !== null && note.fret > 0
+            ? [[index, note.color.replace(/^#/, "")]] : [],
+    ));
+    if (Object.keys(noteColors).length) params.set("noteColors", JSON.stringify(noteColors));
     for (const { fret, startString, endString, markerText } of chord.barres) {
         params.append("barre", `${fret}-${startString}-${endString}${markerText === null ? "" : `-${markerText}`}`);
     }
+    const barreColors = Object.fromEntries(chord.barres.flatMap((barre, index) =>
+        barre.color ? [[index, barre.color.replace(/^#/, "")]] : [],
+    ));
+    if (Object.keys(barreColors).length) params.set("barreColors", JSON.stringify(barreColors));
     set("tuning", chord.tuning.custom ? "custom" : chord.tuning.label, defaults.tuning.label);
     if (chord.tuning.custom) {
         set("tuningNotes", chord.tuning.notes.join(","), customDefault.notes.join(","));
@@ -116,6 +125,16 @@ export function decodeChord(params: URLSearchParams): Chord {
         }
     }
 
+    const noteColors = json(params.get("noteColors"));
+    if (noteColors !== null && typeof noteColors === "object" && !Array.isArray(noteColors)) {
+        for (const [index, value] of Object.entries(noteColors)) {
+            if (!/^[0-5]$/.test(index) || typeof value !== "string") continue;
+            const parsed = color(value);
+            const note = chord.strings[Number(index)];
+            if (parsed && note.fret !== null && note.fret > 0) note.color = parsed;
+        }
+    }
+
     for (const value of params.getAll("barre")) {
         const match = /^(\d+)-([0-5])-([0-5])(?:-(.*))?$/s.exec(value);
         if (!match) continue;
@@ -127,6 +146,16 @@ export function decodeChord(params: URLSearchParams): Chord {
             endString: Number(endString),
             markerText: markerText ?? null,
         });
+    }
+
+    const barreColors = json(params.get("barreColors"));
+    if (barreColors !== null && typeof barreColors === "object" && !Array.isArray(barreColors)) {
+        for (const [index, value] of Object.entries(barreColors)) {
+            if (!/^(0|[1-9]\d*)$/.test(index) || typeof value !== "string") continue;
+            const parsed = color(value);
+            const barre = chord.barres[Number(index)];
+            if (parsed && barre) barre.color = parsed;
+        }
     }
 
     const tuning = params.get("tuning");
