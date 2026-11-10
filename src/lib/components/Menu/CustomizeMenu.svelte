@@ -4,7 +4,7 @@
     import { resetChordStyling } from "#lib/chord.ts";
     import Dropdown from "../Dropdown.svelte";
     import ColorPicker from "../ColorPicker.svelte";
-    import NumberInput from "../NumberInput.svelte";
+    import NumberInput from "./NumberInput.svelte";
 
     type Props = {
         chord: Chord;

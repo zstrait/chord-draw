@@ -50,6 +50,19 @@ export interface Chord {
     styling: Styling;
 }
 
+export interface ChartChord {
+    id: string;
+    chord: Chord;
+}
+
+export interface ChordChart {
+    title: string;
+    rows: number;
+    columns: number;
+    settings: Omit<Chord, "title" | "strings" | "barres">;
+    slots: (ChartChord | null)[][];
+}
+
 export type BarreDrag = {
     fret: number;
     startString: number;

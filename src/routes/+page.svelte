@@ -7,6 +7,7 @@
     import Toolbar from "#lib/components/Toolbar.svelte";
 
     import type { Chord } from "#lib/types.ts";
+    import { createDefaultChord } from "#lib/chord.ts";
     import type { PageProps } from "./$types";
     import { encodeChord, decodeChord } from "#lib/share.ts";
     import { downloadSvg, downloadPng, copySvg, copyPng } from "#lib/export.ts";
@@ -43,13 +44,16 @@
             if (!shared) {
                 try {
                     const saved = localStorage.getItem(autosaveKey);
-                    if (saved !== null) chord = decodeChord(new URLSearchParams(saved));
+                    if (saved !== null)
+                        chord = decodeChord(new URLSearchParams(saved));
                 } catch {}
             }
             past = [];
             future = [];
             sessionSource = shared ? encodeChord(initial).toString() : null;
-            const navigation = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+            const navigation = performance.getEntriesByType("navigation")[0] as
+                | PerformanceNavigationTiming
+                | undefined;
             if (!shared || (firstLoad && navigation?.type === "reload")) {
                 restoreHistory(sessionSource);
             }
@@ -73,8 +77,12 @@
         const history = JSON.stringify({
             source: sessionSource,
             chord: saved,
-            past: past.slice(-historyLimit).map((entry) => encodeChord(entry).toString()),
-            future: future.slice(-historyLimit).map((entry) => encodeChord(entry).toString()),
+            past: past
+                .slice(-historyLimit)
+                .map((entry) => encodeChord(entry).toString()),
+            future: future
+                .slice(-historyLimit)
+                .map((entry) => encodeChord(entry).toString()),
         });
         try {
             sessionStorage.setItem(historyKey, history);
@@ -87,14 +95,28 @@
 
     function restoreHistory(source: string | null) {
         try {
-            const saved = JSON.parse(sessionStorage.getItem(historyKey) ?? "null");
-            if (!saved || saved.source !== source || typeof saved.chord !== "string" ||
-                !Array.isArray(saved.past) || !saved.past.every((entry: unknown) => typeof entry === "string") ||
-                !Array.isArray(saved.future) || !saved.future.every((entry: unknown) => typeof entry === "string")) return;
+            const saved = JSON.parse(
+                sessionStorage.getItem(historyKey) ?? "null",
+            );
+            if (
+                !saved ||
+                saved.source !== source ||
+                typeof saved.chord !== "string" ||
+                !Array.isArray(saved.past) ||
+                !saved.past.every(
+                    (entry: unknown) => typeof entry === "string",
+                ) ||
+                !Array.isArray(saved.future) ||
+                !saved.future.every(
+                    (entry: unknown) => typeof entry === "string",
+                )
+            )
+                return;
 
             function decode(value: string) {
                 const restored = decodeChord(new URLSearchParams(value));
-                if (encodeChord(restored).toString() !== value) throw new Error("Invalid saved chord");
+                if (encodeChord(restored).toString() !== value)
+                    throw new Error("Invalid saved chord");
                 return restored;
             }
 
@@ -152,7 +174,10 @@
     function toastSlide(node: Element, { x }: { x: number }) {
         return fly(node, {
             x,
-            duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 200,
+            duration: window.matchMedia("(prefers-reduced-motion: reduce)")
+                .matches
+                ? 0
+                : 200,
         });
     }
 
@@ -177,7 +202,10 @@
     }
 
     function endInputEdit() {
-        if (groupedInput && JSON.stringify(past.at(-1)) === JSON.stringify(chord)) {
+        if (
+            groupedInput &&
+            JSON.stringify(past.at(-1)) === JSON.stringify(chord)
+        ) {
             past.pop();
         }
         groupedInput = null;
@@ -255,7 +283,9 @@
 
             if (
                 target instanceof HTMLElement &&
-                (target.closest('input, textarea, select, [role="menu"], [aria-haspopup="menu"]') ||
+                (target.closest(
+                    'input, textarea, select, [role="menu"], [aria-haspopup="menu"]',
+                ) ||
                     target.isContentEditable)
             ) {
                 return;
@@ -280,68 +310,75 @@
 />
 
 {#key data.chord}
-<div class="flex h-dvh gap-4 p-2 pl-0 pb-0">
-    <Menu
-        {chord}
-        onChordChange={updateChord}
-        onChordPreview={(changes) => { chordPreview = changes; }}
-        isOpen={menuOpen}
-        onToggle={() => {
-            menuOpen = !menuOpen;
-        }}
-    />
-    <div
-        class="flex min-h-0 min-w-0 flex-1 flex-col transition-[padding-bottom] duration-300 ease-in-out motion-reduce:transition-none"
-        style:padding-bottom={toolbarOpen ? "0.5rem" : "0rem"}
-    >
-        <Header />
-        <div class="divider mt-0 mb-3.5 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5" aria-hidden="true"></div>
-        <Content
-            chord={chordPreview ? { ...chord, ...chordPreview } : chord}
+    <div class="flex h-dvh gap-4 p-2 pl-0 pb-0">
+        <Menu
+            {chord}
             onChordChange={updateChord}
-            onSvgChange={handleSvgChange}
-            isMaximized={!menuOpen && !toolbarOpen}
-            onMaximize={() => {
-                const openBoth = !menuOpen && !toolbarOpen;
-                menuOpen = openBoth;
-                toolbarOpen = openBoth;
+            onChordPreview={(changes) => {
+                chordPreview = changes;
+            }}
+            isOpen={menuOpen}
+            onToggle={() => {
+                menuOpen = !menuOpen;
             }}
         />
-        <div class="relative shrink-0">
+        <div
+            class="flex min-h-0 min-w-0 flex-1 flex-col transition-[padding-bottom] duration-300 ease-in-out motion-reduce:transition-none"
+            style:padding-bottom={toolbarOpen ? "0.5rem" : "0rem"}
+        >
+            <Header />
             <div
-                class="toast toast-end pointer-events-none absolute right-0 bottom-full z-50 p-0"
-                style:margin-bottom={toastAboveTooltip ? "calc(2.5rem - 2px)" : "0.75rem"}
-                role="status"
-                aria-live="polite"
-            >
-                {#if copyMessage}
-                    <div
-                        class="alert animate-none rounded-xl border-0 bg-neutral px-4 py-3 text-sm font-medium text-neutral-content shadow-lg"
-                        in:toastSlide={{ x: 48 }}
-                        out:toastSlide={{ x: 48 }}
-                        onoutroend={showNextCopyToast}
-                    >
-                        <span>{copyMessage}</span>
-                    </div>
-                {/if}
-            </div>
-            <Toolbar
-                {svg}
-                isOpen={toolbarOpen}
-                onToggle={() => {
-                    toolbarOpen = !toolbarOpen;
-                }}
+                class="divider mt-0 mb-3.5 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5"
+                aria-hidden="true"
+            ></div>
+            <Content
+                chord={chordPreview ? { ...chord, ...chordPreview } : chord}
                 onChordChange={updateChord}
-                onUndo={undo}
-                canUndo={past.length > 0}
-                onRedo={redo}
-                canRedo={future.length > 0}
-                onCopy={handleCopy}
-                onDownload={handleDownload}
-                onShare={handleShare}
-                canDownload={svg !== ""}
+                onSvgChange={handleSvgChange}
+                isMaximized={!menuOpen && !toolbarOpen}
+                onMaximize={() => {
+                    const openBoth = !menuOpen && !toolbarOpen;
+                    menuOpen = openBoth;
+                    toolbarOpen = openBoth;
+                }}
             />
+            <div class="relative shrink-0">
+                <div
+                    class="toast toast-end pointer-events-none absolute right-0 bottom-full z-50 p-0"
+                    style:margin-bottom={toastAboveTooltip
+                        ? "calc(2.5rem - 2px)"
+                        : "0.75rem"}
+                    role="status"
+                    aria-live="polite"
+                >
+                    {#if copyMessage}
+                        <div
+                            class="alert animate-none rounded-xl border-0 bg-neutral px-4 py-3 text-sm font-medium text-neutral-content shadow-lg"
+                            in:toastSlide={{ x: 48 }}
+                            out:toastSlide={{ x: 48 }}
+                            onoutroend={showNextCopyToast}
+                        >
+                            <span>{copyMessage}</span>
+                        </div>
+                    {/if}
+                </div>
+                <Toolbar
+                    {svg}
+                    isOpen={toolbarOpen}
+                    onToggle={() => {
+                        toolbarOpen = !toolbarOpen;
+                    }}
+                    onClear={() => updateChord(createDefaultChord())}
+                    onUndo={undo}
+                    canUndo={past.length > 0}
+                    onRedo={redo}
+                    canRedo={future.length > 0}
+                    onCopy={handleCopy}
+                    onDownload={handleDownload}
+                    onShare={handleShare}
+                    canDownload={svg !== ""}
+                />
+            </div>
         </div>
     </div>
-</div>
 {/key}

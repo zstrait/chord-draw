@@ -2,7 +2,7 @@
     import type { Chord } from "#lib/types.ts";
     import { selectTuning, tuningPresets } from "#lib/tunings.ts";
     import Dropdown from "../Dropdown.svelte";
-    import NumberInput from "../NumberInput.svelte";
+    import NumberInput from "./NumberInput.svelte";
 
     const tuningOptions = [
         ...tuningPresets.map((preset) => ({

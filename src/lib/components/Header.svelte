@@ -1,5 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import { page } from "$app/state";
+    import { resolve } from "$app/paths";
     import { Moon, Sun } from "@lucide/svelte";
     import gitLogoLight from "#lib/assets/git-logo-light.svg";
     import gitLogoDark from "#lib/assets/git-logo-dark.svg";
@@ -24,6 +26,25 @@
     class=" p-2 items-center flex h-14 justify-between"
 >
     <span class="brand text-2xl text-primary">ChordDraw</span>
+
+    <nav aria-label="Workspace" class="flex items-center gap-4 text-sm font-medium">
+        <a
+            href={resolve("/")}
+            aria-current={page.route.id === "/" ? "page" : undefined}
+            class="rounded-sm hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+            class:text-primary={page.route.id === "/"}
+            class:underline={page.route.id === "/"}
+            class:underline-offset-4={page.route.id === "/"}
+        >Diagram</a>
+        <a
+            href={resolve("chart/")}
+            aria-current={page.route.id === "/chart" ? "page" : undefined}
+            class="rounded-sm hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+            class:text-primary={page.route.id === "/chart"}
+            class:underline={page.route.id === "/chart"}
+            class:underline-offset-4={page.route.id === "/chart"}
+        >Chart</a>
+    </nav>
 
     <div class="flex items-center gap-2">
         <button

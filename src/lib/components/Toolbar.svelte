@@ -10,39 +10,41 @@
         ChevronUp,
     } from "@lucide/svelte";
 
-    import type { Chord } from "#lib/types.ts";
-    import { createDefaultChord } from "#lib/chord.ts";
     import Dropdown from "./Dropdown.svelte";
     import { getPngSize } from "#lib/export.ts";
 
     type Props = {
         isOpen: boolean;
         onToggle: () => void;
-        onChordChange: (changes: Partial<Chord>) => void;
-        onUndo: () => void;
-        canUndo: boolean;
-        onRedo: () => void;
-        canRedo: boolean;
-        onCopy: (format: "SVG" | "PNG", width: number) => void;
-        onDownload: (format: "SVG" | "PNG", width: number) => void;
-        onShare: () => void;
-        canDownload: boolean;
-        svg: string;
+        onClear?: () => void;
+        canClear?: boolean;
+        onUndo?: () => void;
+        canUndo?: boolean;
+        onRedo?: () => void;
+        canRedo?: boolean;
+        onCopy?: (format: "SVG" | "PNG", width: number) => void;
+        onDownload?: (format: "SVG" | "PNG", width: number) => void;
+        onShare?: () => void;
+        canDownload?: boolean;
+        svg?: string;
+        subject?: "chord" | "chart";
     };
 
     let {
         isOpen,
         onToggle,
-        onChordChange,
+        onClear,
+        canClear = true,
         onUndo,
-        canUndo,
+        canUndo = false,
         onRedo,
-        canRedo,
+        canRedo = false,
         onCopy,
         onDownload,
         onShare,
-        canDownload,
-        svg,
+        canDownload = false,
+        svg = "",
+        subject = "chord",
     }: Props = $props();
 
     let format = $state<"SVG" | "PNG">("PNG");
@@ -113,10 +115,9 @@
                 <button
                     type="button"
                     class="toolbar-control btn btn-ghost btn-square"
-                    aria-label="Reset chord"
-                    onclick={(event) => {
-                        onChordChange(createDefaultChord());
-                    }}
+                    aria-label={`Reset ${subject}`}
+                    onclick={onClear}
+                    disabled={!canClear || !onClear}
                 >
                     <Trash size={24} color="currentColor" />
                 </button>
@@ -128,7 +129,7 @@
                         type="button"
                         class="toolbar-control btn btn-ghost btn-square"
                         onclick={onUndo}
-                        disabled={!canUndo}
+                        disabled={!canUndo || !onUndo}
                         aria-label="Undo"
                     >
                         <Undo2 size={24} color="currentColor" />
@@ -139,7 +140,7 @@
                         type="button"
                         class="toolbar-control btn btn-ghost btn-square"
                         onclick={onRedo}
-                        disabled={!canRedo}
+                        disabled={!canRedo || !onRedo}
                         aria-label="Redo"
                     >
                         <Redo2 size={24} color="currentColor" />
@@ -149,14 +150,14 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2">
+            <fieldset class="flex items-center gap-2 border-0 p-0" disabled={!canDownload}>
                 <div class="tooltip tooltip-top inline-flex shrink-0" data-tip="Copy">
                     <button
                         type="button"
                         class="toolbar-control btn btn-ghost btn-square"
-                        onclick={() => onCopy(format, exportWidth)}
-                        disabled={!canDownload}
-                        aria-label="Copy chord"
+                        onclick={() => onCopy?.(format, exportWidth)}
+                        disabled={!canDownload || !onCopy}
+                        aria-label={`Copy ${subject}`}
                     >
                         <Copy size={24} color="currentColor" />
                     </button>
@@ -166,9 +167,9 @@
                     <button
                         type="button"
                         class="toolbar-control btn btn-ghost btn-square"
-                        onclick={() => onDownload(format, exportWidth)}
-                        disabled={!canDownload}
-                        aria-label="Download chord"
+                        onclick={() => onDownload?.(format, exportWidth)}
+                        disabled={!canDownload || !onDownload}
+                        aria-label={`Download ${subject}`}
                     >
                         <Download size={24} color="currentColor" />
                     </button>
@@ -201,10 +202,10 @@
                         />
                     </div>
                 {/if}
-            </div>
+            </fieldset>
             <span class="h-6 w-px shrink-0 bg-white/25" aria-hidden="true"></span>
             <div class="tooltip tooltip-top inline-flex shrink-0" data-tip="Share">
-                <button type="button" class="toolbar-control btn btn-ghost btn-square" aria-label="Share chord" onclick={onShare}>
+                <button type="button" class="toolbar-control btn btn-ghost btn-square" aria-label={`Share ${subject}`} onclick={onShare} disabled={!onShare}>
                     <Share size={24} color="currentColor" />
                 </button>
             </div>
