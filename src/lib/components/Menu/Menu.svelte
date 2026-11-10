@@ -20,6 +20,6 @@
 
 <Sidebar title="Edit Menu" {isOpen} {onToggle}>
     <EditMenu {chord} {onChordChange} />
-    <div class="divider my-3"></div>
-    <CustomizeMenu {chord} {onChordChange} {onChordPreview} />
+    <div class="divider mt-3 mb-2"></div>
+    <CustomizeMenu {chord} {onChordChange} {onChordPreview} titleClass="text-lg" />
 </Sidebar>

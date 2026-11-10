@@ -14,22 +14,25 @@
 
     type Props = {
         chord: Chord;
+        titleLabel?: string;
+        tuningLabel?: string;
         onChordChange: (
             changes: Partial<Chord>,
             input?: HTMLInputElement,
         ) => void;
     };
 
-    let { chord, onChordChange }: Props = $props();
+    let { chord, onChordChange, titleLabel = "Title", tuningLabel = "Tuning" }: Props = $props();
 </script>
 
 <div class="flex flex-col">
     <div class="flex flex-col">
         <fieldset class="fieldset">
-            <legend class="fieldset-legend">Title</legend>
+            <legend class="fieldset-legend">{titleLabel}</legend>
             <input
                 type="text"
                 class="input"
+                aria-label={titleLabel}
                 value={chord.title}
                 oninput={(event) =>
                     onChordChange(
@@ -40,9 +43,9 @@
         </fieldset>
 
         <fieldset class="fieldset">
-            <legend class="fieldset-legend">Tuning</legend>
+            <legend class="fieldset-legend">{tuningLabel}</legend>
             <Dropdown
-                label="Tuning"
+                label={tuningLabel}
                 value={chord.tuning.custom ? "custom" : chord.tuning.label}
                 options={tuningOptions}
                 onchange={(value) => onChordChange(selectTuning(chord, value))}

@@ -1,17 +1,45 @@
 <script lang="ts">
     import Header from "#lib/components/Header.svelte";
-    import Sidebar from "#lib/components/Menu/Sidebar.svelte";
+    import ChartMenu from "#lib/components/Menu/ChartMenu.svelte";
     import Toolbar from "#lib/components/Toolbar.svelte";
     import { createDefaultChart } from "#lib/chart.ts";
+    import type { ChordChart } from "#lib/types.ts";
+    import { blurInputOnEnter } from "#lib/utils.ts";
 
     let chart = $state(createDefaultChart());
     let menuOpen = $state(true);
     let toolbarOpen = $state(true);
+
+    function updateChart(changes: Partial<ChordChart>) {
+        const rows = changes.rows ?? chart.rows;
+        const columns = changes.columns ?? chart.columns;
+
+        if (rows !== chart.rows || columns !== chart.columns) {
+            const removesChords = chart.slots.some((row, rowIndex) =>
+                row.some((slot, columnIndex) =>
+                    slot !== null && (rowIndex >= rows || columnIndex >= columns),
+                ),
+            );
+            if (removesChords && !window.confirm("Reducing the grid will remove chords outside the new size. Continue?")) return;
+
+            changes = {
+                ...changes,
+                slots: Array.from({ length: rows }, (_, row) =>
+                    Array.from({ length: columns }, (_, column) => chart.slots[row]?.[column] ?? null),
+                ),
+            };
+        }
+
+        Object.assign(chart, changes);
+    }
 </script>
 
+<svelte:window onkeydown={blurInputOnEnter} />
+
 <div class="flex h-dvh gap-4 p-2 pl-0 pb-0">
-    <Sidebar
-        title="Chart Menu"
+    <ChartMenu
+        {chart}
+        onChartChange={updateChart}
         isOpen={menuOpen}
         onToggle={() => { menuOpen = !menuOpen; }}
     />
@@ -27,7 +55,6 @@
             isOpen={toolbarOpen}
             onToggle={() => { toolbarOpen = !toolbarOpen; }}
             onClear={() => { chart = createDefaultChart(); }}
-            canClear={chart.slots.some((row) => row.some((slot) => slot !== null))}
         />
     </div>
 </div>

@@ -8,16 +8,18 @@
 
     type Props = {
         chord: Chord;
+        title?: string;
+        titleClass?: string;
         onChordChange: (
             changes: Partial<Chord>,
             input?: HTMLInputElement,
         ) => void;
-        onChordPreview: (changes: Partial<Chord> | null) => void;
+        onChordPreview?: (changes: Partial<Chord> | null) => void;
     };
 
     type ColorField = "chordColor" | "lineColor" | "circleColor" | "backgroundColor";
 
-    let { chord, onChordChange, onChordPreview }: Props = $props();
+    let { chord, onChordChange, onChordPreview, title = "Customize", titleClass = "text-base" }: Props = $props();
     let colorFields = $state<Partial<Record<ColorField, HTMLFieldSetElement>>>({});
     let picker = $state<{ field: ColorField; anchor: HTMLElement } | null>(null);
     let customColors = $state<Partial<Record<ColorField, string>>>({});
@@ -126,7 +128,7 @@
 
 <div>
     <div class="flex justify-between items-center">
-        <span class="text-base font-semibold text-primary">Customize</span>
+        <span class={`${titleClass} font-semibold text-primary`}>{title}</span>
         <div class="reset-tooltip tooltip tooltip-left" data-tip="Reset styling">
             <button
                 type="button"
@@ -268,7 +270,7 @@
             )}
             anchor={picker.anchor}
             onApply={applyCustomColor}
-            onPreview={(value) => onChordPreview(
+            onPreview={(value) => onChordPreview?.(
                 value !== null && picker ? colorChanges(picker.field, value) : null,
             )}
             onClose={() => { picker = null; }}

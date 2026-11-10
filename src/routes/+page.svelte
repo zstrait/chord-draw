@@ -11,6 +11,7 @@
     import type { PageProps } from "./$types";
     import { encodeChord, decodeChord } from "#lib/share.ts";
     import { downloadSvg, downloadPng, copySvg, copyPng } from "#lib/export.ts";
+    import { blurInputOnEnter } from "#lib/utils.ts";
 
     let { data }: PageProps = $props();
     const autosaveKey = "chorddraw-chord-v1";
@@ -302,10 +303,7 @@
             return;
         }
 
-        if (event.key === "Enter" && event.target instanceof HTMLInputElement) {
-            event.preventDefault();
-            event.target.blur();
-        }
+        blurInputOnEnter(event);
     }}
 />
 

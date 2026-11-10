@@ -8,3 +8,13 @@ export function validatePositiveInput(event: Event): number | null {
 
     return null;
 }
+
+export function blurInputOnEnter(event: KeyboardEvent) {
+    if (
+        !event.defaultPrevented && !event.isComposing &&
+        event.key === "Enter" && event.target instanceof HTMLInputElement
+    ) {
+        event.preventDefault();
+        event.target.blur();
+    }
+}
