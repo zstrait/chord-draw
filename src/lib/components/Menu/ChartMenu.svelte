@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { Chord, ChordChart } from "#lib/types.ts";
     import { createDefaultChord } from "#lib/chord.ts";
+    import { applyChartStyling } from "#lib/chart.ts";
     import Sidebar from "./Sidebar.svelte";
     import EditMenu from "./EditMenu.svelte";
     import CustomizeMenu from "./CustomizeMenu.svelte";
@@ -12,11 +13,13 @@
             changes: Partial<ChordChart>,
             input?: HTMLInputElement,
         ) => void;
+        onChartPreview: (changes: Partial<Chord> | null) => void;
         isOpen: boolean;
         onToggle: () => void;
     };
 
-    let { chart, onChartChange, isOpen, onToggle }: Props = $props();
+    let { chart, onChartChange, onChartPreview, isOpen, onToggle }: Props =
+        $props();
     const defaultChord = createDefaultChord();
     let chord = $derived({
         ...defaultChord,
@@ -26,10 +29,30 @@
 
     function updateSettings(changes: Partial<Chord>, input?: HTMLInputElement) {
         const { title, strings, barres, ...settings } = changes;
+        const styling = settings.styling;
         onChartChange(
             {
                 ...(title !== undefined ? { title } : {}),
                 settings: { ...chart.settings, ...settings },
+                ...(styling
+                    ? {
+                          slots: chart.slots.map((row) =>
+                              row.map((slot) =>
+                                  slot
+                                      ? {
+                                            ...slot,
+                                            chord: applyChartStyling(
+                                                slot.chord,
+                                                styling,
+                                                strings !== undefined ||
+                                                    barres !== undefined,
+                                            ),
+                                        }
+                                      : null,
+                              ),
+                          ),
+                      }
+                    : {}),
             },
             input,
         );
@@ -72,6 +95,7 @@
             {chord}
             title="Chart Customization"
             onChordChange={updateSettings}
+            onChordPreview={onChartPreview}
         />
     </div>
 </Sidebar>

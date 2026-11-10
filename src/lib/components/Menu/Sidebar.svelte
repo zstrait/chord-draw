@@ -13,10 +13,9 @@
 </script>
 
 <div
-    class="mb-2 shrink-0 overflow-hidden transition-[width,margin-right] duration-300 ease-in-out motion-reduce:transition-none"
+    class="mb-2 shrink-0 overflow-hidden transition-[width] duration-300 ease-in-out motion-reduce:transition-none"
     class:pointer-events-none={!isOpen}
     style:width={isOpen ? "20rem" : "3rem"}
-    style:margin-right={isOpen ? "0rem" : "-2rem"}
 >
     <div
         class="relative flex h-full w-80 flex-col p-4 transition-transform duration-300 ease-in-out motion-reduce:transition-none"

@@ -12,14 +12,25 @@
         onSvgChange: (svg: string) => void;
         onMaximize: () => void;
         isMaximized: boolean;
+        sidebarOpen: boolean;
     };
 
-    let { chord, onChordChange, onSvgChange, onMaximize, isMaximized }: Props =
-        $props();
+    let {
+        chord,
+        onChordChange,
+        onSvgChange,
+        onMaximize,
+        isMaximized,
+        sidebarOpen,
+    }: Props = $props();
 </script>
 
-<div class="relative flex min-h-0 min-w-0 flex-col flex-1 overflow-auto p-2">
-    <div class="absolute right-2 top-2 z-10 flex flex-col gap-3">
+<div
+    class="relative -mr-2 flex min-h-0 min-w-0 flex-1 flex-col overflow-auto py-2 pr-4 transition-[margin-left,padding-left] duration-300 ease-in-out motion-reduce:transition-none"
+    style:margin-left={sidebarOpen ? "-1rem" : "-3rem"}
+    style:padding-left={sidebarOpen ? "1.5rem" : "3.5rem"}
+>
+    <div class="absolute right-4 top-2 z-10 flex flex-col gap-3">
         <div
             class="tooltip tooltip-left"
             data-tip={isMaximized ? "Minimize" : "Maximize"}

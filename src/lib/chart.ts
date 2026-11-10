@@ -1,5 +1,18 @@
-import { createDefaultChord } from "./chord.ts";
-import type { ChartChord, ChordChart } from "./types.ts";
+import { createDefaultChord, resetChordStyling } from "./chord.ts";
+import type { ChartChord, Chord, ChordChart } from "./types.ts";
+
+export function applyChartStyling(
+    chord: Chord,
+    styling: Chord["styling"],
+    clearMarkerColors = false,
+): Chord {
+    return {
+        ...chord,
+        ...(clearMarkerColors
+            ? resetChordStyling(chord, styling)
+            : { styling: { ...styling } }),
+    };
+}
 
 export function createChartChord(settings: ChordChart["settings"]): ChartChord {
     return {

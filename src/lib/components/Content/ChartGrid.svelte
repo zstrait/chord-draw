@@ -1,6 +1,7 @@
 <script lang="ts">
     import { CircleMinus, CirclePlus } from "@lucide/svelte";
     import type { Chord, ChordChart } from "#lib/types.ts";
+    import { applyChartStyling } from "#lib/chart.ts";
     import ChordEditor from "./ChordEditor.svelte";
     import ChartHeading from "./ChartHeading.svelte";
 
@@ -8,6 +9,7 @@
         chart,
         selectedChordId,
         chordPreview,
+        chartPreview,
         onChartChange,
         onAddChord,
         onSelectChord,
@@ -16,6 +18,7 @@
         chart: ChordChart;
         selectedChordId: string | null;
         chordPreview: Partial<Chord> | null;
+        chartPreview: Partial<Chord> | null;
         onChartChange: (changes: Partial<ChordChart>) => void;
         onAddChord: (row: number, column: number) => void;
         onSelectChord: (id: string | null) => void;
@@ -60,10 +63,18 @@
             {#each row as slot, columnIndex (slot?.id ?? columnIndex)}
                 {#if slot}
                     {@const selected = slot.id === selectedChordId}
-                    {@const chord =
+                    {@const selectedChord =
                         selected && chordPreview
                             ? { ...slot.chord, ...chordPreview }
                             : slot.chord}
+                    {@const chord = chartPreview?.styling
+                        ? applyChartStyling(
+                              selectedChord,
+                              chartPreview.styling,
+                              chartPreview.strings !== undefined ||
+                                  chartPreview.barres !== undefined,
+                          )
+                        : selectedChord}
                     <div
                         role="group"
                         aria-label={`Chord, row ${rowIndex + 1}, column ${columnIndex + 1}`}
