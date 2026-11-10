@@ -1,6 +1,7 @@
 <script lang="ts">
     import Header from "#lib/components/Header.svelte";
     import ChartMenu from "#lib/components/Menu/ChartMenu.svelte";
+    import ChartGrid from "#lib/components/Content/ChartGrid.svelte";
     import Toolbar from "#lib/components/Toolbar.svelte";
     import { createDefaultChart } from "#lib/chart.ts";
     import type { ChordChart } from "#lib/types.ts";
@@ -49,7 +50,9 @@
     >
         <Header />
         <div class="divider mt-0 mb-3.5 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5" aria-hidden="true"></div>
-        <main aria-label="Chord chart workspace" class="min-h-0 min-w-0 flex-1 overflow-auto p-2"></main>
+        <main aria-label="Chord chart workspace" class="flex min-h-0 min-w-0 flex-1 overflow-auto p-2">
+            <ChartGrid {chart} onChartChange={updateChart} />
+        </main>
         <Toolbar
             subject="chart"
             isOpen={toolbarOpen}
