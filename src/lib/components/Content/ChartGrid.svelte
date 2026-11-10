@@ -107,3 +107,15 @@
         </div>
     {/each}
 </div>
+
+<style>
+    [data-chart-chord][aria-current="true"] {
+        --tw-ring-color: transparent;
+        outline: 3px solid var(--color-primary);
+        outline-offset: 2px;
+    }
+
+    :global([data-theme="dark"]) [data-chart-chord][aria-current="true"] {
+        outline-color: #6096dc;
+    }
+</style>
