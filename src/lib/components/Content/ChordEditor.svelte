@@ -16,14 +16,15 @@
     type Props = {
         chord: Chord;
         rotation: number;
+        active?: boolean;
         onChordChange: (
             changes: Partial<Chord>,
             input?: HTMLInputElement,
         ) => void;
-        onSvgChange: (svg: string) => void;
+        onSvgChange?: (svg: string) => void;
     };
 
-    let { chord, rotation, onChordChange, onSvgChange }: Props = $props();
+    let { chord, rotation, active = true, onChordChange, onSvgChange }: Props = $props();
 
     type SelectedMarker = {
         kind: "note" | "barre";
@@ -71,6 +72,14 @@
     let editingTitle = $state(false);
     let titleInput = $state<HTMLInputElement>();
     let originalTitle = "";
+
+    $effect(() => {
+        if (!active) {
+            editingTitle = false;
+            selectedMarker = null;
+            colorPreview = null;
+        }
+    });
 
     function tuningNavigation(index: number | null, direction: number) {
         const next = index === null ? -1 : index + direction;
@@ -342,6 +351,7 @@
         <div
             class="absolute inset-x-3 top-[10px] bottom-[18px] sm:top-[16px] sm:bottom-[26px]"
             bind:this={drawingArea}
+            inert={!active}
         >
             <ChordDrawing
                 chord={drawingChord}

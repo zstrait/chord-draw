@@ -6,6 +6,8 @@
 
     type Props = {
         chord: Chord;
+        chartChord?: boolean;
+        onResetStyling?: () => void;
         onChordChange: (
             changes: Partial<Chord>,
             input?: HTMLInputElement,
@@ -15,11 +17,11 @@
         onToggle: () => void;
     };
 
-    let { chord, onChordChange, onChordPreview, isOpen, onToggle }: Props = $props();
+    let { chord, chartChord = false, onChordChange, onChordPreview, onResetStyling, isOpen, onToggle }: Props = $props();
 </script>
 
 <Sidebar title="Edit Menu" {isOpen} {onToggle}>
-    <EditMenu {chord} {onChordChange} />
+    <EditMenu {chord} {chartChord} {onChordChange} />
     <div class="divider mt-3 mb-2"></div>
-    <CustomizeMenu {chord} {onChordChange} {onChordPreview} titleClass="text-lg" />
+    <CustomizeMenu {chord} {onChordChange} {onChordPreview} {onResetStyling} titleClass="text-lg" />
 </Sidebar>

@@ -1,10 +1,17 @@
 import { createDefaultChord } from "./chord.ts";
-import type { ChordChart } from "./types.ts";
+import type { ChartChord, ChordChart } from "./types.ts";
+
+export function createChartChord(settings: ChordChart["settings"]): ChartChord {
+    return {
+        id: crypto.randomUUID(),
+        chord: { ...createDefaultChord(), ...structuredClone(settings) },
+    };
+}
 
 export function createDefaultChart(): ChordChart {
     const { title, strings, barres, ...settings } = createDefaultChord();
     const rows = 2;
-    const columns = 3;
+    const columns = 4;
 
     return {
         title,

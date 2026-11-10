@@ -1,27 +1,71 @@
 <script lang="ts">
     import { CircleMinus, CirclePlus } from "@lucide/svelte";
-    import type { ChordChart } from "#lib/types.ts";
+    import type { Chord, ChordChart } from "#lib/types.ts";
+    import ChordEditor from "./ChordEditor.svelte";
 
-    let { chart, onChartChange }: {
+    let { chart, selectedChordId, chordPreview, onChartChange, onAddChord, onSelectChord, onChordChange }: {
         chart: ChordChart;
+        selectedChordId: string | null;
+        chordPreview: Partial<Chord> | null;
         onChartChange: (changes: Partial<ChordChart>) => void;
+        onAddChord: (row: number, column: number) => void;
+        onSelectChord: (id: string) => void;
+        onChordChange: (id: string, changes: Partial<Chord>, input?: HTMLInputElement) => void;
     } = $props();
 
     const dimensions = ["columns", "rows"] as const;
 </script>
 
 <div class="m-auto grid shrink-0 grid-cols-[auto_auto] gap-6 p-4">
-    <div class="grid gap-6" style:grid-template-columns={`repeat(${chart.columns}, 12rem)`}>
+    <div class="grid gap-6" style:grid-template-columns={`repeat(${chart.columns}, 13rem)`}>
         {#each chart.slots as row, rowIndex}
-            {#each row as slot, columnIndex}
-                <button
-                    type="button"
-                    disabled
-                    class="flex aspect-[11/14] w-48 items-center justify-center rounded-xl border border-primary/30 bg-transparent text-primary/60"
-                    aria-label={`Empty chord slot, row ${rowIndex + 1}, column ${columnIndex + 1}`}
-                >
-                    <CirclePlus size={48} strokeWidth={1.5} aria-hidden="true" />
-                </button>
+            {#each row as slot, columnIndex (slot?.id ?? columnIndex)}
+                {#if slot}
+                    {@const selected = slot.id === selectedChordId}
+                    {@const chord = selected && chordPreview ? { ...slot.chord, ...chordPreview } : slot.chord}
+                    <div
+                        role="group"
+                        aria-label={`Chord, row ${rowIndex + 1}, column ${columnIndex + 1}`}
+                        aria-current={selected ? "true" : undefined}
+                        tabindex="-1"
+                        data-chart-chord={slot.id}
+                        class="relative w-52 rounded-xl ring-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                        class:ring-2={selected}
+                        onpointerdown={() => onSelectChord(slot.id)}
+                    >
+                        <ChordEditor
+                            chord={{
+                                ...chord,
+                                tuning: chart.settings.tuning,
+                                fretCount: chart.settings.fretCount,
+                                showFretLabel: chart.settings.showFretLabel,
+                                showStringNoteLabels: false,
+                                showTuningLabel: false,
+                                ShowCapoLabel: false,
+                            }}
+                            rotation={chord.rotation}
+                            active={selected}
+                            onChordChange={(changes, input) => onChordChange(slot.id, changes, input)}
+                        />
+                        {#if !selected}
+                            <button
+                                type="button"
+                                class="absolute inset-0 cursor-pointer rounded-xl border-0 bg-transparent p-0 hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                                aria-label={`Edit chord, row ${rowIndex + 1}, column ${columnIndex + 1}`}
+                                onclick={() => onSelectChord(slot.id)}
+                            ></button>
+                        {/if}
+                    </div>
+                {:else}
+                    <button
+                        type="button"
+                        class="flex aspect-[11/14] w-52 cursor-pointer items-center justify-center rounded-xl border-2 border-primary/30 bg-transparent text-primary/60 hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        aria-label={`Add chord, row ${rowIndex + 1}, column ${columnIndex + 1}`}
+                        onclick={() => onAddChord(rowIndex, columnIndex)}
+                    >
+                        <CirclePlus size={52} strokeWidth={1.5} aria-hidden="true" />
+                    </button>
+                {/if}
             {/each}
         {/each}
     </div>
@@ -42,15 +86,15 @@
             {#each vertical ? [1, -1] : [-1, 1] as change}
                 <button
                     type="button"
-                    class="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 enabled:hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-default disabled:opacity-30"
+                    class="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 enabled:hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-default disabled:opacity-30"
                     aria-label={`${change === 1 ? "Add" : "Remove"} ${vertical ? "column" : "row"}`}
                     disabled={change === -1 && chart[dimension] <= 1}
                     onclick={() => onChartChange({ [dimension]: chart[dimension] + change })}
                 >
                     {#if change === 1}
-                        <CirclePlus size={40} strokeWidth={1.5} aria-hidden="true" />
+                        <CirclePlus size={44} strokeWidth={1.5} aria-hidden="true" />
                     {:else}
-                        <CircleMinus size={40} strokeWidth={1.5} aria-hidden="true" />
+                        <CircleMinus size={44} strokeWidth={1.5} aria-hidden="true" />
                     {/if}
                 </button>
             {/each}

@@ -15,11 +15,12 @@
             input?: HTMLInputElement,
         ) => void;
         onChordPreview?: (changes: Partial<Chord> | null) => void;
+        onResetStyling?: () => void;
     };
 
     type ColorField = "chordColor" | "lineColor" | "circleColor" | "backgroundColor";
 
-    let { chord, onChordChange, onChordPreview, title = "Customize", titleClass = "text-base" }: Props = $props();
+    let { chord, onChordChange, onChordPreview, onResetStyling, title = "Customize", titleClass = "text-base" }: Props = $props();
     let colorFields = $state<Partial<Record<ColorField, HTMLFieldSetElement>>>({});
     let picker = $state<{ field: ColorField; anchor: HTMLElement } | null>(null);
     let customColors = $state<Partial<Record<ColorField, string>>>({});
@@ -134,7 +135,10 @@
                 type="button"
                 class="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-primary hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2"
                 aria-label="Reset customization"
-                onclick={() => onChordChange(resetChordStyling(chord))}
+                onclick={() => {
+                    if (onResetStyling) onResetStyling();
+                    else onChordChange(resetChordStyling(chord));
+                }}
             >
                 <RotateCcw size={22} color="currentColor" />
             </button>

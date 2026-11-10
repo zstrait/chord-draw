@@ -16,13 +16,14 @@
         chord: Chord;
         titleLabel?: string;
         tuningLabel?: string;
+        chartChord?: boolean;
         onChordChange: (
             changes: Partial<Chord>,
             input?: HTMLInputElement,
         ) => void;
     };
 
-    let { chord, onChordChange, titleLabel = "Title", tuningLabel = "Tuning" }: Props = $props();
+    let { chord, onChordChange, titleLabel = "Title", tuningLabel = "Tuning", chartChord = false }: Props = $props();
 </script>
 
 <div class="flex flex-col">
@@ -42,59 +43,62 @@
             />
         </fieldset>
 
-        <fieldset class="fieldset">
-            <legend class="fieldset-legend">{tuningLabel}</legend>
-            <Dropdown
-                label={tuningLabel}
-                value={chord.tuning.custom ? "custom" : chord.tuning.label}
-                options={tuningOptions}
-                onchange={(value) => onChordChange(selectTuning(chord, value))}
-            />
-        </fieldset>
-
-        <div class="grid grid-cols-2 gap-3 pt-2">
-            <label class="menu-check flex min-h-8 cursor-pointer items-center gap-2 text-xs">
-                <input
-                    type="checkbox"
-                    class="checkbox checkbox-primary checkbox-sm rounded-md shadow-none"
-                    checked={chord.showTuningLabel}
-                    oninput={(event) => {
-                        onChordChange({
-                            showTuningLabel: event.currentTarget.checked,
-                        });
-                    }}
-                />
-                Tuning Label
-            </label>
-
-            <label class="menu-check flex min-h-8 cursor-pointer items-center gap-2 text-xs">
-                <input
-                    type="checkbox"
-                    class="checkbox checkbox-primary checkbox-sm rounded-md shadow-none"
-                    checked={chord.showStringNoteLabels}
-                    oninput={(event) => {
-                        onChordChange({
-                            showStringNoteLabels: event.currentTarget.checked,
-                        });
-                    }}
-                />
-                String Note Labels
-            </label>
-        </div>
-
-        <div class="grid grid-cols-3 gap-3 pt-2">
+        {#if !chartChord}
             <fieldset class="fieldset">
-                <legend class="fieldset-legend">Capo Fret</legend>
-                <NumberInput
-                    label="Capo Fret"
-                    placeholder="None"
-                    value={chord.capoFret}
-                    max={24}
-                    onchange={(value, input) => onChordChange({ capoFret: value }, input)}
-                    onclear={(input) => onChordChange({ capoFret: null }, input)}
+                <legend class="fieldset-legend">{tuningLabel}</legend>
+                <Dropdown
+                    label={tuningLabel}
+                    value={chord.tuning.custom ? "custom" : chord.tuning.label}
+                    options={tuningOptions}
+                    onchange={(value) => onChordChange(selectTuning(chord, value))}
                 />
             </fieldset>
 
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <label class="menu-check flex min-h-8 cursor-pointer items-center gap-2 text-xs">
+                    <input
+                        type="checkbox"
+                        class="checkbox checkbox-primary checkbox-sm rounded-md shadow-none"
+                        checked={chord.showTuningLabel}
+                        oninput={(event) => {
+                            onChordChange({
+                                showTuningLabel: event.currentTarget.checked,
+                            });
+                        }}
+                    />
+                    Tuning Label
+                </label>
+
+                <label class="menu-check flex min-h-8 cursor-pointer items-center gap-2 text-xs">
+                    <input
+                        type="checkbox"
+                        class="checkbox checkbox-primary checkbox-sm rounded-md shadow-none"
+                        checked={chord.showStringNoteLabels}
+                        oninput={(event) => {
+                            onChordChange({
+                                showStringNoteLabels: event.currentTarget.checked,
+                            });
+                        }}
+                    />
+                    String Note Labels
+                </label>
+            </div>
+        {/if}
+
+        <div class={chartChord ? "grid gap-3 pt-2" : "grid grid-cols-3 gap-3 pt-2"}>
+            {#if !chartChord}
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">Capo Fret</legend>
+                    <NumberInput
+                        label="Capo Fret"
+                        placeholder="None"
+                        value={chord.capoFret}
+                        max={24}
+                        onchange={(value, input) => onChordChange({ capoFret: value }, input)}
+                        onclear={(input) => onChordChange({ capoFret: null }, input)}
+                    />
+                </fieldset>
+            {/if}
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Starting Fret</legend>
                 <NumberInput
@@ -105,45 +109,49 @@
                 />
             </fieldset>
 
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend">Frets</legend>
-                <NumberInput
-                    label="Frets"
-                    value={chord.fretCount}
-                    max={12}
-                    onchange={(value, input) => onChordChange({ fretCount: value }, input)}
-                />
-            </fieldset>
+            {#if !chartChord}
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">Frets</legend>
+                    <NumberInput
+                        label="Frets"
+                        value={chord.fretCount}
+                        max={12}
+                        onchange={(value, input) => onChordChange({ fretCount: value }, input)}
+                    />
+                </fieldset>
+            {/if}
         </div>
 
-        <div class="grid grid-cols-2 gap-3 pt-2">
-            <label class="menu-check flex min-h-8 cursor-pointer items-center gap-2 text-xs">
-                <input
-                    type="checkbox"
-                    class="checkbox checkbox-primary checkbox-sm rounded-md shadow-none"
-                    checked={chord.ShowCapoLabel}
-                    oninput={(event) => {
-                        onChordChange({
-                            ShowCapoLabel: event.currentTarget.checked,
-                        });
-                    }}
-                />
-                Capo Label
-            </label>
+        {#if !chartChord}
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <label class="menu-check flex min-h-8 cursor-pointer items-center gap-2 text-xs">
+                    <input
+                        type="checkbox"
+                        class="checkbox checkbox-primary checkbox-sm rounded-md shadow-none"
+                        checked={chord.ShowCapoLabel}
+                        oninput={(event) => {
+                            onChordChange({
+                                ShowCapoLabel: event.currentTarget.checked,
+                            });
+                        }}
+                    />
+                    Capo Label
+                </label>
 
-            <label class="menu-check flex min-h-8 cursor-pointer items-center gap-2 text-xs">
-                <input
-                    type="checkbox"
-                    class="checkbox checkbox-primary checkbox-sm rounded-md shadow-none"
-                    checked={chord.showFretLabel}
-                    oninput={(event) => {
-                        onChordChange({
-                            showFretLabel: event.currentTarget.checked,
-                        });
-                    }}
-                />
-                Starting Fret Label
-            </label>
-        </div>
+                <label class="menu-check flex min-h-8 cursor-pointer items-center gap-2 text-xs">
+                    <input
+                        type="checkbox"
+                        class="checkbox checkbox-primary checkbox-sm rounded-md shadow-none"
+                        checked={chord.showFretLabel}
+                        oninput={(event) => {
+                            onChordChange({
+                                showFretLabel: event.currentTarget.checked,
+                            });
+                        }}
+                    />
+                    Starting Fret Label
+                </label>
+            </div>
+        {/if}
     </div>
 </div>

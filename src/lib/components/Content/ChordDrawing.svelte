@@ -23,7 +23,7 @@
         onTargetsChange: (targets: HoverTarget[]) => void;
         onTitleTargetChange: (target: TitleTarget | null) => void;
         onTuningTargetsChange: (targets: TuningTarget[]) => void;
-        onSvgChange: (svg: string) => void;
+        onSvgChange?: (svg: string) => void;
     } = $props();
 
     let container: HTMLDivElement;
@@ -379,7 +379,7 @@
                 const titleOffset = compactTitle && grid && title
                     ? Math.max(0, grid.nutTop - title.y - title.height - 12)
                     : 0;
-                if (svg) onSvgChange(trimSvg(svg, titleOffset));
+                if (svg && onSvgChange) onSvgChange(trimSvg(svg, titleOffset));
                 measureTitle(titleFontSize, angle);
                 if (customTuning) {
                     measureTuningTargets(stringCount, angle, showTuningLabel);
