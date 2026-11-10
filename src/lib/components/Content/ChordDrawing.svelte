@@ -120,16 +120,25 @@
 
         const stringSpacing = diagramWidth * (1 - 2 * sidePadding) / (stringCount - 1);
         const fretSpacing = stringSpacing * fretSize;
-        const tuning = svg.querySelector<SVGTextElement>(`text.tuning-${stringCount - 1}`);
-        const caption = svg.querySelector<SVGTextElement>("text.watermark");
-        const viewBox = svg.viewBox.baseVal;
-        const bottom = viewBox.height + 2 * viewBox.y - fretSpacing / 10
-            - (tuning?.getBBox().height ?? 0)
-            - 2 * (caption?.getBBox().height ?? 0);
-        const top = bottom - fretSpacing * fretCount;
+        const left = diagramWidth * sidePadding;
+        const string = svg.querySelector<SVGLineElement>(`line[x1="${left}"][x2="${left}"]`);
+        let top: number;
+        if (string) {
+            top = Number(string.getAttribute("y1"));
+        } else {
+            const tuning = svg.querySelector<SVGTextElement>(`text.tuning-${stringCount - 1}`);
+            const caption = svg.querySelector<SVGTextElement>("text.watermark");
+            const viewBox = svg.viewBox.baseVal;
+            const bottom = tuning
+                ? Number(tuning.getAttribute("y")) - fretSpacing / 5
+                : caption
+                    ? Number(caption.getAttribute("y")) - caption.getBBox().height / 2 - fretSpacing / 5
+                    : viewBox.height + 2 * viewBox.y - fretSpacing / 10;
+            top = bottom - fretSpacing * fretCount;
+        }
 
         return {
-            left: diagramWidth * sidePadding,
+            left,
             top,
             nutTop: top - topFretSize,
             stringSpacing,
