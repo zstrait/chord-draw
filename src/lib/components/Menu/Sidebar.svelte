@@ -13,8 +13,10 @@
 </script>
 
 <div
-    class="mb-2 shrink-0 overflow-hidden transition-[width] duration-300 ease-in-out motion-reduce:transition-none"
+    class="mb-2 shrink-0 overflow-hidden transition-[width,margin-right] duration-300 ease-in-out motion-reduce:transition-none"
+    class:pointer-events-none={!isOpen}
     style:width={isOpen ? "20rem" : "3rem"}
+    style:margin-right={isOpen ? "0rem" : "-2rem"}
 >
     <div
         class="relative flex h-full w-80 flex-col p-4 transition-transform duration-300 ease-in-out motion-reduce:transition-none"
@@ -25,7 +27,7 @@
         {#if !isOpen}
             <button
                 type="button"
-                class="sidebar-open absolute inset-y-0 right-0 z-20 w-12 cursor-pointer border-0 bg-transparent p-0"
+                class="sidebar-open pointer-events-auto absolute inset-y-0 right-8 z-20 w-4 cursor-pointer border-0 bg-transparent p-0"
                 tabindex="-1"
                 onclick={onToggle}
                 aria-label="Expand sidebar"
@@ -67,7 +69,7 @@
         >
             <button
                 type="button"
-                class="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-primary hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2"
+                class="pointer-events-auto flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-primary hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2"
                 onclick={onToggle}
                 aria-expanded={isOpen}
                 aria-controls="sidebar-settings"

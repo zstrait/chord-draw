@@ -203,7 +203,7 @@
         class="flex min-h-0 min-w-0 flex-1 flex-col transition-[padding-bottom] duration-300 ease-in-out motion-reduce:transition-none"
         style:padding-bottom={toolbarOpen ? "0.5rem" : "0rem"}
     >
-        <Header />
+        <Header sidebarOpen={menuOpen} />
         <div
             class="divider mt-0 mb-3.5 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5"
             aria-hidden="true"
@@ -211,7 +211,7 @@
         <main
             data-chart-workspace
             aria-label="Chord chart workspace"
-            class="flex min-h-0 min-w-0 flex-1 overflow-auto p-2"
+            class="-ml-4 -mr-2 flex min-h-0 min-w-0 flex-1 items-center-safe justify-center-safe overflow-auto py-2 pl-6 pr-4"
         >
             <ChartGrid
                 {chart}

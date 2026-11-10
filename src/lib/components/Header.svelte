@@ -6,6 +6,7 @@
     import gitLogoLight from "#lib/assets/git-logo-light.svg";
     import gitLogoDark from "#lib/assets/git-logo-dark.svg";
 
+    let { sidebarOpen }: { sidebarOpen: boolean } = $props();
     let darkMode = $state(false);
 
     onMount(() => {
@@ -22,7 +23,10 @@
     }
 </script>
 
-<header class=" p-2 items-center flex h-14 justify-between">
+<header
+    class=" p-2 items-center flex h-14 justify-between"
+    style:padding-left={sidebarOpen ? "0.5rem" : "1.5rem"}
+>
     <span class="brand text-2xl text-primary">ChordDraw</span>
 
     <nav

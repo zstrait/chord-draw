@@ -38,7 +38,7 @@
     let gridRow = $derived(hasHeading ? 2 : 1);
 </script>
 
-<div class="m-auto grid shrink-0 grid-cols-[auto_auto] gap-6 p-4">
+<div class="grid shrink-0 grid-cols-[auto_auto] gap-6 p-4">
     {#if hasHeading}
         <div class="col-start-1 min-w-0 [contain:inline-size]">
             <ChartHeading

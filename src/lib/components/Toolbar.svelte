@@ -73,14 +73,16 @@
 </script>
 
 <div
-    class="relative shrink-0 transition-[height] duration-300 ease-in-out motion-reduce:transition-none"
+    class="relative shrink-0 transition-[height,margin-top] duration-300 ease-in-out motion-reduce:transition-none"
     class:overflow-hidden={!isOpen}
+    class:pointer-events-none={!isOpen}
     style:height={isOpen ? "4rem" : "3rem"}
+    style:margin-top={isOpen ? "0rem" : "-2rem"}
 >
     {#if !isOpen}
         <button
             type="button"
-            class="toolbar-open absolute inset-0 z-20 cursor-pointer border-0 bg-transparent p-0"
+            class="toolbar-open pointer-events-auto absolute inset-x-0 bottom-0 z-20 h-4 cursor-pointer border-0 bg-transparent p-0"
             tabindex="-1"
             onclick={onToggle}
             aria-label="Expand toolbar"
@@ -260,7 +262,7 @@
         {/if}
         <button
             type="button"
-            class="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2"
+            class="pointer-events-auto flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2"
             onclick={onToggle}
             aria-expanded={isOpen}
             aria-controls="toolbar-actions"
