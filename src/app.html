@@ -1,43 +1,43 @@
 <!doctype html>
 <html lang="en" data-theme="light">
-  <head>
-    <meta charset="utf-8" />
-    <title>
-      ChordDraw | Create Guitar Chord Diagrams | (Free, No Account, No
-      Watermark)
-    </title>
-    <meta
-      name="description"
-      content="Create and customize guitar chord diagrams for free. Download PNG or SVG images with no account required and no watermark."
-    />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="text-scale" content="scale" />
-    <script>
-      (() => {
-        let theme;
-        try {
-          theme = localStorage.getItem("chorddraw-theme");
-        } catch {}
-        document.documentElement.dataset.theme =
-          theme === "light" || theme === "dark" ? theme : "light";
-      })();
-    </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-      rel="preconnect"
-      href="https://fonts.gstatic.com"
-      crossorigin="anonymous"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;family=Rock+Salt&amp;display=swap"
-      rel="stylesheet"
-    />
-    %sveltekit.head%
-  </head>
-  <body
-    class="min-h-dvh bg-[var(--workspace-bg)] text-base-content"
-    data-sveltekit-preload-data="hover"
-  >
-    <div style="display: contents">%sveltekit.body%</div>
-  </body>
+    <head>
+        <meta charset="utf-8" />
+        <title>
+            ChordDraw | Create Guitar Chord Diagrams | (Free, No Account, No
+            Watermark)
+        </title>
+        <meta
+            name="description"
+            content="Create and customize guitar chord diagrams for free. Download PNG or SVG images with no account required and no watermark."
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="text-scale" content="scale" />
+        <script>
+            (() => {
+                let theme;
+                try {
+                    theme = localStorage.getItem("chorddraw-theme");
+                } catch {}
+                document.documentElement.dataset.theme =
+                    theme === "light" || theme === "dark" ? theme : "light";
+            })();
+        </script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+            rel="preconnect"
+            href="https://fonts.gstatic.com"
+            crossorigin="anonymous"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;family=Rock+Salt&amp;display=swap"
+            rel="stylesheet"
+        />
+        %sveltekit.head%
+    </head>
+    <body
+        class="min-h-dvh bg-[var(--workspace-bg)] text-base-content"
+        data-sveltekit-preload-data="hover"
+    >
+        <div style="display: contents">%sveltekit.body%</div>
+    </body>
 </html>
