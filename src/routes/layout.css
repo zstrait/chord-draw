@@ -1,71 +1,71 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 @plugin 'daisyui';
 
 @theme {
-    --font-sans: 'Lexend', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Lexend", ui-sans-serif, system-ui, sans-serif;
 }
 
-[data-theme='light'] {
-    color-scheme: light;
-    --workspace-bg: #f1f3f6;
-    --sidebar-bg: #cbd7e6;
-    --toolbar-bg: #526e93;
-    --color-base-100: #ffffff;
-    --color-base-200: #f7f9fc;
-    --color-base-300: #aabcd1;
-    --color-base-content: #1e2d43;
-    --color-primary: #345f97;
-    --color-primary-content: #ffffff;
-    --color-neutral: #1e2d43;
-    --color-neutral-content: #ffffff;
+[data-theme="light"] {
+  color-scheme: light;
+  --workspace-bg: #f1f3f6;
+  --sidebar-bg: #cbd7e6;
+  --toolbar-bg: #526e93;
+  --color-base-100: #ffffff;
+  --color-base-200: #f7f9fc;
+  --color-base-300: #aabcd1;
+  --color-base-content: #1e2d43;
+  --color-primary: #345f97;
+  --color-primary-content: #ffffff;
+  --color-neutral: #1e2d43;
+  --color-neutral-content: #ffffff;
 }
 
-[data-theme='dark'] {
-    color-scheme: dark;
-    --workspace-bg: #1f2938;
-    --sidebar-bg: #2c3b50;
-    --toolbar-bg: #364a65;
-    --color-base-100: #263244;
-    --color-base-200: #314157;
-    --color-base-300: #4b5d75;
-    --color-base-content: #d0d9e5;
-    --color-primary: #93aaca;
-    --color-primary-content: #1e2c40;
-    --color-neutral: #37495f;
-    --color-neutral-content: #dfe6f0;
+[data-theme="dark"] {
+  color-scheme: dark;
+  --workspace-bg: #1f2938;
+  --sidebar-bg: #2c3b50;
+  --toolbar-bg: #364a65;
+  --color-base-100: #263244;
+  --color-base-200: #314157;
+  --color-base-300: #4b5d75;
+  --color-base-content: #d0d9e5;
+  --color-primary: #93aaca;
+  --color-primary-content: #1e2c40;
+  --color-neutral: #37495f;
+  --color-neutral-content: #dfe6f0;
 }
 
 [data-theme] :is(.input, .select, .btn:not(.btn-primary):not(.btn-ghost)) {
-    border-color: var(--color-base-300);
+  border-color: var(--color-base-300);
 }
 
 [data-theme] .label {
-    color: var(--color-base-content);
+  color: var(--color-base-content);
 }
 
 [data-theme] .divider {
-    --divider-color: var(--color-base-300);
+  --divider-color: var(--color-base-300);
 }
 
 .tooltip {
-    --tt-bg: var(--color-neutral);
-    --tt-radius: 0.5rem;
+  --tt-bg: var(--color-neutral);
+  --tt-radius: 0.5rem;
 }
 
 .tooltip[data-tip]::before {
-    border-radius: 0.5rem;
-    padding: 0.375rem 0.625rem;
-    color: var(--color-neutral-content);
-    font-size: 0.875rem;
-    font-weight: 500;
-    line-height: 1.5;
-    box-shadow: 0 3px 8px rgb(30 45 67 / 20%);
+  border-radius: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  color: var(--color-neutral-content);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+  box-shadow: 0 3px 8px rgb(30 45 67 / 20%);
 }
 
-[data-theme='dark'] .tooltip {
-    --tt-bg: var(--color-primary);
+[data-theme="dark"] .tooltip {
+  --tt-bg: var(--color-primary);
 }
 
-[data-theme='dark'] .tooltip[data-tip]::before {
-    color: var(--color-primary-content);
+[data-theme="dark"] .tooltip[data-tip]::before {
+  color: var(--color-primary-content);
 }
