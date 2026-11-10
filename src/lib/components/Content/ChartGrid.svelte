@@ -18,7 +18,7 @@
         chordPreview: Partial<Chord> | null;
         onChartChange: (changes: Partial<ChordChart>) => void;
         onAddChord: (row: number, column: number) => void;
-        onSelectChord: (id: string) => void;
+        onSelectChord: (id: string | null) => void;
         onChordChange: (
             id: string,
             changes: Partial<Chord>,
@@ -27,11 +27,13 @@
     } = $props();
 
     const dimensions = ["columns", "rows"] as const;
+    let headingEditing = $state(false);
     let hasHeading = $derived(
         !!chart.title ||
-            chart.settings.showTuningLabel ||
+            (chart.settings.showTuningLabel && !!chart.settings.tuning.label) ||
             chart.settings.showStringNoteLabels ||
-            chart.settings.ShowCapoLabel,
+            chart.settings.ShowCapoLabel ||
+            headingEditing,
     );
     let gridRow = $derived(hasHeading ? 2 : 1);
 </script>
@@ -39,7 +41,14 @@
 <div class="m-auto grid shrink-0 grid-cols-[auto_auto] gap-6 p-4">
     {#if hasHeading}
         <div class="col-start-1 min-w-0 [contain:inline-size]">
-            <ChartHeading {chart} />
+            <ChartHeading
+                {chart}
+                {onChartChange}
+                onEditStart={() => onSelectChord(null)}
+                onEditingChange={(value) => {
+                    headingEditing = value;
+                }}
+            />
         </div>
     {/if}
     <div
