@@ -5,6 +5,7 @@
     import Menu from "#lib/components/Menu/Menu.svelte";
     import ChartGrid from "#lib/components/Content/ChartGrid.svelte";
     import Toolbar from "#lib/components/Toolbar.svelte";
+    import ConfirmModal from "#lib/components/ConfirmModal.svelte";
     import { createChartChord, createDefaultChart } from "#lib/chart.ts";
     import { resetChordStyling } from "#lib/chord.ts";
     import type { Chord, ChordChart } from "#lib/types.ts";
@@ -16,6 +17,7 @@
     let selectedChordId = $state<string | null>(null);
     let chordPreview = $state<Partial<Chord> | null>(null);
     let selectedChord = $derived(findChord(selectedChordId));
+    let confirmModal: ConfirmModal;
 
     function findChord(id: string | null) {
         return chart.slots.flat().find((slot) => slot?.id === id) ?? null;
@@ -63,34 +65,60 @@
     }
 
     function clearChart() {
-        if (chart.slots.some((row) => row.some((slot) => slot !== null)) &&
-            !window.confirm("Clear the chart and reset its settings?")) return;
-        selectChord(null);
-        updateChart(createDefaultChart());
+        function clear() {
+            selectChord(null);
+            updateChart(createDefaultChart());
+        }
+
+        if (chart.slots.some((row) => row.some((slot) => slot !== null))) {
+            confirmModal.show({
+                title: "Clear chart?",
+                message: "This will remove all chords and reset the chart settings.",
+                confirmLabel: "Clear chart",
+                wide: true,
+                onConfirm: clear,
+            });
+        } else {
+            clear();
+        }
     }
 
     function updateChart(changes: Partial<ChordChart>) {
         const rows = changes.rows ?? chart.rows;
         const columns = changes.columns ?? chart.columns;
 
-        if (rows !== chart.rows || columns !== chart.columns) {
-            const removesChords = !changes.slots && chart.slots.some((row, rowIndex) =>
-                row.some((slot, columnIndex) =>
-                    slot !== null && (rowIndex >= rows || columnIndex >= columns),
-                ),
-            );
-            if (removesChords && !window.confirm("Reducing the grid will remove chords outside the new size. Continue?")) return;
+        function applyChanges() {
+            if (rows !== chart.rows || columns !== chart.columns) {
+                changes = {
+                    ...changes,
+                    slots: changes.slots ?? Array.from({ length: rows }, (_, row) =>
+                        Array.from({ length: columns }, (_, column) => chart.slots[row]?.[column] ?? null),
+                    ),
+                };
+            }
 
-            changes = {
-                ...changes,
-                slots: changes.slots ?? Array.from({ length: rows }, (_, row) =>
-                    Array.from({ length: columns }, (_, column) => chart.slots[row]?.[column] ?? null),
-                ),
-            };
+            Object.assign(chart, changes);
+            if (selectedChordId && !findChord(selectedChordId)) selectChord(null);
         }
 
-        Object.assign(chart, changes);
-        if (selectedChordId && !findChord(selectedChordId)) selectChord(null);
+        const removedChords = changes.slots ? 0 : chart.slots.reduce((count, row, rowIndex) =>
+            count + row.filter((slot, columnIndex) =>
+                slot !== null && (rowIndex >= rows || columnIndex >= columns),
+            ).length,
+        0);
+        if (removedChords > 0) {
+            const area = rows < chart.rows && columns < chart.columns ? "rows and columns"
+                : rows < chart.rows ? (chart.rows - rows === 1 ? "row" : "rows")
+                : chart.columns - columns === 1 ? "column" : "columns";
+            confirmModal.show({
+                title: `Remove ${area}?`,
+                message: `There ${removedChords === 1 ? "is a chord" : `are ${removedChords} chords`} in the ${area} you’re removing.\n${removedChords === 1 ? "This chord" : "These chords"} will be deleted.`,
+                confirmLabel: `Remove ${area}`,
+                onConfirm: applyChanges,
+            });
+        } else {
+            applyChanges();
+        }
     }
 </script>
 
@@ -150,3 +178,5 @@
         />
     </div>
 </div>
+
+<ConfirmModal bind:this={confirmModal} />
