@@ -3,6 +3,17 @@
     import { formatCapo } from "#lib/chord.ts";
 
     let { chart }: { chart: ChordChart } = $props();
+    let labels = $derived(
+        [
+            chart.settings.showTuningLabel ? chart.settings.tuning.label : "",
+            chart.settings.showStringNoteLabels
+                ? chart.settings.tuning.notes.join(" ")
+                : "",
+            chart.settings.ShowCapoLabel
+                ? formatCapo(chart.settings.capoFret)
+                : "",
+        ].filter(Boolean),
+    );
 </script>
 
 <header
@@ -13,19 +24,14 @@
             {chart.title}
         </h1>
     {/if}
-    {#if chart.settings.showTuningLabel || chart.settings.showStringNoteLabels || chart.settings.ShowCapoLabel}
-        <div
-            class="flex max-w-full flex-wrap justify-center gap-x-4 gap-y-1 text-sm"
-        >
-            {#if chart.settings.showTuningLabel}
-                <span>{chart.settings.tuning.label}</span>
-            {/if}
-            {#if chart.settings.showStringNoteLabels}
-                <span>({chart.settings.tuning.notes.join(" ")})</span>
-            {/if}
-            {#if chart.settings.ShowCapoLabel}
-                <span>{formatCapo(chart.settings.capoFret)}</span>
-            {/if}
-        </div>
+    {#if labels.length}
+        <p class="max-w-full whitespace-pre-wrap break-words text-sm">
+            {#each labels as label, index}
+                {#if index > 0}<span
+                        class="text-base-content/50"
+                        aria-hidden="true">{"  |  "}</span
+                    >{/if}{label}
+            {/each}
+        </p>
     {/if}
 </header>

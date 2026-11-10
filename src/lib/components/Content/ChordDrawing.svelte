@@ -6,6 +6,7 @@
         TuningTarget,
     } from "#lib/types.ts";
     import { trimSvg } from "#lib/export.ts";
+    import { formatCapo } from "#lib/chord.ts";
     import {
         SVGuitarChord,
         ChordStyle,
@@ -356,11 +357,7 @@
             text.push(tuning);
         }
         if (showCapoLabel) {
-            if (capo == null) {
-                text.push("(No Capo)");
-            } else {
-                text.push(`(Capo at ${capo})`);
-            }
+            text.push(`(${formatCapo(capo)})`);
         }
 
         return text.join(" ");

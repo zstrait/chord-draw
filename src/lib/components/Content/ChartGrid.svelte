@@ -2,6 +2,7 @@
     import { CircleMinus, CirclePlus } from "@lucide/svelte";
     import type { Chord, ChordChart } from "#lib/types.ts";
     import ChordEditor from "./ChordEditor.svelte";
+    import ChartHeading from "./ChartHeading.svelte";
 
     let {
         chart,
@@ -26,11 +27,24 @@
     } = $props();
 
     const dimensions = ["columns", "rows"] as const;
+    let hasHeading = $derived(
+        !!chart.title ||
+            chart.settings.showTuningLabel ||
+            chart.settings.showStringNoteLabels ||
+            chart.settings.ShowCapoLabel,
+    );
+    let gridRow = $derived(hasHeading ? 2 : 1);
 </script>
 
 <div class="m-auto grid shrink-0 grid-cols-[auto_auto] gap-6 p-4">
+    {#if hasHeading}
+        <div class="col-start-1 min-w-0 [contain:inline-size]">
+            <ChartHeading {chart} />
+        </div>
+    {/if}
     <div
-        class="grid gap-6"
+        class="col-start-1 grid gap-6"
+        style:grid-row={gridRow}
         style:grid-template-columns={`repeat(${chart.columns}, 13rem)`}
     >
         {#each chart.slots as row, rowIndex}
@@ -98,7 +112,8 @@
             class="flex items-center gap-3 text-primary/60"
             class:flex-col={vertical}
             class:col-start-1={!vertical}
-            class:row-start-2={!vertical}
+            class:col-start-2={vertical}
+            style:grid-row={vertical ? gridRow : gridRow + 1}
         >
             <span
                 class="flex-1 border-dotted border-primary/40"

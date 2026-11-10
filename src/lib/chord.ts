@@ -1,5 +1,9 @@
 import type { Chord } from "./types";
 
+export function formatCapo(capo: number | null): string {
+    return capo == null ? "No Capo" : `Capo at ${capo}`;
+}
+
 export function createDefaultChord(): Chord {
     return {
         title: "",
