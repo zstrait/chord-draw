@@ -69,9 +69,7 @@
             barreDrag = {
                 ...barreDrag,
                 endString: target.stringIndex,
-                hasDragged:
-                    barreDrag.hasDragged ||
-                    target.stringIndex !== barreDrag.startString,
+                hasDragged: target.stringIndex !== barreDrag.startString,
             };
         }
     }
@@ -191,6 +189,7 @@
             style:top={`${preview.y}px`}
             style:width={`${preview.width}px`}
             style:height={`${preview.height}px`}
+            style:border-radius={`${preview.radius}px`}
         ></div>
     {/if}
 </div>
@@ -245,7 +244,6 @@
         position: absolute;
         pointer-events: none;
         border: 2px solid rgb(52 110 195 / 35%);
-        border-radius: 999px;
         background: rgb(52 110 195 / 16%);
     }
 

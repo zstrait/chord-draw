@@ -35,6 +35,7 @@ export function getPreview(targets: HoverTarget[], drag: BarreDrag | null) {
         y: Math.min(startY, endY) - height / 2,
         width: Math.abs(endX - startX) + width,
         height: Math.abs(endY - startY) + height,
+        radius: start.diameter / 4,
     };
 }
 
