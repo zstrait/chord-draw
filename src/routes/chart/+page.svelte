@@ -13,6 +13,7 @@
         createChartChord,
         createDefaultChart,
         getChartDisplayChord,
+        isSavedChart,
     } from "#lib/chart.ts";
     import { resetChordStyling } from "#lib/chord.ts";
     import { renderChartSvg } from "#lib/chart-export.ts";
@@ -25,7 +26,12 @@
 
     let { data }: PageProps = $props();
     let chart = $state(untrack(() => $state.snapshot(data.chart)));
+    const autosaveKey = "chorddraw-chart-v1";
+    const historyKey = "chorddraw-chart-history-v1";
     const historyLimit = 50;
+    let autosaveReady = $state(false);
+    let sessionSource = $state<string | null>(null);
+    let firstLoad = true;
     let past = $state<ChordChart[]>([]);
     let future = $state<ChordChart[]>([]);
     let groupedInput: HTMLInputElement | null = null;
@@ -58,10 +64,26 @@
 
     $effect.pre(() => {
         const initial = data.chart;
+        const shared = data.hasSharedChart;
         untrack(() => {
             chart = $state.snapshot(initial);
+            if (!shared) {
+                try {
+                    const saved = JSON.parse(
+                        localStorage.getItem(autosaveKey) ?? "null",
+                    );
+                    if (isSavedChart(saved)) chart = saved;
+                } catch {}
+            }
             past = [];
             future = [];
+            sessionSource = shared ? encodeChart(initial).toString() : null;
+            const navigation = performance.getEntriesByType("navigation")[0] as
+                PerformanceNavigationTiming | undefined;
+            if (!shared || (firstLoad && navigation?.type === "reload")) {
+                restoreHistory(sessionSource);
+            }
+            firstLoad = false;
             groupedInput = null;
             selectedChordId = null;
             isChordFocused = false;
@@ -74,8 +96,56 @@
             exportRevision++;
             exportError = "";
             gridScroll = { left: 0, top: 0 };
+            autosaveReady = true;
         });
     });
+
+    $effect(() => {
+        if (!autosaveReady) return;
+        const saved = JSON.stringify(chart);
+        try {
+            localStorage.setItem(autosaveKey, saved);
+        } catch {}
+        const history = JSON.stringify({
+            source: sessionSource,
+            chart,
+            past: past.slice(-historyLimit),
+            future: future.slice(-historyLimit),
+        });
+        try {
+            sessionStorage.setItem(historyKey, history);
+        } catch {
+            try {
+                sessionStorage.removeItem(historyKey);
+            } catch {}
+        }
+    });
+
+    function restoreHistory(source: string | null) {
+        try {
+            const saved = JSON.parse(
+                sessionStorage.getItem(historyKey) ?? "null",
+            );
+            if (
+                !saved ||
+                saved.source !== source ||
+                !isSavedChart(saved.chart) ||
+                !Array.isArray(saved.past) ||
+                !Array.isArray(saved.future)
+            )
+                return;
+
+            const previous = saved.past.slice(-historyLimit);
+            const next = saved.future.slice(-historyLimit);
+            if (!previous.every(isSavedChart) || !next.every(isSavedChart))
+                return;
+            if (JSON.stringify(previous.at(-1)) === JSON.stringify(saved.chart))
+                previous.pop();
+            chart = saved.chart;
+            past = previous;
+            future = next;
+        } catch {}
+    }
 
     $effect(() => {
         if (!isPreviewMode) return;
