@@ -15,6 +15,8 @@
         isMaximized,
         rotateLabel = "Rotate drawing 90 degrees clockwise",
         showChartActions = false,
+        onFillEmptySlots,
+        hasEmptySlots = false,
     }: {
         rotation: number;
         onRotate: () => void;
@@ -22,6 +24,8 @@
         isMaximized: boolean;
         rotateLabel?: string;
         showChartActions?: boolean;
+        onFillEmptySlots?: () => void;
+        hasEmptySlots?: boolean;
     } = $props();
 </script>
 
@@ -67,8 +71,10 @@
         <div class="tooltip tooltip-left" data-tip="Fill Empty Slots">
             <button
                 type="button"
-                class="flex size-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-primary/5 p-0 text-primary hover:bg-primary/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                class="flex size-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-primary/5 p-0 text-primary enabled:hover:bg-primary/15 disabled:cursor-default disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 aria-label="Fill empty chord slots"
+                disabled={!hasEmptySlots}
+                onclick={onFillEmptySlots}
             >
                 <SquareDashedPlus size={26} color="currentColor" />
             </button>

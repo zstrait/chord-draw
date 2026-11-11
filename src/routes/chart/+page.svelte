@@ -25,6 +25,9 @@
     let chordPreview = $state<Partial<Chord> | null>(null);
     let chartPreview = $state<Partial<Chord> | null>(null);
     let selectedChord = $derived(findChord(selectedChordId));
+    let hasEmptySlots = $derived(
+        chart.slots.some((row) => row.some((slot) => slot === null)),
+    );
     let confirmModal: ConfirmModal;
 
     function findChord(id: string | null) {
@@ -102,6 +105,16 @@
             ),
         });
         selectChord(slot.id);
+    }
+
+    function fillEmptySlots() {
+        const settings = $state.snapshot(chart.settings);
+
+        updateChart({
+            slots: chart.slots.map((row) =>
+                row.map((slot) => slot ?? createChartChord(settings)),
+            ),
+        });
     }
 
     function updateChord(id: string, changes: Partial<Chord>) {
@@ -357,6 +370,8 @@
                             ? "Rotate active chord 90 degrees clockwise"
                             : "Rotate all chords 90 degrees clockwise"}
                         showChartActions
+                        onFillEmptySlots={fillEmptySlots}
+                        {hasEmptySlots}
                     />
                 </div>
             </main>
