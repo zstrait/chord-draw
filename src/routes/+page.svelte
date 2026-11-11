@@ -12,6 +12,7 @@
     import { encodeChord, decodeChord } from "#lib/share.ts";
     import { downloadSvg, downloadPng, copySvg, copyPng } from "#lib/export.ts";
     import { blurInputOnEnter } from "#lib/utils.ts";
+    import { canHandleKeybind, handleKeybind } from "#lib/keybinds.ts";
 
     let { data }: PageProps = $props();
     const autosaveKey = "chorddraw-chord-v1";
@@ -28,6 +29,9 @@
     let svg = $state("");
     let menuOpen = $state(true);
     let toolbarOpen = $state(true);
+    let header = $state<ReturnType<typeof Header>>();
+    let content = $state<ReturnType<typeof Content>>();
+    let toolbar = $state<ReturnType<typeof Toolbar>>();
     let copyMessage = $state("");
     let toastAboveTooltip = $state(false);
     let nextCopyToast: { message: string; aboveTooltip: boolean } | null = null;
@@ -264,46 +268,57 @@
             console.error(error);
         }
     }
-</script>
 
-<svelte:window
-    onfocusin={endInputEdit}
-    onfocusout={endInputEdit}
-    onkeydown={(event) => {
-        if (event.defaultPrevented || event.isComposing) {
+    function toggleMaximize() {
+        const openBoth = !menuOpen && !toolbarOpen;
+        menuOpen = openBoth;
+        toolbarOpen = openBoth;
+    }
+
+    function clearChord() {
+        updateChord(createDefaultChord());
+    }
+
+    function handleKeydown(event: KeyboardEvent) {
+        if (
+            handleKeybind(event, {
+                rotate: () => content?.rotate(),
+                maximize: toggleMaximize,
+                theme: () => header?.toggleTheme(),
+                download: () => toolbar?.download(),
+                copy: () => toolbar?.copy(),
+                share: () => toolbar?.share(),
+                clear: clearChord,
+                menu: () => {
+                    menuOpen = !menuOpen;
+                },
+                toolbar: () => {
+                    toolbarOpen = !toolbarOpen;
+                },
+            })
+        )
             return;
-        }
 
+        if (event.defaultPrevented || event.isComposing) return;
         if (
             (event.metaKey || event.ctrlKey) &&
             !event.altKey &&
             event.key.toLowerCase() === "z"
         ) {
-            const target = event.target;
-
-            if (
-                target instanceof HTMLElement &&
-                (target.closest(
-                    'input, textarea, select, [role="menu"], [aria-haspopup="menu"]',
-                ) ||
-                    target.isContentEditable)
-            ) {
-                return;
-            }
-
+            if (!canHandleKeybind(event)) return;
             event.preventDefault();
-
-            if (event.shiftKey) {
-                redo();
-            } else {
-                undo();
-            }
-
+            if (event.shiftKey) redo();
+            else undo();
             return;
         }
-
         blurInputOnEnter(event);
-    }}
+    }
+</script>
+
+<svelte:window
+    onfocusin={endInputEdit}
+    onfocusout={endInputEdit}
+    onkeydown={handleKeydown}
 />
 
 {#key data.chord}
@@ -323,22 +338,19 @@
             class="flex min-h-0 min-w-0 flex-1 flex-col transition-[padding-bottom] duration-300 ease-in-out motion-reduce:transition-none"
             style:padding-bottom={toolbarOpen ? "0.5rem" : "0rem"}
         >
-            <Header />
+            <Header bind:this={header} />
             <div
                 class="divider m-0 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5"
                 aria-hidden="true"
             ></div>
             <Content
+                bind:this={content}
                 chord={chordPreview ? { ...chord, ...chordPreview } : chord}
                 sidebarOpen={menuOpen}
                 onChordChange={updateChord}
                 onSvgChange={handleSvgChange}
                 isMaximized={!menuOpen && !toolbarOpen}
-                onMaximize={() => {
-                    const openBoth = !menuOpen && !toolbarOpen;
-                    menuOpen = openBoth;
-                    toolbarOpen = openBoth;
-                }}
+                onMaximize={toggleMaximize}
             />
             <div class="relative shrink-0">
                 <div
@@ -361,12 +373,13 @@
                     {/if}
                 </div>
                 <Toolbar
+                    bind:this={toolbar}
                     {svg}
                     isOpen={toolbarOpen}
                     onToggle={() => {
                         toolbarOpen = !toolbarOpen;
                     }}
-                    onClear={() => updateChord(createDefaultChord())}
+                    onClear={clearChord}
                     onUndo={undo}
                     canUndo={past.length > 0}
                     onRedo={redo}

@@ -18,10 +18,13 @@
     import { copyPng, copySvg, downloadPng, downloadSvg } from "#lib/export.ts";
     import type { Chord, ChordChart, ChartSlotPosition } from "#lib/types.ts";
     import { blurInputOnEnter } from "#lib/utils.ts";
+    import { handleKeybind } from "#lib/keybinds.ts";
 
     let chart = $state(createDefaultChart());
     let menuOpen = $state(true);
     let toolbarOpen = $state(true);
+    let header = $state<ReturnType<typeof Header>>();
+    let toolbar = $state<ReturnType<typeof Toolbar>>();
     let selectedChordId = $state<string | null>(null);
     let isChordFocused = $state(false);
     let isMoveMode = $state(false);
@@ -104,21 +107,20 @@
     }
 
     async function togglePreview() {
-        if (!workspace) return;
-        const element = workspace;
         if (!isPreviewMode) {
-            gridScroll = {
-                left: element.scrollLeft,
-                top: element.scrollTop,
-            };
+            if (workspace)
+                gridScroll = {
+                    left: workspace.scrollLeft,
+                    top: workspace.scrollTop,
+                };
             isMoveMode = false;
             isPreviewMode = true;
             await tick();
-            element.scrollTo({ left: 0, top: 0, behavior: "instant" });
+            workspace?.scrollTo({ left: 0, top: 0, behavior: "instant" });
         } else {
             isPreviewMode = false;
             await tick();
-            element.scrollTo({ ...gridScroll, behavior: "instant" });
+            workspace?.scrollTo({ ...gridScroll, behavior: "instant" });
         }
     }
 
@@ -211,6 +213,45 @@
     }
 
     function handleKeydown(event: KeyboardEvent) {
+        if (event.defaultPrevented || event.isComposing) return;
+        const activeChord =
+            !isPreviewMode && !isMoveMode ? selectedChord : null;
+        const canNavigate = !!activeChord && !isChordFocused;
+        if (
+            handleKeybind(event, {
+                move: toggleMoveMode,
+                preview: togglePreview,
+                rotate,
+                maximize: toggleMaximize,
+                fill: fillEmptySlots,
+                theme: () => header?.toggleTheme(),
+                download: () => toolbar?.download(),
+                copy: () => toolbar?.copy(),
+                clear: clearChart,
+                menu: () => {
+                    menuOpen = !menuOpen;
+                },
+                toolbar: () => {
+                    toolbarOpen = !toolbarOpen;
+                },
+                addColumn: () => resizeChart("columns", 1),
+                removeColumn: () => resizeChart("columns", -1),
+                addRow: () => resizeChart("rows", 1),
+                removeRow: () => resizeChart("rows", -1),
+                focus: activeChord
+                    ? () => focusChord(activeChord.id)
+                    : undefined,
+                remove: activeChord
+                    ? () => removeChord(activeChord.id)
+                    : undefined,
+                left: canNavigate ? () => navigateChords(0, -1) : undefined,
+                right: canNavigate ? () => navigateChords(0, 1) : undefined,
+                up: canNavigate ? () => navigateChords(-1, 0) : undefined,
+                down: canNavigate ? () => navigateChords(1, 0) : undefined,
+            })
+        )
+            return;
+
         if (event.key === "Escape" && !event.isComposing && isPreviewMode) {
             event.preventDefault();
             togglePreview();
@@ -256,6 +297,7 @@
     }
 
     function fillEmptySlots() {
+        if (!hasEmptySlots) return;
         const settings = $state.snapshot(chart.settings);
 
         updateChart({
@@ -263,6 +305,41 @@
                 row.map((slot) => slot ?? createChartChord(settings)),
             ),
         });
+    }
+
+    function resizeChart(dimension: "rows" | "columns", change: number) {
+        const value = chart[dimension] + change;
+        if (value >= 1) updateChart({ [dimension]: value });
+    }
+
+    async function navigateChords(rowChange: number, columnChange: number) {
+        if (!selectedChord) return;
+        const row = chart.slots.findIndex((entries) =>
+            entries.some((slot) => slot?.id === selectedChordId),
+        );
+        if (row < 0) return;
+        const column = chart.slots[row].findIndex(
+            (slot) => slot?.id === selectedChordId,
+        );
+        let nextRow = row + rowChange;
+        let nextColumn = column + columnChange;
+        while (
+            nextRow >= 0 &&
+            nextRow < chart.rows &&
+            nextColumn >= 0 &&
+            nextColumn < chart.columns &&
+            !chart.slots[nextRow]?.[nextColumn]
+        ) {
+            nextRow += rowChange;
+            nextColumn += columnChange;
+        }
+        const next = chart.slots[nextRow]?.[nextColumn];
+        if (!next) return;
+        await selectChord(next.id);
+        if (selectedChordId === next.id)
+            document
+                .querySelector<HTMLElement>(`[data-chart-chord="${next.id}"]`)
+                ?.scrollIntoView({ block: "nearest", inline: "nearest" });
     }
 
     function moveChord(from: ChartSlotPosition, to: ChartSlotPosition) {
@@ -472,7 +549,7 @@
         class="flex min-h-0 min-w-0 flex-1 flex-col transition-[padding-bottom] duration-300 ease-in-out motion-reduce:transition-none"
         style:padding-bottom={toolbarOpen ? "0.5rem" : "0rem"}
     >
-        <Header />
+        <Header bind:this={header} />
         <div
             class="divider m-0 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5"
             aria-hidden="true"
@@ -592,6 +669,7 @@
                 </div>
             {/if}
             <Toolbar
+                bind:this={toolbar}
                 subject="chart"
                 isOpen={toolbarOpen}
                 onToggle={() => {

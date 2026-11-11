@@ -26,6 +26,10 @@
         isMaximized,
         sidebarOpen,
     }: Props = $props();
+
+    export function rotate() {
+        onChordChange({ rotation: (chord.rotation + 90) % 360 });
+    }
 </script>
 
 <div
@@ -49,8 +53,7 @@
             rotation={chord.rotation}
             {isMaximized}
             {onMaximize}
-            onRotate={() =>
-                onChordChange({ rotation: (chord.rotation + 90) % 360 })}
+            onRotate={rotate}
         />
     </div>
     <div

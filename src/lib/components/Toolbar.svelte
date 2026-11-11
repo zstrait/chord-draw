@@ -50,6 +50,18 @@
     let format = $state<"SVG" | "PNG">("PNG");
     let exportWidth = $state(1024);
 
+    export function copy() {
+        if (canDownload) onCopy?.(format, exportWidth);
+    }
+
+    export function download() {
+        if (canDownload) onDownload?.(format, exportWidth);
+    }
+
+    export function share() {
+        onShare?.();
+    }
+
     const formatOptions = [
         { label: "PNG", value: "PNG" },
         { label: "SVG", value: "SVG" },
@@ -175,7 +187,7 @@
                     <button
                         type="button"
                         class="toolbar-control btn btn-ghost btn-square"
-                        onclick={() => onCopy?.(format, exportWidth)}
+                        onclick={copy}
                         disabled={!canDownload || !onCopy}
                         aria-label={`Copy ${subject}`}
                     >
@@ -190,7 +202,7 @@
                     <button
                         type="button"
                         class="toolbar-control btn btn-ghost btn-square"
-                        onclick={() => onDownload?.(format, exportWidth)}
+                        onclick={download}
                         disabled={!canDownload || !onDownload}
                         aria-label={`Download ${subject}`}
                     >
@@ -242,7 +254,7 @@
                     type="button"
                     class="toolbar-control btn btn-ghost btn-square"
                     aria-label={`Share ${subject}`}
-                    onclick={onShare}
+                    onclick={share}
                     disabled={!onShare}
                 >
                     <Share size={24} color="currentColor" />

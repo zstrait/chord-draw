@@ -12,7 +12,7 @@
         darkMode = document.documentElement.dataset.theme === "dark";
     });
 
-    function toggleTheme() {
+    export function toggleTheme() {
         darkMode = !darkMode;
         const theme = darkMode ? "dark" : "light";
         document.documentElement.dataset.theme = theme;
