@@ -43,6 +43,27 @@
         }
     }
 
+    function handleKeydown(event: KeyboardEvent) {
+        blurInputOnEnter(event);
+        if (
+            event.key !== "Enter" ||
+            event.defaultPrevented ||
+            event.isComposing ||
+            selectedChordId === null ||
+            !(event.target instanceof Element) ||
+            event.target.closest(
+                "button, input, textarea, select, a, summary, [contenteditable], [role='button'], [role='menuitem']",
+            ) ||
+            document.querySelector(
+                ".marker-menu, [popover]:popover-open, dialog[open]",
+            )
+        )
+            return;
+
+        event.preventDefault();
+        selectChord(null);
+    }
+
     function addChord(row: number, column: number) {
         if (chart.slots[row][column] !== null) return;
         const slot = createChartChord($state.snapshot(chart.settings));
@@ -160,7 +181,7 @@
 </script>
 
 <svelte:window
-    onkeydown={blurInputOnEnter}
+    onkeydown={handleKeydown}
     onpointerdown={(event) => {
         const target = event.target;
         if (
