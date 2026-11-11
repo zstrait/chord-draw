@@ -25,8 +25,10 @@
         onCopy?: (format: "SVG" | "PNG", width: number) => void;
         onDownload?: (format: "SVG" | "PNG", width: number) => void;
         onShare?: () => void;
+        onSizeOpen?: () => void;
         canDownload?: boolean;
         svg?: string;
+        columns?: number;
         subject?: "chord" | "chart";
     };
 
@@ -42,20 +44,22 @@
         onCopy,
         onDownload,
         onShare,
+        onSizeOpen,
         canDownload = false,
         svg = "",
+        columns = 1,
         subject = "chord",
     }: Props = $props();
 
     let format = $state<"SVG" | "PNG">("PNG");
-    let exportWidth = $state(1024);
+    let exportWidth = $state(512);
 
     export function copy() {
-        if (canDownload) onCopy?.(format, exportWidth);
+        if (canDownload) onCopy?.(format, exportWidth * columns);
     }
 
     export function download() {
-        if (canDownload) onDownload?.(format, exportWidth);
+        if (canDownload) onDownload?.(format, exportWidth * columns);
     }
 
     export function share() {
@@ -68,14 +72,14 @@
     ] as const;
 
     const exportSizes = [
-        { label: "Small", value: 512 },
-        { label: "Medium", value: 1024 },
-        { label: "Large", value: 2048 },
+        { label: "Small", value: 256 },
+        { label: "Medium", value: 512 },
+        { label: "Large", value: 1024 },
     ];
 
     const sizeOptions = $derived(
         exportSizes.map((option) => {
-            const size = getPngSize(svg, option.value);
+            const size = getPngSize(svg, option.value * columns);
             return {
                 ...option,
                 tooltip: size ? `${size.width} × ${size.height} px` : undefined,
@@ -176,10 +180,7 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <fieldset
-                class="flex items-center gap-2 border-0 p-0"
-                disabled={!canDownload}
-            >
+            <fieldset class="flex items-center gap-2 border-0 p-0">
                 <div
                     class="tooltip tooltip-top inline-flex shrink-0"
                     data-tip="Copy"
@@ -235,6 +236,7 @@
                             label="Export size"
                             value={exportWidth}
                             options={sizeOptions}
+                            onopen={onSizeOpen}
                             onchange={(value) => {
                                 exportWidth = value;
                             }}

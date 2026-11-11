@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { onDestroy, untrack } from "svelte";
-    import { fly } from "svelte/transition";
+    import { untrack } from "svelte";
     import Header from "#lib/components/Header.svelte";
     import Menu from "#lib/components/Menu/Menu.svelte";
     import Content from "#lib/components/Content/Content.svelte";
     import Toolbar from "#lib/components/Toolbar.svelte";
+    import Toast from "#lib/components/Toast.svelte";
 
     import type { Chord } from "#lib/types.ts";
     import { createDefaultChord } from "#lib/chord.ts";
@@ -32,14 +32,8 @@
     let header = $state<ReturnType<typeof Header>>();
     let content = $state<ReturnType<typeof Content>>();
     let toolbar = $state<ReturnType<typeof Toolbar>>();
-    let copyMessage = $state("");
-    let toastAboveTooltip = $state(false);
-    let nextCopyToast: { message: string; aboveTooltip: boolean } | null = null;
-    let toastExiting = false;
-    let copyToastTimer: ReturnType<typeof setTimeout> | undefined;
+    let toast = $state<ReturnType<typeof Toast>>();
     let groupedInput: HTMLInputElement | null = null;
-
-    onDestroy(() => clearTimeout(copyToastTimer));
 
     $effect.pre(() => {
         const initial = data.chord;
@@ -64,10 +58,6 @@
             firstLoad = false;
             groupedInput = null;
             chordPreview = null;
-            copyMessage = "";
-            nextCopyToast = null;
-            toastExiting = false;
-            clearTimeout(copyToastTimer);
             autosaveReady = true;
         });
     });
@@ -138,51 +128,17 @@
         if (stack.length > historyLimit) stack.shift();
     }
 
-    function showCopyToast(message: string, aboveTooltip = false) {
-        nextCopyToast = { message, aboveTooltip };
-        clearTimeout(copyToastTimer);
-        if (copyMessage) {
-            hideCopyToast();
-        } else if (!toastExiting) {
-            showNextCopyToast();
-        }
-    }
-
-    function hideCopyToast() {
-        toastExiting = true;
-        copyMessage = "";
-    }
-
-    function showNextCopyToast() {
-        toastExiting = false;
-        if (!nextCopyToast) return;
-        copyMessage = nextCopyToast.message;
-        toastAboveTooltip = nextCopyToast.aboveTooltip;
-        nextCopyToast = null;
-        copyToastTimer = setTimeout(hideCopyToast, 2000);
-    }
-
     async function handleShare() {
         const url = new URL(window.location.href);
         url.search = encodeChord(chord).toString();
         url.hash = "";
         try {
             await navigator.clipboard.writeText(url.href);
-            showCopyToast("Link copied!", true);
+            toast?.show("Link copied!", true);
         } catch (error) {
             console.error(error);
-            showCopyToast("Couldn’t copy link", true);
+            toast?.show("Couldn’t copy link", true);
         }
-    }
-
-    function toastSlide(node: Element, { x }: { x: number }) {
-        return fly(node, {
-            x,
-            duration: window.matchMedia("(prefers-reduced-motion: reduce)")
-                .matches
-                ? 0
-                : 200,
-        });
     }
 
     function handleSvgChange(value: string) {
@@ -263,7 +219,7 @@
                 await copyPng(svg, width);
             }
 
-            showCopyToast("Copied!");
+            toast?.show("Copied!");
         } catch (error) {
             console.error(error);
         }
@@ -344,25 +300,7 @@
                 onMaximize={toggleMaximize}
             />
             <div class="relative shrink-0">
-                <div
-                    class="toast toast-end pointer-events-none absolute right-0 bottom-full z-50 p-0"
-                    style:margin-bottom={toastAboveTooltip
-                        ? "calc(2.5rem - 2px)"
-                        : "0.75rem"}
-                    role="status"
-                    aria-live="polite"
-                >
-                    {#if copyMessage}
-                        <div
-                            class="alert animate-none rounded-xl border-0 bg-neutral px-4 py-3 text-sm font-medium text-neutral-content shadow-lg"
-                            in:toastSlide={{ x: 48 }}
-                            out:toastSlide={{ x: 48 }}
-                            onoutroend={showNextCopyToast}
-                        >
-                            <span>{copyMessage}</span>
-                        </div>
-                    {/if}
-                </div>
+                <Toast bind:this={toast} />
                 <Toolbar
                     bind:this={toolbar}
                     {svg}

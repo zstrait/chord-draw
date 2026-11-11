@@ -16,6 +16,7 @@
         value: T;
         options: readonly Option[];
         onchange: (value: T) => void;
+        onopen?: () => void;
         placement?: "top" | "bottom";
         class?: string;
     };
@@ -25,6 +26,7 @@
         value,
         options,
         onchange,
+        onopen,
         placement = "bottom",
         class: className = "w-full",
     }: Props = $props();
@@ -33,14 +35,33 @@
     let trigger: HTMLButtonElement;
     let menu: HTMLUListElement;
     let open = $state(false);
-    let tooltip: HTMLDivElement;
-    let tooltipText = $state("");
+    let tooltip = $state<HTMLDivElement>();
+    let tooltipOption = $state<{
+        button: HTMLButtonElement;
+        value: T;
+    } | null>(null);
+    let tooltipText = $derived(
+        options.find((option) => option.value === tooltipOption?.value)
+            ?.tooltip ?? "",
+    );
     let selected = $derived(options.find((option) => option.value === value));
     let selectedLabel = $derived(
         selected?.selectedLabel ?? selected?.label ?? value,
     );
     let search = "";
     let lastKeyTime = 0;
+
+    $effect(() => {
+        if (!tooltip) return;
+        if (!tooltipOption || !tooltipText) {
+            tooltip.hidePopover();
+            return;
+        }
+        const bounds = tooltipOption.button.getBoundingClientRect();
+        tooltip.style.left = `${bounds.left}px`;
+        tooltip.style.top = `${bounds.top + bounds.height / 2}px`;
+        tooltip.showPopover();
+    });
 
     function optionButtons() {
         return Array.from(
@@ -57,17 +78,15 @@
     }
 
     function hideTooltip() {
-        tooltip.hidePopover();
+        tooltipOption = null;
+        tooltip?.hidePopover();
     }
 
-    function showTooltip(event: MouseEvent | FocusEvent, text?: string) {
-        if (!text) return;
-        const button = event.currentTarget as HTMLButtonElement;
-        const bounds = button.getBoundingClientRect();
-        tooltipText = text;
-        tooltip.style.left = `${bounds.left}px`;
-        tooltip.style.top = `${bounds.top + bounds.height / 2}px`;
-        tooltip.showPopover();
+    function showTooltip(event: MouseEvent | FocusEvent, value: T) {
+        tooltipOption = {
+            button: event.currentTarget as HTMLButtonElement,
+            value,
+        };
     }
 
     function focusOption(button?: HTMLButtonElement) {
@@ -83,6 +102,7 @@
     }
 
     function show(focusLast = false) {
+        onopen?.();
         menu.showPopover();
 
         const bounds = trigger.getBoundingClientRect();
@@ -242,9 +262,9 @@
                         : undefined}
                     disabled={option.disabled}
                     tabindex="-1"
-                    onmouseenter={(event) => showTooltip(event, option.tooltip)}
+                    onmouseenter={(event) => showTooltip(event, option.value)}
                     onmouseleave={hideTooltip}
-                    onfocus={(event) => showTooltip(event, option.tooltip)}
+                    onfocus={(event) => showTooltip(event, option.value)}
                     onblur={hideTooltip}
                     onclick={() => {
                         if (option.value !== value || option.reselect) {

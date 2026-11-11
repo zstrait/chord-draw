@@ -1,5 +1,6 @@
-import type { Chord } from "./types.ts";
+import type { Chord, ChordChart } from "./types.ts";
 import { createDefaultChord } from "./chord.ts";
+import { createDefaultChart } from "./chart.ts";
 import { normalizeTuningNote, selectTuning, tuningPresets } from "./tunings.ts";
 
 const numbers = {
@@ -30,6 +31,15 @@ const colors = {
 } as const;
 
 const customDefault = selectTuning(createDefaultChord(), "custom").tuning!;
+const maxChartSlots = 10000;
+
+function validChartSize(rows: number, columns: number): boolean {
+    return (
+        integer(rows, 1, maxChartSlots) &&
+        integer(columns, 1, maxChartSlots) &&
+        rows * columns <= maxChartSlots
+    );
+}
 
 function integer(value: unknown, min: number, max: number): value is number {
     return (
@@ -293,4 +303,83 @@ export function decodeChord(params: URLSearchParams): Chord {
     const rotation = Number(params.get("rotation"));
     if ([0, 90, 180, 270].includes(rotation)) chord.rotation = rotation;
     return chord;
+}
+
+export function encodeChart(chart: ChordChart): URLSearchParams {
+    if (!validChartSize(chart.rows, chart.columns))
+        throw new Error("Chart is too large to share");
+
+    const defaults = createDefaultChart();
+    const params = encodeChord({
+        ...createDefaultChord(),
+        ...chart.settings,
+        title: chart.title,
+    });
+    params.set("chart", "1");
+    if (chart.rows !== defaults.rows) params.set("rows", String(chart.rows));
+    if (chart.columns !== defaults.columns)
+        params.set("columns", String(chart.columns));
+
+    chart.slots.forEach((row, rowIndex) => {
+        row.forEach((slot, columnIndex) => {
+            if (!slot) return;
+            const index = rowIndex * chart.columns + columnIndex;
+            params.append("slot", String(index));
+            for (const [name, value] of encodeChord(slot.chord))
+                params.append(`${index}.${name}`, value);
+        });
+    });
+    return params;
+}
+
+export function decodeChart(params: URLSearchParams): ChordChart {
+    const chart = createDefaultChart();
+    if (params.get("chart") !== "1") return chart;
+
+    const rows = Number(params.get("rows") ?? chart.rows);
+    const columns = Number(params.get("columns") ?? chart.columns);
+    if (!validChartSize(rows, columns)) return chart;
+
+    const { title, strings, barres, ...settings } = decodeChord(params);
+    chart.title = title;
+    chart.settings = settings;
+    chart.rows = rows;
+    chart.columns = columns;
+    chart.slots = Array.from({ length: rows }, () =>
+        Array.from({ length: columns }, () => null),
+    );
+
+    const slotParams = new Map<number, URLSearchParams>();
+    for (const [name, value] of params) {
+        const match = /^(0|[1-9]\d*)\.(.+)$/.exec(name);
+        if (!match) continue;
+        const index = Number(match[1]);
+        if (!integer(index, 0, rows * columns - 1)) continue;
+        let chordParams = slotParams.get(index);
+        if (!chordParams) {
+            chordParams = new URLSearchParams();
+            slotParams.set(index, chordParams);
+        }
+        chordParams.append(match[2], value);
+    }
+
+    for (const value of params.getAll("slot")) {
+        const separator = value.indexOf(":");
+        const position = separator < 0 ? value : value.slice(0, separator);
+        if (!/^(0|[1-9]\d*)$/.test(position)) continue;
+        const index = Number(position);
+        if (!integer(index, 0, rows * columns - 1)) continue;
+        const row = Math.floor(index / columns);
+        const column = index % columns;
+        if (chart.slots[row][column]) continue;
+        chart.slots[row][column] = {
+            id: crypto.randomUUID(),
+            chord: decodeChord(
+                separator < 0
+                    ? (slotParams.get(index) ?? new URLSearchParams())
+                    : new URLSearchParams(value.slice(separator + 1)),
+            ),
+        };
+    }
+    return chart;
 }

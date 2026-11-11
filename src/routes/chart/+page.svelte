@@ -7,6 +7,7 @@
     import Content from "#lib/components/Content/Content.svelte";
     import WorkspaceControls from "#lib/components/Content/WorkspaceControls.svelte";
     import Toolbar from "#lib/components/Toolbar.svelte";
+    import Toast from "#lib/components/Toast.svelte";
     import ConfirmModal from "#lib/components/ConfirmModal.svelte";
     import {
         createChartChord,
@@ -19,8 +20,11 @@
     import type { Chord, ChordChart, ChartSlotPosition } from "#lib/types.ts";
     import { blurInputOnEnter } from "#lib/utils.ts";
     import { handleKeybind } from "#lib/keybinds.ts";
+    import { encodeChart } from "#lib/share.ts";
+    import type { PageProps } from "./$types";
 
-    let chart = $state(createDefaultChart());
+    let { data }: PageProps = $props();
+    let chart = $state(untrack(() => $state.snapshot(data.chart)));
     const historyLimit = 50;
     let past = $state<ChordChart[]>([]);
     let future = $state<ChordChart[]>([]);
@@ -37,11 +41,10 @@
     let previewUrl = $state("");
     let isExporting = $state(false);
     let exportError = $state("");
-    let exportMessage = $state("");
+    let toast = $state<ReturnType<typeof Toast>>();
     let exportRevision = $state(0);
-    let renderedRevision = -1;
+    let renderedRevision = $state(-1);
     let rendering: Promise<void> | null = null;
-    let exportTimer: ReturnType<typeof setTimeout> | undefined;
     let disposed = false;
     let workspace = $state<HTMLElement>();
     let gridScroll = { left: 0, top: 0 };
@@ -51,7 +54,28 @@
     let hasEmptySlots = $derived(
         chart.slots.some((row) => row.some((slot) => slot === null)),
     );
-    let confirmModal: ConfirmModal;
+    let confirmModal = $state<ReturnType<typeof ConfirmModal>>();
+
+    $effect.pre(() => {
+        const initial = data.chart;
+        untrack(() => {
+            chart = $state.snapshot(initial);
+            past = [];
+            future = [];
+            groupedInput = null;
+            selectedChordId = null;
+            isChordFocused = false;
+            isMoveMode = false;
+            isPreviewMode = false;
+            chordPreview = null;
+            chartPreview = null;
+            chartSvg = "";
+            renderedRevision = -1;
+            exportRevision++;
+            exportError = "";
+            gridScroll = { left: 0, top: 0 };
+        });
+    });
 
     $effect(() => {
         if (!isPreviewMode) return;
@@ -73,7 +97,6 @@
 
     onDestroy(() => {
         disposed = true;
-        clearTimeout(exportTimer);
     });
 
     async function getChartSvg(): Promise<string> {
@@ -128,18 +151,9 @@
         }
     }
 
-    function showExportMessage(message: string) {
-        if (disposed) return;
-        clearTimeout(exportTimer);
-        exportMessage = message;
-        exportTimer = setTimeout(() => {
-            exportMessage = "";
-        }, 2500);
-    }
-
     function reportExportError(error: unknown) {
         console.error(error);
-        showExportMessage("Could not export the chart. Please try again.");
+        toast?.show("Could not export the chart. Please try again.");
     }
 
     async function handleDownload(format: "SVG" | "PNG", width: number) {
@@ -161,9 +175,22 @@
                     : getChartSvg();
             if (format === "SVG") await copySvg(svg);
             else await copyPng(svg, width);
-            showExportMessage("Copied!");
+            toast?.show("Copied!");
         } catch (error) {
             reportExportError(error);
+        }
+    }
+
+    async function handleShare() {
+        try {
+            const url = new URL(window.location.href);
+            url.search = encodeChart(chart).toString();
+            url.hash = "";
+            await navigator.clipboard.writeText(url.href);
+            toast?.show("Link copied!", true);
+        } catch (error) {
+            console.error(error);
+            toast?.show("Couldn’t copy link", true);
         }
     }
 
@@ -231,6 +258,7 @@
                 theme: () => header?.toggleTheme(),
                 download: () => toolbar?.download(),
                 copy: () => toolbar?.copy(),
+                share: () => toolbar?.share(),
                 undo,
                 redo,
                 clear: clearChart,
@@ -442,7 +470,7 @@
         }
 
         if (chart.slots.some((row) => row.some((slot) => slot !== null))) {
-            confirmModal.show({
+            confirmModal?.show({
                 title: "Clear chart?",
                 message:
                     "This will remove all chords and reset the chart settings.",
@@ -558,7 +586,7 @@
                       : chart.columns - columns === 1
                         ? "column"
                         : "columns";
-            confirmModal.show({
+            confirmModal?.show({
                 title: `Remove ${area}?`,
                 message: `There ${removedChords === 1 ? "is a chord" : `are ${removedChords} chords`} in the ${area} you’re removing.\n${removedChords === 1 ? "This chord" : "These chords"} will be deleted.`,
                 confirmLabel: `Remove ${area}`,
@@ -586,181 +614,177 @@
     }}
 />
 
-<div class="flex h-dvh gap-4 p-2 pl-0 pb-0">
-    {#if selectedChord && !isPreviewMode}
-        {#key selectedChord.id}
-            {@const id = selectedChord.id}
-            <Menu
-                chord={selectedChord.chord}
-                chartChord
-                onChordChange={(changes, input) =>
-                    updateChord(id, changes, input)}
-                onChordPreview={(changes) => {
-                    if (selectedChordId === id) chordPreview = changes;
+{#key data.chart}
+    <div class="flex h-dvh gap-4 p-2 pl-0 pb-0">
+        {#if selectedChord && !isPreviewMode}
+            {#key selectedChord.id}
+                {@const id = selectedChord.id}
+                <Menu
+                    chord={selectedChord.chord}
+                    chartChord
+                    onChordChange={(changes, input) =>
+                        updateChord(id, changes, input)}
+                    onChordPreview={(changes) => {
+                        if (selectedChordId === id) chordPreview = changes;
+                    }}
+                    onResetStyling={() => resetStyling(id)}
+                    isOpen={menuOpen}
+                    onToggle={() => {
+                        menuOpen = !menuOpen;
+                    }}
+                />
+            {/key}
+        {:else}
+            <ChartMenu
+                {chart}
+                onChartChange={updateChart}
+                onChartPreview={(changes) => {
+                    chartPreview = changes;
                 }}
-                onResetStyling={() => resetStyling(id)}
                 isOpen={menuOpen}
                 onToggle={() => {
                     menuOpen = !menuOpen;
                 }}
             />
-        {/key}
-    {:else}
-        <ChartMenu
-            {chart}
-            onChartChange={updateChart}
-            onChartPreview={(changes) => {
-                chartPreview = changes;
-            }}
-            isOpen={menuOpen}
-            onToggle={() => {
-                menuOpen = !menuOpen;
-            }}
-        />
-    {/if}
-    <div
-        class="flex min-h-0 min-w-0 flex-1 flex-col transition-[padding-bottom] duration-300 ease-in-out motion-reduce:transition-none"
-        style:padding-bottom={toolbarOpen ? "0.5rem" : "0rem"}
-    >
-        <Header bind:this={header} />
+        {/if}
         <div
-            class="divider m-0 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5"
-            aria-hidden="true"
-        ></div>
-        {#if isChordFocused && selectedChord && !isPreviewMode}
-            {@const id = selectedChord.id}
+            class="flex min-h-0 min-w-0 flex-1 flex-col transition-[padding-bottom] duration-300 ease-in-out motion-reduce:transition-none"
+            style:padding-bottom={toolbarOpen ? "0.5rem" : "0rem"}
+        >
+            <Header bind:this={header} />
             <div
-                role="region"
-                aria-label="Focused chord"
-                tabindex="-1"
-                data-chart-chord={id}
-                class="flex min-h-0 min-w-0 flex-1 outline-none"
-            >
-                <Content
-                    chord={getChartDisplayChord(
-                        chordPreview
-                            ? { ...selectedChord.chord, ...chordPreview }
-                            : selectedChord.chord,
-                        chart.settings,
-                    )}
-                    sidebarOpen={menuOpen}
-                    onChordChange={(changes, input) =>
-                        updateChord(id, changes, input)}
-                    onBack={backToChart}
-                    isMaximized={!menuOpen && !toolbarOpen}
-                    onMaximize={toggleMaximize}
-                />
-            </div>
-        {:else}
-            <main
-                bind:this={workspace}
-                data-chart-workspace
-                aria-label="Chord chart workspace"
-                class="-mr-2 flex min-h-0 min-w-0 flex-1 justify-center-safe overflow-auto pt-5.5 pr-4 pb-2 transition-[margin-left,padding-left] duration-300 ease-in-out motion-reduce:transition-none"
-                style:margin-left={menuOpen ? "-1rem" : "-3rem"}
-                style:padding-left={menuOpen ? "1.5rem" : "3.5rem"}
-            >
+                class="divider m-0 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5"
+                aria-hidden="true"
+            ></div>
+            {#if isChordFocused && selectedChord && !isPreviewMode}
+                {@const id = selectedChord.id}
                 <div
-                    class="flex min-h-full min-w-full shrink-0 items-center-safe"
+                    role="region"
+                    aria-label="Focused chord"
+                    tabindex="-1"
+                    data-chart-chord={id}
+                    class="flex min-h-0 min-w-0 flex-1 outline-none"
                 >
-                    <div
-                        class="flex min-h-full flex-1 items-center-safe justify-center"
-                    >
-                        {#if isPreviewMode}
-                            <div class="shrink-0 p-4" aria-busy={isExporting}>
-                                {#if previewUrl}
-                                    <img
-                                        src={previewUrl}
-                                        alt="Chart export preview"
-                                        class="max-w-none rounded-xl bg-white shadow-sm"
-                                    />
-                                {:else if exportError}
-                                    <p
-                                        role="alert"
-                                        class="text-sm text-base-content"
-                                    >
-                                        {exportError}
-                                    </p>
-                                {:else}
-                                    <p
-                                        role="status"
-                                        class="text-sm text-base-content/70"
-                                    >
-                                        Preparing preview…
-                                    </p>
-                                {/if}
-                            </div>
-                        {:else}
-                            <ChartGrid
-                                {chart}
-                                {selectedChordId}
-                                {chordPreview}
-                                {chartPreview}
-                                {isMoveMode}
-                                onChartChange={updateChart}
-                                onAddChord={addChord}
-                                onSelectChord={selectChord}
-                                onRemoveChord={removeChord}
-                                onFocusChord={focusChord}
-                                onChordChange={updateChord}
-                                onMoveChord={moveChord}
-                            />
-                        {/if}
-                    </div>
-                    <WorkspaceControls
-                        rotation={!isPreviewMode && selectedChord
-                            ? selectedChord.chord.rotation
-                            : chart.settings.rotation}
+                    <Content
+                        chord={getChartDisplayChord(
+                            chordPreview
+                                ? { ...selectedChord.chord, ...chordPreview }
+                                : selectedChord.chord,
+                            chart.settings,
+                        )}
+                        sidebarOpen={menuOpen}
+                        onChordChange={(changes, input) =>
+                            updateChord(id, changes, input)}
+                        onBack={backToChart}
                         isMaximized={!menuOpen && !toolbarOpen}
                         onMaximize={toggleMaximize}
-                        onRotate={rotate}
-                        rotateLabel={selectedChord && !isPreviewMode
-                            ? "Rotate active chord 90 degrees clockwise"
-                            : "Rotate all chords 90 degrees clockwise"}
-                        showChartActions
-                        onFillEmptySlots={fillEmptySlots}
-                        {hasEmptySlots}
-                        {isMoveMode}
-                        onToggleMove={toggleMoveMode}
-                        {isPreviewMode}
-                        onTogglePreview={togglePreview}
                     />
                 </div>
-            </main>
-        {/if}
-        <div class="relative shrink-0">
-            {#if exportMessage}
-                <div
-                    class="toast toast-end pointer-events-none absolute right-0 bottom-full z-50 mb-3 p-0"
-                    role="status"
-                    aria-live="polite"
+            {:else}
+                <main
+                    bind:this={workspace}
+                    data-chart-workspace
+                    aria-label="Chord chart workspace"
+                    class="-mr-2 flex min-h-0 min-w-0 flex-1 justify-center-safe overflow-auto pt-5.5 pr-4 pb-2 transition-[margin-left,padding-left] duration-300 ease-in-out motion-reduce:transition-none"
+                    style:margin-left={menuOpen ? "-1rem" : "-3rem"}
+                    style:padding-left={menuOpen ? "1.5rem" : "3.5rem"}
                 >
                     <div
-                        class="alert rounded-xl border-0 bg-neutral px-4 py-3 text-sm font-medium text-neutral-content shadow-lg"
+                        class="flex min-h-full min-w-full shrink-0 items-center-safe"
                     >
-                        {exportMessage}
+                        <div
+                            class="flex min-h-full flex-1 items-center-safe justify-center"
+                        >
+                            {#if isPreviewMode}
+                                <div
+                                    class="shrink-0 p-4"
+                                    aria-busy={isExporting}
+                                >
+                                    {#if previewUrl}
+                                        <img
+                                            src={previewUrl}
+                                            alt="Chart export preview"
+                                            class="max-w-none rounded-xl bg-white shadow-sm"
+                                        />
+                                    {:else if exportError}
+                                        <p
+                                            role="alert"
+                                            class="text-sm text-base-content"
+                                        >
+                                            {exportError}
+                                        </p>
+                                    {:else}
+                                        <p
+                                            role="status"
+                                            class="text-sm text-base-content/70"
+                                        >
+                                            Preparing preview…
+                                        </p>
+                                    {/if}
+                                </div>
+                            {:else}
+                                <ChartGrid
+                                    {chart}
+                                    {selectedChordId}
+                                    {chordPreview}
+                                    {chartPreview}
+                                    {isMoveMode}
+                                    onChartChange={updateChart}
+                                    onAddChord={addChord}
+                                    onSelectChord={selectChord}
+                                    onRemoveChord={removeChord}
+                                    onFocusChord={focusChord}
+                                    onChordChange={updateChord}
+                                    onMoveChord={moveChord}
+                                />
+                            {/if}
+                        </div>
+                        <WorkspaceControls
+                            rotation={!isPreviewMode && selectedChord
+                                ? selectedChord.chord.rotation
+                                : chart.settings.rotation}
+                            isMaximized={!menuOpen && !toolbarOpen}
+                            onMaximize={toggleMaximize}
+                            onRotate={rotate}
+                            rotateLabel={selectedChord && !isPreviewMode
+                                ? "Rotate active chord 90 degrees clockwise"
+                                : "Rotate all chords 90 degrees clockwise"}
+                            showChartActions
+                            onFillEmptySlots={fillEmptySlots}
+                            {hasEmptySlots}
+                            {isMoveMode}
+                            onToggleMove={toggleMoveMode}
+                            {isPreviewMode}
+                            onTogglePreview={togglePreview}
+                        />
                     </div>
-                </div>
+                </main>
             {/if}
-            <Toolbar
-                bind:this={toolbar}
-                subject="chart"
-                isOpen={toolbarOpen}
-                onToggle={() => {
-                    toolbarOpen = !toolbarOpen;
-                }}
-                onClear={clearChart}
-                onUndo={undo}
-                canUndo={past.length > 0}
-                onRedo={redo}
-                canRedo={future.length > 0}
-                svg={chartSvg}
-                onCopy={handleCopy}
-                onDownload={handleDownload}
-                canDownload={!isExporting}
-            />
+            <div class="relative shrink-0">
+                <Toast bind:this={toast} />
+                <Toolbar
+                    bind:this={toolbar}
+                    subject="chart"
+                    columns={chart.columns}
+                    isOpen={toolbarOpen}
+                    onToggle={() => {
+                        toolbarOpen = !toolbarOpen;
+                    }}
+                    onClear={clearChart}
+                    onUndo={undo}
+                    canUndo={past.length > 0}
+                    onRedo={redo}
+                    canRedo={future.length > 0}
+                    svg={renderedRevision === exportRevision ? chartSvg : ""}
+                    onSizeOpen={() => getChartSvg().catch(reportExportError)}
+                    onCopy={handleCopy}
+                    onDownload={handleDownload}
+                    onShare={handleShare}
+                    canDownload={!isExporting}
+                />
+            </div>
         </div>
     </div>
-</div>
 
-<ConfirmModal bind:this={confirmModal} />
+    <ConfirmModal bind:this={confirmModal} />
+{/key}
