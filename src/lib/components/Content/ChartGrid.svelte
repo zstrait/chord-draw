@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { CircleMinus, CirclePlus } from "@lucide/svelte";
+    import { CircleMinus, CirclePlus, X, ZoomIn } from "@lucide/svelte";
     import type { Chord, ChordChart } from "#lib/types.ts";
-    import { applyChartStyling } from "#lib/chart.ts";
+    import { applyChartStyling, getChartDisplayChord } from "#lib/chart.ts";
     import ChordEditor from "./ChordEditor.svelte";
     import ChartHeading from "./ChartHeading.svelte";
 
@@ -13,6 +13,8 @@
         onChartChange,
         onAddChord,
         onSelectChord,
+        onRemoveChord,
+        onFocusChord,
         onChordChange,
     }: {
         chart: ChordChart;
@@ -22,6 +24,8 @@
         onChartChange: (changes: Partial<ChordChart>) => void;
         onAddChord: (row: number, column: number) => void;
         onSelectChord: (id: string | null) => void;
+        onRemoveChord: (id: string) => void;
+        onFocusChord: (id: string) => void;
         onChordChange: (
             id: string,
             changes: Partial<Chord>,
@@ -81,7 +85,7 @@
                         aria-current={selected ? "true" : undefined}
                         tabindex="-1"
                         data-chart-chord={slot.id}
-                        class="relative rounded-xl ring-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                        class="group/chart-chord relative rounded-xl ring-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
                         style:width={chord.rotation % 180
                             ? "calc(13rem * 14 / 11)"
                             : "13rem"}
@@ -89,15 +93,7 @@
                         onpointerdown={() => onSelectChord(slot.id)}
                     >
                         <ChordEditor
-                            chord={{
-                                ...chord,
-                                tuning: chart.settings.tuning,
-                                fretCount: chart.settings.fretCount,
-                                showFretLabel: chart.settings.showFretLabel,
-                                showStringNoteLabels: false,
-                                showTuningLabel: false,
-                                ShowCapoLabel: false,
-                            }}
+                            chord={getChartDisplayChord(chord, chart.settings)}
                             rotation={chord.rotation}
                             active={selected}
                             onChordChange={(changes, input) =>
@@ -111,6 +107,31 @@
                                 onclick={() => onSelectChord(slot.id)}
                             ></button>
                         {/if}
+                        <div
+                            class="pointer-events-none absolute -inset-x-2.5 -top-2.5 z-20 flex justify-between group-hover/chart-chord:visible group-focus-within/chart-chord:visible"
+                            class:invisible={!selected}
+                        >
+                            <button
+                                type="button"
+                                class="chart-action-remove pointer-events-auto flex size-6 cursor-pointer items-center justify-center rounded-full border border-[#C74646] bg-[#E05454] p-0 text-[#783b3b] shadow-sm transition-transform duration-[250ms] hover:scale-110 hover:bg-[#C74646] focus-visible:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E05454] motion-reduce:transition-none"
+                                aria-label={`Remove chord, row ${rowIndex + 1}, column ${columnIndex + 1}`}
+                                onpointerdown={(event) =>
+                                    event.stopPropagation()}
+                                onclick={() => onRemoveChord(slot.id)}
+                            >
+                                <X size={16} aria-hidden="true" />
+                            </button>
+                            <button
+                                type="button"
+                                class="chart-action-focus pointer-events-auto flex size-6 cursor-pointer items-center justify-center rounded-full border border-[#2E439A] bg-[#3852B4] p-0 text-[#f1f3f6] shadow-sm transition-transform duration-[250ms] hover:scale-110 hover:bg-[#2E439A] focus-visible:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3852B4] motion-reduce:transition-none"
+                                aria-label={`Focus chord, row ${rowIndex + 1}, column ${columnIndex + 1}`}
+                                onpointerdown={(event) =>
+                                    event.stopPropagation()}
+                                onclick={() => onFocusChord(slot.id)}
+                            >
+                                <ZoomIn size={16} aria-hidden="true" />
+                            </button>
+                        </div>
                     </div>
                 {:else}
                     <button
@@ -190,6 +211,34 @@
 </div>
 
 <style>
+    :global([data-theme="dark"]) .chart-action-remove {
+        border-color: #a24242;
+        background-color: #c95555;
+        color: #fff1f1;
+    }
+
+    :global([data-theme="dark"]) .chart-action-remove:hover {
+        background-color: #b64747;
+    }
+
+    :global([data-theme="dark"]) .chart-action-remove:focus-visible {
+        outline-color: #c95555;
+    }
+
+    :global([data-theme="dark"]) .chart-action-focus {
+        border-color: #355a89;
+        background-color: #4d79b4;
+        color: #f1f3f6;
+    }
+
+    :global([data-theme="dark"]) .chart-action-focus:hover {
+        background-color: #3f6c9f;
+    }
+
+    :global([data-theme="dark"]) .chart-action-focus:focus-visible {
+        outline-color: #4d79b4;
+    }
+
     [data-chart-chord]:is([aria-current="true"], :hover) {
         outline: 3px solid var(--color-primary);
         outline-offset: 2px;

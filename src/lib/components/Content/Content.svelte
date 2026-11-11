@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { Chord } from "#lib/types.ts";
+    import { ArrowLeft } from "@lucide/svelte";
     import ChordEditor from "./ChordEditor.svelte";
     import WorkspaceControls from "./WorkspaceControls.svelte";
 
@@ -9,7 +10,8 @@
             changes: Partial<Chord>,
             input?: HTMLInputElement,
         ) => void;
-        onSvgChange: (svg: string) => void;
+        onSvgChange?: (svg: string) => void;
+        onBack?: () => void;
         onMaximize: () => void;
         isMaximized: boolean;
         sidebarOpen: boolean;
@@ -19,6 +21,7 @@
         chord,
         onChordChange,
         onSvgChange,
+        onBack,
         onMaximize,
         isMaximized,
         sidebarOpen,
@@ -30,6 +33,17 @@
     style:margin-left={sidebarOpen ? "-1rem" : "-3rem"}
     style:padding-left={sidebarOpen ? "1.5rem" : "3.5rem"}
 >
+    {#if onBack}
+        <button
+            type="button"
+            class="absolute top-2 z-10 flex h-9 cursor-pointer items-center gap-2 rounded-lg border-0 bg-primary/5 px-3 text-sm font-medium text-primary transition-[left] duration-300 ease-in-out hover:bg-primary/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none"
+            style:left={sidebarOpen ? "1.5rem" : "3.5rem"}
+            onclick={onBack}
+        >
+            <ArrowLeft size={18} aria-hidden="true" />
+            Back to chart
+        </button>
+    {/if}
     <WorkspaceControls
         rotation={chord.rotation}
         {isMaximized}
@@ -37,7 +51,10 @@
         onRotate={() =>
             onChordChange({ rotation: (chord.rotation + 90) % 360 })}
     />
-    <div class="flex flex-1 items-center justify-center px-4 py-4">
+    <div
+        class="flex flex-1 items-center justify-center px-4 py-4"
+        class:pt-14={!!onBack}
+    >
         <ChordEditor
             {chord}
             rotation={chord.rotation}

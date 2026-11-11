@@ -1,6 +1,21 @@
 import { createDefaultChord, resetChordStyling } from "./chord.ts";
 import type { ChartChord, Chord, ChordChart } from "./types.ts";
 
+export function getChartDisplayChord(
+    chord: Chord,
+    settings: ChordChart["settings"],
+): Chord {
+    return {
+        ...chord,
+        tuning: settings.tuning,
+        fretCount: settings.fretCount,
+        showFretLabel: settings.showFretLabel,
+        showStringNoteLabels: false,
+        showTuningLabel: false,
+        ShowCapoLabel: false,
+    };
+}
+
 export function applyChartStyling(
     chord: Chord,
     styling: Chord["styling"],
