@@ -180,13 +180,6 @@
             active={false}
             onChordChange={() => {}}
         />
-        {#if target && targetOccupied}
-            <span
-                class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-primary px-2 py-1 text-xs font-semibold text-primary-content"
-            >
-                Swap
-            </span>
-        {/if}
     </div>
 {/if}
 

@@ -10,6 +10,8 @@ export type KeybindActions = Partial<
         | "copy"
         | "share"
         | "clear"
+        | "undo"
+        | "redo"
         | "menu"
         | "toolbar"
         | "addColumn"
@@ -47,6 +49,8 @@ const keybinds: Keybind[] = [
     { key: "c", command: true, action: "copy" },
     { key: "l", shift: true, action: "share" },
     { key: "x", command: true, action: "clear" },
+    { key: "z", command: true, action: "undo", repeat: true },
+    { key: "z", command: true, shift: true, action: "redo", repeat: true },
     { key: "m", shift: true, action: "menu" },
     { key: "t", shift: true, action: "toolbar" },
     { code: "Equal", shift: true, action: "addColumn" },

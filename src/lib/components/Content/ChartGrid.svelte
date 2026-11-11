@@ -25,7 +25,10 @@
         chordPreview: Partial<Chord> | null;
         chartPreview: Partial<Chord> | null;
         isMoveMode: boolean;
-        onChartChange: (changes: Partial<ChordChart>) => void;
+        onChartChange: (
+            changes: Partial<ChordChart>,
+            input?: HTMLInputElement,
+        ) => void;
         onAddChord: (row: number, column: number) => void;
         onSelectChord: (id: string | null) => void;
         onRemoveChord: (id: string) => void;

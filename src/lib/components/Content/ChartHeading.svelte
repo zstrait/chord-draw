@@ -11,7 +11,10 @@
         onEditingChange,
     }: {
         chart: ChordChart;
-        onChartChange: (changes: Partial<ChordChart>) => void;
+        onChartChange: (
+            changes: Partial<ChordChart>,
+            input?: HTMLInputElement,
+        ) => void;
         onEditStart: () => void;
         onEditingChange: (editing: boolean) => void;
     } = $props();
@@ -30,24 +33,27 @@
 
     function change(field: Field, next: string) {
         if (field === "title") {
-            onChartChange({ title: next });
+            onChartChange({ title: next }, input);
             return;
         }
-        onChartChange({
-            settings: {
-                ...chart.settings,
-                tuning:
-                    field === "tuning"
-                        ? { ...chart.settings.tuning, label: next }
-                        : {
-                              ...chart.settings.tuning,
-                              notes: chart.settings.tuning.notes.map(
-                                  (note, index) =>
-                                      index === field ? next : note,
-                              ),
-                          },
+        onChartChange(
+            {
+                settings: {
+                    ...chart.settings,
+                    tuning:
+                        field === "tuning"
+                            ? { ...chart.settings.tuning, label: next }
+                            : {
+                                  ...chart.settings.tuning,
+                                  notes: chart.settings.tuning.notes.map(
+                                      (note, index) =>
+                                          index === field ? next : note,
+                                  ),
+                              },
+                },
             },
-        });
+            input,
+        );
     }
 
     async function start(field: Field) {

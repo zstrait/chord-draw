@@ -12,7 +12,7 @@
     import { encodeChord, decodeChord } from "#lib/share.ts";
     import { downloadSvg, downloadPng, copySvg, copyPng } from "#lib/export.ts";
     import { blurInputOnEnter } from "#lib/utils.ts";
-    import { canHandleKeybind, handleKeybind } from "#lib/keybinds.ts";
+    import { handleKeybind } from "#lib/keybinds.ts";
 
     let { data }: PageProps = $props();
     const autosaveKey = "chorddraw-chord-v1";
@@ -289,6 +289,8 @@
                 copy: () => toolbar?.copy(),
                 share: () => toolbar?.share(),
                 clear: clearChord,
+                undo,
+                redo,
                 menu: () => {
                     menuOpen = !menuOpen;
                 },
@@ -300,17 +302,6 @@
             return;
 
         if (event.defaultPrevented || event.isComposing) return;
-        if (
-            (event.metaKey || event.ctrlKey) &&
-            !event.altKey &&
-            event.key.toLowerCase() === "z"
-        ) {
-            if (!canHandleKeybind(event)) return;
-            event.preventDefault();
-            if (event.shiftKey) redo();
-            else undo();
-            return;
-        }
         blurInputOnEnter(event);
     }
 </script>

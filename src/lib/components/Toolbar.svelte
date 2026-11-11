@@ -319,7 +319,8 @@
     .toolbar-control:disabled {
         background-color: transparent;
         border-color: transparent;
-        color: rgb(255 255 255 / 30%);
+        color: white;
+        opacity: 0.3;
     }
 
     @media (pointer: coarse) {

@@ -21,6 +21,10 @@
     import { handleKeybind } from "#lib/keybinds.ts";
 
     let chart = $state(createDefaultChart());
+    const historyLimit = 50;
+    let past = $state<ChordChart[]>([]);
+    let future = $state<ChordChart[]>([]);
+    let groupedInput: HTMLInputElement | null = null;
     let menuOpen = $state(true);
     let toolbarOpen = $state(true);
     let header = $state<ReturnType<typeof Header>>();
@@ -227,6 +231,8 @@
                 theme: () => header?.toggleTheme(),
                 download: () => toolbar?.download(),
                 copy: () => toolbar?.copy(),
+                undo,
+                redo,
                 clear: clearChart,
                 menu: () => {
                     menuOpen = !menuOpen;
@@ -358,18 +364,28 @@
         updateChart({ slots });
     }
 
-    function updateChord(id: string, changes: Partial<Chord>) {
+    function updateChord(
+        id: string,
+        changes: Partial<Chord>,
+        input: HTMLInputElement | null = null,
+    ) {
         const slot = findChord(id);
         if (!slot) return;
-        updateChart({
-            slots: chart.slots.map((row) =>
-                row.map((entry) =>
-                    entry?.id === id
-                        ? { ...entry, chord: { ...entry.chord, ...changes } }
-                        : entry,
+        updateChart(
+            {
+                slots: chart.slots.map((row) =>
+                    row.map((entry) =>
+                        entry?.id === id
+                            ? {
+                                  ...entry,
+                                  chord: { ...entry.chord, ...changes },
+                              }
+                            : entry,
+                    ),
                 ),
-            ),
-        });
+            },
+            input,
+        );
     }
 
     function removeChord(id: string) {
@@ -439,7 +455,49 @@
         }
     }
 
-    function updateChart(changes: Partial<ChordChart>) {
+    function remember(stack: ChordChart[]) {
+        stack.push($state.snapshot(chart));
+        if (stack.length > historyLimit) stack.shift();
+    }
+
+    function endInputEdit() {
+        if (
+            groupedInput &&
+            JSON.stringify(past.at(-1)) === JSON.stringify(chart)
+        ) {
+            past.pop();
+        }
+        groupedInput = null;
+    }
+
+    function restoreChart(value: ChordChart) {
+        chart = value;
+        chordPreview = null;
+        chartPreview = null;
+        exportRevision++;
+        if (selectedChordId && !findChord(selectedChordId)) selectChord(null);
+    }
+
+    function undo() {
+        endInputEdit();
+        const previous = past.pop();
+        if (previous === undefined) return;
+        remember(future);
+        restoreChart(previous);
+    }
+
+    function redo() {
+        endInputEdit();
+        const next = future.pop();
+        if (next === undefined) return;
+        remember(past);
+        restoreChart(next);
+    }
+
+    function updateChart(
+        changes: Partial<ChordChart>,
+        input: HTMLInputElement | null = null,
+    ) {
         const rows = changes.rows ?? chart.rows;
         const columns = changes.columns ?? chart.columns;
 
@@ -458,6 +516,18 @@
                         ),
                 };
             }
+
+            if (
+                JSON.stringify(chart) ===
+                JSON.stringify({ ...chart, ...changes })
+            )
+                return;
+            if (input === null || input !== groupedInput) {
+                endInputEdit();
+                remember(past);
+            }
+            groupedInput = input;
+            future = [];
 
             Object.assign(chart, changes);
             exportRevision++;
@@ -501,6 +571,8 @@
 </script>
 
 <svelte:window
+    onfocusin={endInputEdit}
+    onfocusout={endInputEdit}
     onkeydown={handleKeydown}
     onpointerdown={(event) => {
         const target = event.target;
@@ -521,7 +593,8 @@
             <Menu
                 chord={selectedChord.chord}
                 chartChord
-                onChordChange={(changes) => updateChord(id, changes)}
+                onChordChange={(changes, input) =>
+                    updateChord(id, changes, input)}
                 onChordPreview={(changes) => {
                     if (selectedChordId === id) chordPreview = changes;
                 }}
@@ -571,7 +644,8 @@
                         chart.settings,
                     )}
                     sidebarOpen={menuOpen}
-                    onChordChange={(changes) => updateChord(id, changes)}
+                    onChordChange={(changes, input) =>
+                        updateChord(id, changes, input)}
                     onBack={backToChart}
                     isMaximized={!menuOpen && !toolbarOpen}
                     onMaximize={toggleMaximize}
@@ -676,6 +750,10 @@
                     toolbarOpen = !toolbarOpen;
                 }}
                 onClear={clearChart}
+                onUndo={undo}
+                canUndo={past.length > 0}
+                onRedo={redo}
+                canRedo={future.length > 0}
                 svg={chartSvg}
                 onCopy={handleCopy}
                 onDownload={handleDownload}
