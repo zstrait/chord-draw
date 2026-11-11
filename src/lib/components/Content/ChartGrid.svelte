@@ -55,9 +55,9 @@
         </div>
     {/if}
     <div
-        class="col-start-1 grid gap-6"
+        class="col-start-1 grid items-start justify-items-center gap-6"
         style:grid-row={gridRow}
-        style:grid-template-columns={`repeat(${chart.columns}, 13rem)`}
+        style:grid-template-columns={`repeat(${chart.columns}, max-content)`}
     >
         {#each chart.slots as row, rowIndex}
             {#each row as slot, columnIndex (slot?.id ?? columnIndex)}
@@ -81,7 +81,10 @@
                         aria-current={selected ? "true" : undefined}
                         tabindex="-1"
                         data-chart-chord={slot.id}
-                        class="relative w-52 rounded-xl ring-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                        class="relative rounded-xl ring-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                        style:width={chord.rotation % 180
+                            ? "calc(13rem * 14 / 11)"
+                            : "13rem"}
                         class:ring-2={selected}
                         onpointerdown={() => onSelectChord(slot.id)}
                     >
@@ -112,7 +115,13 @@
                 {:else}
                     <button
                         type="button"
-                        class="flex aspect-[11/14] w-52 cursor-pointer items-center justify-center rounded-xl border-2 border-primary/30 bg-transparent text-primary hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        class="flex cursor-pointer items-center justify-center rounded-xl border-2 border-primary/30 bg-transparent text-primary hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        style:width={chart.settings.rotation % 180
+                            ? "calc(13rem * 14 / 11)"
+                            : "13rem"}
+                        style:aspect-ratio={chart.settings.rotation % 180
+                            ? "14 / 11"
+                            : "11 / 14"}
                         aria-label={`Add chord, row ${rowIndex + 1}, column ${columnIndex + 1}`}
                         onclick={() => onAddChord(rowIndex, columnIndex)}
                     >

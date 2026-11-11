@@ -4,6 +4,7 @@
     import ChartMenu from "#lib/components/Menu/ChartMenu.svelte";
     import Menu from "#lib/components/Menu/Menu.svelte";
     import ChartGrid from "#lib/components/Content/ChartGrid.svelte";
+    import WorkspaceControls from "#lib/components/Content/WorkspaceControls.svelte";
     import Toolbar from "#lib/components/Toolbar.svelte";
     import ConfirmModal from "#lib/components/ConfirmModal.svelte";
     import { createChartChord, createDefaultChart } from "#lib/chart.ts";
@@ -89,6 +90,35 @@
                 ),
             ),
         });
+    }
+
+    function rotate() {
+        if (selectedChord) {
+            updateChord(selectedChord.id, {
+                rotation: (selectedChord.chord.rotation + 90) % 360,
+            });
+        } else {
+            updateChart({
+                settings: {
+                    ...chart.settings,
+                    rotation: (chart.settings.rotation + 90) % 360,
+                },
+                slots: chart.slots.map((row) =>
+                    row.map((slot) =>
+                        slot
+                            ? {
+                                  ...slot,
+                                  chord: {
+                                      ...slot.chord,
+                                      rotation:
+                                          (slot.chord.rotation + 90) % 360,
+                                  },
+                              }
+                            : null,
+                    ),
+                ),
+            });
+        }
     }
 
     function resetStyling(id: string) {
@@ -233,24 +263,40 @@
             class="divider mt-0 mb-3.5 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5"
             aria-hidden="true"
         ></div>
-        <main
-            data-chart-workspace
-            aria-label="Chord chart workspace"
-            class="-mr-2 flex min-h-0 min-w-0 flex-1 items-center-safe justify-center-safe overflow-auto py-2 pr-4 transition-[margin-left,padding-left] duration-300 ease-in-out motion-reduce:transition-none"
-            style:margin-left={menuOpen ? "-1rem" : "-3rem"}
-            style:padding-left={menuOpen ? "1.5rem" : "3.5rem"}
-        >
-            <ChartGrid
-                {chart}
-                {selectedChordId}
-                {chordPreview}
-                {chartPreview}
-                onChartChange={updateChart}
-                onAddChord={addChord}
-                onSelectChord={selectChord}
-                onChordChange={updateChord}
+        <div class="relative flex min-h-0 min-w-0 flex-1">
+            <WorkspaceControls
+                rotation={selectedChord?.chord.rotation ??
+                    chart.settings.rotation}
+                isMaximized={!menuOpen && !toolbarOpen}
+                onMaximize={() => {
+                    const openBoth = !menuOpen && !toolbarOpen;
+                    menuOpen = openBoth;
+                    toolbarOpen = openBoth;
+                }}
+                onRotate={rotate}
+                rotateLabel={selectedChord
+                    ? "Rotate active chord 90 degrees clockwise"
+                    : "Rotate all chords 90 degrees clockwise"}
             />
-        </main>
+            <main
+                data-chart-workspace
+                aria-label="Chord chart workspace"
+                class="-mr-2 flex min-h-0 min-w-0 flex-1 items-center-safe justify-center-safe overflow-auto py-2 pr-4 transition-[margin-left,padding-left] duration-300 ease-in-out motion-reduce:transition-none"
+                style:margin-left={menuOpen ? "-1rem" : "-3rem"}
+                style:padding-left={menuOpen ? "1.5rem" : "3.5rem"}
+            >
+                <ChartGrid
+                    {chart}
+                    {selectedChordId}
+                    {chordPreview}
+                    {chartPreview}
+                    onChartChange={updateChart}
+                    onAddChord={addChord}
+                    onSelectChord={selectChord}
+                    onChordChange={updateChord}
+                />
+            </main>
+        </div>
         <Toolbar
             subject="chart"
             isOpen={toolbarOpen}
