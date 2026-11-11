@@ -328,9 +328,11 @@
                 style:margin-left={menuOpen ? "-1rem" : "-3rem"}
                 style:padding-left={menuOpen ? "1.5rem" : "3.5rem"}
             >
-                <div class="flex min-h-full min-w-full shrink-0 items-center">
+                <div
+                    class="flex min-h-full min-w-full shrink-0 items-center-safe"
+                >
                     <div
-                        class="flex min-h-full flex-1 items-center justify-center"
+                        class="flex min-h-full flex-1 items-center-safe justify-center"
                     >
                         <ChartGrid
                             {chart}
