@@ -321,38 +321,43 @@
                 />
             </div>
         {:else}
-            <div class="relative flex min-h-0 min-w-0 flex-1">
-                <WorkspaceControls
-                    rotation={selectedChord?.chord.rotation ??
-                        chart.settings.rotation}
-                    isMaximized={!menuOpen && !toolbarOpen}
-                    onMaximize={toggleMaximize}
-                    onRotate={rotate}
-                    rotateLabel={selectedChord
-                        ? "Rotate active chord 90 degrees clockwise"
-                        : "Rotate all chords 90 degrees clockwise"}
-                />
-                <main
-                    data-chart-workspace
-                    aria-label="Chord chart workspace"
-                    class="-mr-2 flex min-h-0 min-w-0 flex-1 items-center-safe justify-center-safe overflow-auto py-2 pr-4 transition-[margin-left,padding-left] duration-300 ease-in-out motion-reduce:transition-none"
-                    style:margin-left={menuOpen ? "-1rem" : "-3rem"}
-                    style:padding-left={menuOpen ? "1.5rem" : "3.5rem"}
-                >
-                    <ChartGrid
-                        {chart}
-                        {selectedChordId}
-                        {chordPreview}
-                        {chartPreview}
-                        onChartChange={updateChart}
-                        onAddChord={addChord}
-                        onSelectChord={selectChord}
-                        onRemoveChord={removeChord}
-                        onFocusChord={focusChord}
-                        onChordChange={updateChord}
+            <main
+                data-chart-workspace
+                aria-label="Chord chart workspace"
+                class="-mr-2 flex min-h-0 min-w-0 flex-1 justify-center-safe overflow-auto py-2 pr-4 transition-[margin-left,padding-left] duration-300 ease-in-out motion-reduce:transition-none"
+                style:margin-left={menuOpen ? "-1rem" : "-3rem"}
+                style:padding-left={menuOpen ? "1.5rem" : "3.5rem"}
+            >
+                <div class="flex min-h-full min-w-full shrink-0 items-center">
+                    <div
+                        class="flex min-h-full flex-1 items-center justify-center"
+                    >
+                        <ChartGrid
+                            {chart}
+                            {selectedChordId}
+                            {chordPreview}
+                            {chartPreview}
+                            onChartChange={updateChart}
+                            onAddChord={addChord}
+                            onSelectChord={selectChord}
+                            onRemoveChord={removeChord}
+                            onFocusChord={focusChord}
+                            onChordChange={updateChord}
+                        />
+                    </div>
+                    <WorkspaceControls
+                        rotation={selectedChord?.chord.rotation ??
+                            chart.settings.rotation}
+                        isMaximized={!menuOpen && !toolbarOpen}
+                        onMaximize={toggleMaximize}
+                        onRotate={rotate}
+                        rotateLabel={selectedChord
+                            ? "Rotate active chord 90 degrees clockwise"
+                            : "Rotate all chords 90 degrees clockwise"}
+                        showChartActions
                     />
-                </main>
-            </div>
+                </div>
+            </main>
         {/if}
         <Toolbar
             subject="chart"

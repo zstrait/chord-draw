@@ -44,13 +44,15 @@
             Back to chart
         </button>
     {/if}
-    <WorkspaceControls
-        rotation={chord.rotation}
-        {isMaximized}
-        {onMaximize}
-        onRotate={() =>
-            onChordChange({ rotation: (chord.rotation + 90) % 360 })}
-    />
+    <div class="absolute right-4 top-2 z-10">
+        <WorkspaceControls
+            rotation={chord.rotation}
+            {isMaximized}
+            {onMaximize}
+            onRotate={() =>
+                onChordChange({ rotation: (chord.rotation + 90) % 360 })}
+        />
+    </div>
     <div
         class="flex flex-1 items-center justify-center px-4 py-4"
         class:pt-14={!!onBack}

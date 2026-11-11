@@ -1,5 +1,12 @@
 <script lang="ts">
-    import { Maximize2, Minimize2, RotateCwSquare } from "@lucide/svelte";
+    import {
+        Maximize2,
+        Minimize2,
+        RotateCwSquare,
+        SquareDashedPlus,
+        Move,
+        ScanEye,
+    } from "@lucide/svelte";
 
     let {
         rotation,
@@ -7,16 +14,18 @@
         onMaximize,
         isMaximized,
         rotateLabel = "Rotate drawing 90 degrees clockwise",
+        showChartActions = false,
     }: {
         rotation: number;
         onRotate: () => void;
         onMaximize: () => void;
         isMaximized: boolean;
         rotateLabel?: string;
+        showChartActions?: boolean;
     } = $props();
 </script>
 
-<div class="absolute right-4 top-2 z-10 flex flex-col gap-3">
+<div class="z-10 flex shrink-0 flex-col gap-3 self-start">
     <div
         class="tooltip tooltip-left"
         data-tip={isMaximized ? "Minimize" : "Maximize"}
@@ -34,6 +43,7 @@
             {/if}
         </button>
     </div>
+
     <div class="tooltip tooltip-left" data-tip="Rotate">
         <button
             type="button"
@@ -45,11 +55,43 @@
             }}
         >
             <RotateCwSquare
-                size={24}
+                size={25}
                 color="currentColor"
                 class="origin-center"
                 style={`transform: rotate(${rotation}deg)`}
             />
         </button>
     </div>
+
+    {#if showChartActions}
+        <div class="tooltip tooltip-left" data-tip="Fill Empty Slots">
+            <button
+                type="button"
+                class="flex size-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-primary/5 p-0 text-primary hover:bg-primary/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                aria-label="Fill empty chord slots"
+            >
+                <SquareDashedPlus size={26} color="currentColor" />
+            </button>
+        </div>
+
+        <div class="tooltip tooltip-left" data-tip="Move Chords">
+            <button
+                type="button"
+                class="flex size-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-primary/5 p-0 text-primary hover:bg-primary/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                aria-label="Move chords"
+            >
+                <Move size={24} color="currentColor" />
+            </button>
+        </div>
+
+        <div class="tooltip tooltip-left" data-tip="Preview Export">
+            <button
+                type="button"
+                class="flex size-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-primary/5 p-0 text-primary hover:bg-primary/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                aria-label="Preview export"
+            >
+                <ScanEye size={27} color="currentColor" />
+            </button>
+        </div>
+    {/if}
 </div>
