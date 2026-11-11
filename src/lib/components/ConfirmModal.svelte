@@ -55,7 +55,7 @@
     }}
 >
     <div
-        class={`modal-box ${content.wide ? "max-w-[30rem]" : "max-w-[26rem]"} overflow-hidden rounded-2xl bg-base-100 p-0 text-base-content shadow-2xl`}
+        class={`modal-box ${content.wide ? "max-w-[30rem]" : "max-w-[27rem]"} overflow-hidden rounded-2xl bg-base-100 p-0 text-base-content shadow-2xl`}
     >
         <div
             class="flex items-center gap-2.5 bg-(--toolbar-bg) px-5 py-4 text-neutral-content"

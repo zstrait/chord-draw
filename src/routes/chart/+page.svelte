@@ -14,7 +14,7 @@
         getChartDisplayChord,
     } from "#lib/chart.ts";
     import { resetChordStyling } from "#lib/chord.ts";
-    import type { Chord, ChordChart } from "#lib/types.ts";
+    import type { Chord, ChordChart, ChartSlotPosition } from "#lib/types.ts";
     import { blurInputOnEnter } from "#lib/utils.ts";
 
     let chart = $state(createDefaultChart());
@@ -22,6 +22,7 @@
     let toolbarOpen = $state(true);
     let selectedChordId = $state<string | null>(null);
     let isChordFocused = $state(false);
+    let isMoveMode = $state(false);
     let chordPreview = $state<Partial<Chord> | null>(null);
     let chartPreview = $state<Partial<Chord> | null>(null);
     let selectedChord = $derived(findChord(selectedChordId));
@@ -36,12 +37,12 @@
 
     async function selectChord(id: string | null) {
         if (id === null) isChordFocused = false;
-        if (id === selectedChordId) return;
         for (const popup of document.querySelectorAll<HTMLElement>(
             "[popover]:popover-open",
         )) {
             popup.hidePopover();
         }
+        if (id === selectedChordId) return;
         selectedChordId = id;
         chordPreview = null;
         await focusSelectedChord();
@@ -73,7 +74,17 @@
         toolbarOpen = openBoth;
     }
 
+    function toggleMoveMode() {
+        isMoveMode = !isMoveMode;
+        if (isMoveMode) selectChord(null);
+    }
+
     function handleKeydown(event: KeyboardEvent) {
+        if (event.key === "Escape" && !event.isComposing && isMoveMode) {
+            event.preventDefault();
+            isMoveMode = false;
+            return;
+        }
         blurInputOnEnter(event);
         if (
             event.key !== "Enter" ||
@@ -115,6 +126,22 @@
                 row.map((slot) => slot ?? createChartChord(settings)),
             ),
         });
+    }
+
+    function moveChord(from: ChartSlotPosition, to: ChartSlotPosition) {
+        if (
+            !chart.slots[from.row]?.[from.column] ||
+            chart.slots[to.row]?.[to.column] === undefined ||
+            (from.row === to.row && from.column === to.column)
+        )
+            return;
+
+        const slots = chart.slots.map((row) => [...row]);
+        [slots[from.row][from.column], slots[to.row][to.column]] = [
+            slots[to.row][to.column],
+            slots[from.row][from.column],
+        ];
+        updateChart({ slots });
     }
 
     function updateChord(id: string, changes: Partial<Chord>) {
@@ -179,6 +206,7 @@
 
     function clearChart() {
         function clear() {
+            isMoveMode = false;
             selectChord(null);
             updateChart(createDefaultChart());
         }
@@ -352,12 +380,14 @@
                             {selectedChordId}
                             {chordPreview}
                             {chartPreview}
+                            {isMoveMode}
                             onChartChange={updateChart}
                             onAddChord={addChord}
                             onSelectChord={selectChord}
                             onRemoveChord={removeChord}
                             onFocusChord={focusChord}
                             onChordChange={updateChord}
+                            onMoveChord={moveChord}
                         />
                     </div>
                     <WorkspaceControls
@@ -372,6 +402,8 @@
                         showChartActions
                         onFillEmptySlots={fillEmptySlots}
                         {hasEmptySlots}
+                        {isMoveMode}
+                        onToggleMove={toggleMoveMode}
                     />
                 </div>
             </main>

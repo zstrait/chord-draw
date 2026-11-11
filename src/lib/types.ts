@@ -55,6 +55,11 @@ export interface ChartChord {
     chord: Chord;
 }
 
+export type ChartSlotPosition = {
+    row: number;
+    column: number;
+};
+
 export interface ChordChart {
     title: string;
     rows: number;

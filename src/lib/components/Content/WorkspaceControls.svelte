@@ -17,6 +17,8 @@
         showChartActions = false,
         onFillEmptySlots,
         hasEmptySlots = false,
+        isMoveMode = false,
+        onToggleMove,
     }: {
         rotation: number;
         onRotate: () => void;
@@ -26,6 +28,8 @@
         showChartActions?: boolean;
         onFillEmptySlots?: () => void;
         hasEmptySlots?: boolean;
+        isMoveMode?: boolean;
+        onToggleMove?: () => void;
     } = $props();
 </script>
 
@@ -80,11 +84,18 @@
             </button>
         </div>
 
-        <div class="tooltip tooltip-left" data-tip="Move Chords">
+        <div
+            class="tooltip tooltip-left"
+            data-tip={isMoveMode ? "Exit Move Mode" : "Move Chords"}
+        >
             <button
                 type="button"
-                class="flex size-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-primary/5 p-0 text-primary hover:bg-primary/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                class="flex size-9 cursor-pointer items-center justify-center rounded-lg border-0 p-0 text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary {isMoveMode
+                    ? 'bg-primary/20 ring-1 ring-primary/40 hover:bg-primary/25'
+                    : 'bg-primary/5 hover:bg-primary/15'}"
                 aria-label="Move chords"
+                aria-pressed={isMoveMode}
+                onclick={onToggleMove}
             >
                 <Move size={24} color="currentColor" />
             </button>

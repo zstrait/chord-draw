@@ -1,26 +1,30 @@
 <script lang="ts">
     import { CircleMinus, CirclePlus, X, ZoomIn } from "@lucide/svelte";
-    import type { Chord, ChordChart } from "#lib/types.ts";
+    import type { Chord, ChordChart, ChartSlotPosition } from "#lib/types.ts";
     import { applyChartStyling, getChartDisplayChord } from "#lib/chart.ts";
     import ChordEditor from "./ChordEditor.svelte";
     import ChartHeading from "./ChartHeading.svelte";
+    import ChartMoveOverlay from "./ChartMoveOverlay.svelte";
 
     let {
         chart,
         selectedChordId,
         chordPreview,
         chartPreview,
+        isMoveMode,
         onChartChange,
         onAddChord,
         onSelectChord,
         onRemoveChord,
         onFocusChord,
         onChordChange,
+        onMoveChord,
     }: {
         chart: ChordChart;
         selectedChordId: string | null;
         chordPreview: Partial<Chord> | null;
         chartPreview: Partial<Chord> | null;
+        isMoveMode: boolean;
         onChartChange: (changes: Partial<ChordChart>) => void;
         onAddChord: (row: number, column: number) => void;
         onSelectChord: (id: string | null) => void;
@@ -31,6 +35,7 @@
             changes: Partial<Chord>,
             input?: HTMLInputElement,
         ) => void;
+        onMoveChord: (from: ChartSlotPosition, to: ChartSlotPosition) => void;
     } = $props();
 
     const dimensions = ["columns", "rows"] as const;
@@ -43,6 +48,7 @@
             headingEditing,
     );
     let gridRow = $derived(hasHeading ? 2 : 1);
+    let moveTarget = $state<ChartSlotPosition | null>(null);
 </script>
 
 <div class="grid shrink-0 grid-cols-[auto_auto] gap-6 p-4">
@@ -59,14 +65,19 @@
         </div>
     {/if}
     <div
+        data-chart-slots
         class="col-start-1 grid items-start justify-items-center gap-6"
         style:grid-row={gridRow}
         style:grid-template-columns={`repeat(${chart.columns}, max-content)`}
     >
         {#each chart.slots as row, rowIndex}
             {#each row as slot, columnIndex (slot?.id ?? columnIndex)}
+                {@const dropTarget =
+                    moveTarget?.row === rowIndex &&
+                    moveTarget.column === columnIndex}
                 {#if slot}
-                    {@const selected = slot.id === selectedChordId}
+                    {@const selected =
+                        !isMoveMode && slot.id === selectedChordId}
                     {@const selectedChord =
                         selected && chordPreview
                             ? { ...slot.chord, ...chordPreview }
@@ -79,27 +90,53 @@
                                   chartPreview.barres !== undefined,
                           )
                         : selectedChord}
+                    {@const displayChord = getChartDisplayChord(
+                        chord,
+                        chart.settings,
+                    )}
                     <div
                         role="group"
                         aria-label={`Chord, row ${rowIndex + 1}, column ${columnIndex + 1}`}
                         aria-current={selected ? "true" : undefined}
                         tabindex="-1"
                         data-chart-chord={slot.id}
+                        data-chart-slot
+                        data-chart-row={rowIndex}
+                        data-chart-column={columnIndex}
                         class="group/chart-chord relative rounded-xl ring-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
                         style:width={chord.rotation % 180
                             ? "calc(13rem * 14 / 11)"
                             : "13rem"}
                         class:ring-2={selected}
-                        onpointerdown={() => onSelectChord(slot.id)}
+                        class:drop-target={dropTarget}
+                        onpointerdown={() => {
+                            if (!isMoveMode) onSelectChord(slot.id);
+                        }}
                     >
                         <ChordEditor
-                            chord={getChartDisplayChord(chord, chart.settings)}
+                            chord={displayChord}
                             rotation={chord.rotation}
                             active={selected}
                             onChordChange={(changes, input) =>
                                 onChordChange(slot.id, changes, input)}
                         />
-                        {#if !selected}
+                        {#if isMoveMode}
+                            <ChartMoveOverlay
+                                chord={displayChord}
+                                position={{
+                                    row: rowIndex,
+                                    column: columnIndex,
+                                }}
+                                onTargetChange={(target) => {
+                                    moveTarget = target;
+                                }}
+                                onMove={(target) =>
+                                    onMoveChord(
+                                        { row: rowIndex, column: columnIndex },
+                                        target,
+                                    )}
+                            />
+                        {:else if !selected}
                             <button
                                 type="button"
                                 class="absolute inset-0 cursor-pointer rounded-xl border-0 bg-transparent p-0 hover:bg-primary/2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
@@ -107,43 +144,50 @@
                                 onclick={() => onSelectChord(slot.id)}
                             ></button>
                         {/if}
-                        <div
-                            class="pointer-events-none absolute -inset-x-2.5 -top-2.5 z-20 flex justify-between group-hover/chart-chord:visible group-focus-within/chart-chord:visible"
-                            class:invisible={!selected}
-                        >
-                            <button
-                                type="button"
-                                class="chart-action-remove pointer-events-auto flex size-6 cursor-pointer items-center justify-center rounded-full border border-[#C74646] bg-[#E05454] p-0 text-[#783b3b] shadow-sm transition-transform duration-[250ms] hover:scale-110 hover:bg-[#C74646] focus-visible:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E05454] motion-reduce:transition-none"
-                                aria-label={`Remove chord, row ${rowIndex + 1}, column ${columnIndex + 1}`}
-                                onpointerdown={(event) =>
-                                    event.stopPropagation()}
-                                onclick={() => onRemoveChord(slot.id)}
+                        {#if !isMoveMode}
+                            <div
+                                class="pointer-events-none absolute -inset-x-2.5 -top-2.5 z-20 flex justify-between group-hover/chart-chord:visible group-focus-within/chart-chord:visible"
+                                class:invisible={!selected}
                             >
-                                <X size={16} aria-hidden="true" />
-                            </button>
-                            <button
-                                type="button"
-                                class="chart-action-focus pointer-events-auto flex size-6 cursor-pointer items-center justify-center rounded-full border border-[#2E439A] bg-[#3852B4] p-0 text-[#f1f3f6] shadow-sm transition-transform duration-[250ms] hover:scale-110 hover:bg-[#2E439A] focus-visible:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3852B4] motion-reduce:transition-none"
-                                aria-label={`Focus chord, row ${rowIndex + 1}, column ${columnIndex + 1}`}
-                                onpointerdown={(event) =>
-                                    event.stopPropagation()}
-                                onclick={() => onFocusChord(slot.id)}
-                            >
-                                <ZoomIn size={16} aria-hidden="true" />
-                            </button>
-                        </div>
+                                <button
+                                    type="button"
+                                    class="chart-action-remove pointer-events-auto flex size-6 cursor-pointer items-center justify-center rounded-full border border-[#C74646] bg-[#E05454] p-0 text-[#783b3b] shadow-sm transition-transform duration-[250ms] hover:scale-110 hover:bg-[#C74646] focus-visible:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E05454] motion-reduce:transition-none"
+                                    aria-label={`Remove chord, row ${rowIndex + 1}, column ${columnIndex + 1}`}
+                                    onpointerdown={(event) =>
+                                        event.stopPropagation()}
+                                    onclick={() => onRemoveChord(slot.id)}
+                                >
+                                    <X size={16} aria-hidden="true" />
+                                </button>
+                                <button
+                                    type="button"
+                                    class="chart-action-focus pointer-events-auto flex size-6 cursor-pointer items-center justify-center rounded-full border border-[#2E439A] bg-[#3852B4] p-0 text-[#f1f3f6] shadow-sm transition-transform duration-[250ms] hover:scale-110 hover:bg-[#2E439A] focus-visible:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3852B4] motion-reduce:transition-none"
+                                    aria-label={`Focus chord, row ${rowIndex + 1}, column ${columnIndex + 1}`}
+                                    onpointerdown={(event) =>
+                                        event.stopPropagation()}
+                                    onclick={() => onFocusChord(slot.id)}
+                                >
+                                    <ZoomIn size={16} aria-hidden="true" />
+                                </button>
+                            </div>
+                        {/if}
                     </div>
                 {:else}
                     <button
                         type="button"
-                        class="flex cursor-pointer items-center justify-center rounded-xl border-2 border-primary/30 bg-transparent text-primary hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        data-chart-slot
+                        data-chart-row={rowIndex}
+                        data-chart-column={columnIndex}
+                        class="flex cursor-pointer items-center justify-center rounded-xl border-2 border-primary/30 bg-transparent text-primary enabled:hover:bg-primary/5 disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                         style:width={chart.settings.rotation % 180
                             ? "calc(13rem * 14 / 11)"
                             : "13rem"}
                         style:aspect-ratio={chart.settings.rotation % 180
                             ? "14 / 11"
                             : "11 / 14"}
-                        aria-label={`Add chord, row ${rowIndex + 1}, column ${columnIndex + 1}`}
+                        aria-label={`${isMoveMode ? "Empty slot" : "Add chord"}, row ${rowIndex + 1}, column ${columnIndex + 1}`}
+                        class:drop-target={dropTarget}
+                        disabled={isMoveMode}
                         onclick={() => onAddChord(rowIndex, columnIndex)}
                     >
                         <CirclePlus
@@ -264,5 +308,16 @@
     :global([data-theme="dark"])
         [data-chart-chord]:not([aria-current="true"]):hover {
         outline-color: color-mix(in srgb, #6096dc 35%, transparent);
+    }
+
+    [data-chart-slot].drop-target,
+    [data-chart-slot].drop-target:hover {
+        outline: 3px solid var(--color-primary);
+        outline-offset: 3px;
+    }
+
+    :global([data-theme="dark"]) [data-chart-slot].drop-target,
+    :global([data-theme="dark"]) [data-chart-slot].drop-target:hover {
+        outline-color: #6096dc;
     }
 </style>
