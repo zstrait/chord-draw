@@ -325,7 +325,7 @@
         >
             <Header />
             <div
-                class="divider mt-0 mb-3.5 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5"
+                class="divider m-0 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5"
                 aria-hidden="true"
             ></div>
             <Content

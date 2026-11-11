@@ -335,7 +335,7 @@
     >
         <Header />
         <div
-            class="divider mt-0 mb-3.5 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5"
+            class="divider m-0 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5"
             aria-hidden="true"
         ></div>
         {#if isChordFocused && selectedChord}
@@ -365,7 +365,7 @@
             <main
                 data-chart-workspace
                 aria-label="Chord chart workspace"
-                class="-mr-2 flex min-h-0 min-w-0 flex-1 justify-center-safe overflow-auto py-2 pr-4 transition-[margin-left,padding-left] duration-300 ease-in-out motion-reduce:transition-none"
+                class="-mr-2 flex min-h-0 min-w-0 flex-1 justify-center-safe overflow-auto pt-5.5 pr-4 pb-2 transition-[margin-left,padding-left] duration-300 ease-in-out motion-reduce:transition-none"
                 style:margin-left={menuOpen ? "-1rem" : "-3rem"}
                 style:padding-left={menuOpen ? "1.5rem" : "3.5rem"}
             >
