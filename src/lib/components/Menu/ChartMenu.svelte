@@ -30,23 +30,31 @@
     function updateSettings(changes: Partial<Chord>, input?: HTMLInputElement) {
         const { title, strings, barres, ...settings } = changes;
         const styling = settings.styling;
+        const startFret = settings.startFret;
+        const updateChord = (chord: Chord) => {
+            const updated = styling
+                ? applyChartStyling(
+                      chord,
+                      styling,
+                      strings !== undefined || barres !== undefined,
+                  )
+                : chord;
+            return startFret === undefined
+                ? updated
+                : { ...updated, startFret };
+        };
         onChartChange(
             {
                 ...(title !== undefined ? { title } : {}),
                 settings: { ...chart.settings, ...settings },
-                ...(styling
+                ...(styling || startFret !== undefined
                     ? {
                           slots: chart.slots.map((row) =>
                               row.map((slot) =>
                                   slot
                                       ? {
                                             ...slot,
-                                            chord: applyChartStyling(
-                                                slot.chord,
-                                                styling,
-                                                strings !== undefined ||
-                                                    barres !== undefined,
-                                            ),
+                                            chord: updateChord(slot.chord),
                                         }
                                       : null,
                               ),
