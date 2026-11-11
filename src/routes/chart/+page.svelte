@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { tick } from "svelte";
+    import { onDestroy, tick, untrack } from "svelte";
     import Header from "#lib/components/Header.svelte";
     import ChartMenu from "#lib/components/Menu/ChartMenu.svelte";
     import Menu from "#lib/components/Menu/Menu.svelte";
@@ -14,6 +14,8 @@
         getChartDisplayChord,
     } from "#lib/chart.ts";
     import { resetChordStyling } from "#lib/chord.ts";
+    import { renderChartSvg } from "#lib/chart-export.ts";
+    import { copyPng, copySvg, downloadPng, downloadSvg } from "#lib/export.ts";
     import type { Chord, ChordChart, ChartSlotPosition } from "#lib/types.ts";
     import { blurInputOnEnter } from "#lib/utils.ts";
 
@@ -23,6 +25,19 @@
     let selectedChordId = $state<string | null>(null);
     let isChordFocused = $state(false);
     let isMoveMode = $state(false);
+    let isPreviewMode = $state(false);
+    let chartSvg = $state("");
+    let previewUrl = $state("");
+    let isExporting = $state(false);
+    let exportError = $state("");
+    let exportMessage = $state("");
+    let exportRevision = $state(0);
+    let renderedRevision = -1;
+    let rendering: Promise<void> | null = null;
+    let exportTimer: ReturnType<typeof setTimeout> | undefined;
+    let disposed = false;
+    let workspace = $state<HTMLElement>();
+    let gridScroll = { left: 0, top: 0 };
     let chordPreview = $state<Partial<Chord> | null>(null);
     let chartPreview = $state<Partial<Chord> | null>(null);
     let selectedChord = $derived(findChord(selectedChordId));
@@ -30,6 +45,121 @@
         chart.slots.some((row) => row.some((slot) => slot === null)),
     );
     let confirmModal: ConfirmModal;
+
+    $effect(() => {
+        if (!isPreviewMode) return;
+        exportRevision;
+        untrack(getChartSvg).catch(reportExportError);
+    });
+
+    $effect(() => {
+        if (!isPreviewMode || !chartSvg) {
+            previewUrl = "";
+            return;
+        }
+        const url = URL.createObjectURL(
+            new Blob([chartSvg], { type: "image/svg+xml" }),
+        );
+        previewUrl = url;
+        return () => URL.revokeObjectURL(url);
+    });
+
+    onDestroy(() => {
+        disposed = true;
+        clearTimeout(exportTimer);
+    });
+
+    async function getChartSvg(): Promise<string> {
+        while (
+            !disposed &&
+            (renderedRevision !== exportRevision || !chartSvg)
+        ) {
+            if (rendering) {
+                await rendering;
+                continue;
+            }
+            const revision = exportRevision;
+            isExporting = true;
+            exportError = "";
+            rendering = renderChartSvg($state.snapshot(chart))
+                .then((svg) => {
+                    if (!disposed && revision === exportRevision) {
+                        chartSvg = svg;
+                        renderedRevision = revision;
+                    }
+                })
+                .catch((error) => {
+                    if (!disposed)
+                        exportError =
+                            "Could not generate the chart preview. Please try again.";
+                    throw error;
+                })
+                .finally(() => {
+                    rendering = null;
+                    if (!disposed) isExporting = false;
+                });
+            await rendering;
+        }
+        return disposed ? "" : chartSvg;
+    }
+
+    async function togglePreview() {
+        if (!workspace) return;
+        const element = workspace;
+        if (!isPreviewMode) {
+            gridScroll = {
+                left: element.scrollLeft,
+                top: element.scrollTop,
+            };
+            isMoveMode = false;
+            isPreviewMode = true;
+            await tick();
+            element.scrollTo({ left: 0, top: 0, behavior: "instant" });
+        } else {
+            isPreviewMode = false;
+            await tick();
+            element.scrollTo({ ...gridScroll, behavior: "instant" });
+        }
+    }
+
+    function showExportMessage(message: string) {
+        if (disposed) return;
+        clearTimeout(exportTimer);
+        exportMessage = message;
+        exportTimer = setTimeout(() => {
+            exportMessage = "";
+        }, 2500);
+    }
+
+    function reportExportError(error: unknown) {
+        console.error(error);
+        showExportMessage("Could not export the chart. Please try again.");
+    }
+
+    async function handleDownload(format: "SVG" | "PNG", width: number) {
+        try {
+            const svg = await getChartSvg();
+            if (!svg) return;
+            if (format === "SVG") downloadSvg(svg, "chart.svg");
+            else await downloadPng(svg, width, "chart.png");
+        } catch (error) {
+            reportExportError(error);
+        }
+    }
+
+    async function handleCopy(format: "SVG" | "PNG", width: number) {
+        try {
+            const svg =
+                renderedRevision === exportRevision && chartSvg
+                    ? chartSvg
+                    : getChartSvg();
+            if (format === "SVG") await copySvg(svg);
+            else await copyPng(svg, width);
+            showExportMessage("Copied!");
+        } catch (error) {
+            reportExportError(error);
+        }
+    }
 
     function findChord(id: string | null) {
         return chart.slots.flat().find((slot) => slot?.id === id) ?? null;
@@ -75,11 +205,17 @@
     }
 
     function toggleMoveMode() {
+        if (isPreviewMode) return;
         isMoveMode = !isMoveMode;
         if (isMoveMode) selectChord(null);
     }
 
     function handleKeydown(event: KeyboardEvent) {
+        if (event.key === "Escape" && !event.isComposing && isPreviewMode) {
+            event.preventDefault();
+            togglePreview();
+            return;
+        }
         if (event.key === "Escape" && !event.isComposing && isMoveMode) {
             event.preventDefault();
             isMoveMode = false;
@@ -88,6 +224,7 @@
         blurInputOnEnter(event);
         if (
             event.key !== "Enter" ||
+            isPreviewMode ||
             event.defaultPrevented ||
             event.isComposing ||
             selectedChordId === null ||
@@ -167,7 +304,7 @@
     }
 
     function rotate() {
-        if (selectedChord) {
+        if (selectedChord && !isPreviewMode) {
             updateChord(selectedChord.id, {
                 rotation: (selectedChord.chord.rotation + 90) % 360,
             });
@@ -246,6 +383,7 @@
             }
 
             Object.assign(chart, changes);
+            exportRevision++;
             if (selectedChordId && !findChord(selectedChordId))
                 selectChord(null);
         }
@@ -290,6 +428,7 @@
     onpointerdown={(event) => {
         const target = event.target;
         if (
+            !isPreviewMode &&
             target instanceof Element &&
             target.closest("[data-chart-workspace]") &&
             !target.closest("[data-chart-chord], button, [popover]")
@@ -299,7 +438,7 @@
 />
 
 <div class="flex h-dvh gap-4 p-2 pl-0 pb-0">
-    {#if selectedChord}
+    {#if selectedChord && !isPreviewMode}
         {#key selectedChord.id}
             {@const id = selectedChord.id}
             <Menu
@@ -338,7 +477,7 @@
             class="divider m-0 h-0.5 shrink-0 overflow-hidden rounded-full opacity-40 before:h-0.5 after:h-0.5"
             aria-hidden="true"
         ></div>
-        {#if isChordFocused && selectedChord}
+        {#if isChordFocused && selectedChord && !isPreviewMode}
             {@const id = selectedChord.id}
             <div
                 role="region"
@@ -363,6 +502,7 @@
             </div>
         {:else}
             <main
+                bind:this={workspace}
                 data-chart-workspace
                 aria-label="Chord chart workspace"
                 class="-mr-2 flex min-h-0 min-w-0 flex-1 justify-center-safe overflow-auto pt-5.5 pr-4 pb-2 transition-[margin-left,padding-left] duration-300 ease-in-out motion-reduce:transition-none"
@@ -375,28 +515,55 @@
                     <div
                         class="flex min-h-full flex-1 items-center-safe justify-center"
                     >
-                        <ChartGrid
-                            {chart}
-                            {selectedChordId}
-                            {chordPreview}
-                            {chartPreview}
-                            {isMoveMode}
-                            onChartChange={updateChart}
-                            onAddChord={addChord}
-                            onSelectChord={selectChord}
-                            onRemoveChord={removeChord}
-                            onFocusChord={focusChord}
-                            onChordChange={updateChord}
-                            onMoveChord={moveChord}
-                        />
+                        {#if isPreviewMode}
+                            <div class="shrink-0 p-4" aria-busy={isExporting}>
+                                {#if previewUrl}
+                                    <img
+                                        src={previewUrl}
+                                        alt="Chart export preview"
+                                        class="max-w-none rounded-xl bg-white shadow-sm"
+                                    />
+                                {:else if exportError}
+                                    <p
+                                        role="alert"
+                                        class="text-sm text-base-content"
+                                    >
+                                        {exportError}
+                                    </p>
+                                {:else}
+                                    <p
+                                        role="status"
+                                        class="text-sm text-base-content/70"
+                                    >
+                                        Preparing preview…
+                                    </p>
+                                {/if}
+                            </div>
+                        {:else}
+                            <ChartGrid
+                                {chart}
+                                {selectedChordId}
+                                {chordPreview}
+                                {chartPreview}
+                                {isMoveMode}
+                                onChartChange={updateChart}
+                                onAddChord={addChord}
+                                onSelectChord={selectChord}
+                                onRemoveChord={removeChord}
+                                onFocusChord={focusChord}
+                                onChordChange={updateChord}
+                                onMoveChord={moveChord}
+                            />
+                        {/if}
                     </div>
                     <WorkspaceControls
-                        rotation={selectedChord?.chord.rotation ??
-                            chart.settings.rotation}
+                        rotation={!isPreviewMode && selectedChord
+                            ? selectedChord.chord.rotation
+                            : chart.settings.rotation}
                         isMaximized={!menuOpen && !toolbarOpen}
                         onMaximize={toggleMaximize}
                         onRotate={rotate}
-                        rotateLabel={selectedChord
+                        rotateLabel={selectedChord && !isPreviewMode
                             ? "Rotate active chord 90 degrees clockwise"
                             : "Rotate all chords 90 degrees clockwise"}
                         showChartActions
@@ -404,18 +571,39 @@
                         {hasEmptySlots}
                         {isMoveMode}
                         onToggleMove={toggleMoveMode}
+                        {isPreviewMode}
+                        onTogglePreview={togglePreview}
                     />
                 </div>
             </main>
         {/if}
-        <Toolbar
-            subject="chart"
-            isOpen={toolbarOpen}
-            onToggle={() => {
-                toolbarOpen = !toolbarOpen;
-            }}
-            onClear={clearChart}
-        />
+        <div class="relative shrink-0">
+            {#if exportMessage}
+                <div
+                    class="toast toast-end pointer-events-none absolute right-0 bottom-full z-50 mb-3 p-0"
+                    role="status"
+                    aria-live="polite"
+                >
+                    <div
+                        class="alert rounded-xl border-0 bg-neutral px-4 py-3 text-sm font-medium text-neutral-content shadow-lg"
+                    >
+                        {exportMessage}
+                    </div>
+                </div>
+            {/if}
+            <Toolbar
+                subject="chart"
+                isOpen={toolbarOpen}
+                onToggle={() => {
+                    toolbarOpen = !toolbarOpen;
+                }}
+                onClear={clearChart}
+                svg={chartSvg}
+                onCopy={handleCopy}
+                onDownload={handleDownload}
+                canDownload={!isExporting}
+            />
+        </div>
     </div>
 </div>
 

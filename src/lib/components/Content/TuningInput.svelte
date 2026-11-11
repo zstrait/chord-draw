@@ -67,6 +67,7 @@
             bind:this={input}
             bind:value={draft}
             type="text"
+            data-theme="light"
             class="input h-full w-full min-w-0 rounded-md border-primary bg-base-100 px-1 text-center text-base-content shadow-none"
             style:font-size={`${target.fontSize}px`}
             style:font-family={target.fontFamily}

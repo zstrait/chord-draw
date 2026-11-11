@@ -387,6 +387,7 @@
                             bind:this={titleInput}
                             value={chord.title}
                             type="text"
+                            data-theme="light"
                             class="input h-full w-full rounded-md border-primary bg-base-100 px-2 text-center text-base-content shadow-none"
                             style:font-size={`${titleTarget.fontSize}px`}
                             style:font-family={titleTarget.fontFamily}

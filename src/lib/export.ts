@@ -82,7 +82,7 @@ export function trimSvg(svg: SVGSVGElement, titleOffset = 0): string {
     return copy.outerHTML;
 }
 
-export function downloadSvg(svg: string) {
+export function downloadSvg(svg: string, filename = "chord.svg") {
     const file = new Blob([svg], {
         type: "image/svg+xml;charset=utf-8",
     });
@@ -91,7 +91,7 @@ export function downloadSvg(svg: string) {
     const link = document.createElement("a");
 
     link.href = url;
-    link.download = "chord.svg";
+    link.download = filename;
 
     document.body.append(link);
     link.click();
@@ -167,13 +167,17 @@ export async function svgToPng(svg: string, width = 1024): Promise<Blob> {
     }
 }
 
-export async function downloadPng(svg: string, width = 1024) {
+export async function downloadPng(
+    svg: string,
+    width = 1024,
+    filename = "chord.png",
+) {
     const png = await svgToPng(svg, width);
     const url = URL.createObjectURL(png);
     const link = document.createElement("a");
 
     link.href = url;
-    link.download = "chord.png";
+    link.download = filename;
 
     document.body.append(link);
     link.click();
@@ -182,13 +186,25 @@ export async function downloadPng(svg: string, width = 1024) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export async function copySvg(svg: string) {
-    await navigator.clipboard.writeText(svg);
+export async function copySvg(svg: string | Promise<string>) {
+    if (typeof svg === "string") {
+        await navigator.clipboard.writeText(svg);
+        return;
+    }
+    await navigator.clipboard.write([
+        new ClipboardItem({
+            "text/plain": svg.then(
+                (value) => new Blob([value], { type: "text/plain" }),
+            ),
+        }),
+    ]);
 }
 
-export async function copyPng(svg: string, width = 1024) {
+export async function copyPng(svg: string | Promise<string>, width = 1024) {
     const item = new ClipboardItem({
-        "image/png": svgToPng(svg, width),
+        "image/png": Promise.resolve(svg).then((value) =>
+            svgToPng(value, width),
+        ),
     });
 
     await navigator.clipboard.write([item]);

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { tick } from "svelte";
     import type { ChordChart } from "#lib/types.ts";
-    import { formatCapo } from "#lib/chord.ts";
+    import { getChartLabels } from "#lib/chart.ts";
     import { normalizeTuningNote } from "#lib/tunings.ts";
 
     let {
@@ -20,28 +20,7 @@
     let editing = $state<Field | null>(null);
     let input = $state<HTMLInputElement>();
     let original = $state("");
-    let labels = $derived.by(() => {
-        const parts: { kind: "tuning" | "notes" | "capo"; text: string }[] = [];
-        if (
-            chart.settings.showTuningLabel &&
-            (chart.settings.tuning.label || editing === "tuning")
-        ) {
-            parts.push({ kind: "tuning", text: chart.settings.tuning.label });
-        }
-        if (chart.settings.showStringNoteLabels) {
-            parts.push({
-                kind: "notes",
-                text: chart.settings.tuning.notes.join(" "),
-            });
-        }
-        if (chart.settings.ShowCapoLabel) {
-            parts.push({
-                kind: "capo",
-                text: formatCapo(chart.settings.capoFret),
-            });
-        }
-        return parts;
-    });
+    let labels = $derived(getChartLabels(chart, editing === "tuning"));
 
     function value(field: Field) {
         if (field === "title") return chart.title;

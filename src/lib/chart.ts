@@ -1,5 +1,25 @@
-import { createDefaultChord, resetChordStyling } from "./chord.ts";
+import { createDefaultChord, formatCapo, resetChordStyling } from "./chord.ts";
 import type { ChartChord, Chord, ChordChart } from "./types.ts";
+
+export function getChartLabels(chart: ChordChart, editingTuning = false) {
+    const labels: { kind: "tuning" | "notes" | "capo"; text: string }[] = [];
+    if (
+        chart.settings.showTuningLabel &&
+        (chart.settings.tuning.label || editingTuning)
+    )
+        labels.push({ kind: "tuning", text: chart.settings.tuning.label });
+    if (chart.settings.showStringNoteLabels)
+        labels.push({
+            kind: "notes",
+            text: chart.settings.tuning.notes.join(" "),
+        });
+    if (chart.settings.ShowCapoLabel)
+        labels.push({
+            kind: "capo",
+            text: formatCapo(chart.settings.capoFret),
+        });
+    return labels;
+}
 
 export function getChartDisplayChord(
     chord: Chord,
