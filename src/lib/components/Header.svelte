@@ -27,23 +27,23 @@
 
     <nav
         aria-label="Workspace"
-        class="flex items-center gap-4 text-sm font-medium"
+        class="flex items-center gap-3 text-base font-medium"
     >
         <a
             href={resolve("/")}
             aria-current={page.route.id === "/" ? "page" : undefined}
-            class="rounded-sm hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-            class:text-primary={page.route.id === "/"}
-            class:underline={page.route.id === "/"}
-            class:underline-offset-4={page.route.id === "/"}>Diagram</a
+            class="nav-link relative rounded-sm whitespace-nowrap hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+            class:text-primary={page.route.id === "/"}>Chord Diagram</a
         >
+        <span
+            class="nav-divider divider divider-horizontal m-0 h-6 w-2 shrink-0"
+            aria-hidden="true"
+        ></span>
         <a
             href={resolve("chart/")}
             aria-current={page.route.id === "/chart" ? "page" : undefined}
-            class="rounded-sm hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-            class:text-primary={page.route.id === "/chart"}
-            class:underline={page.route.id === "/chart"}
-            class:underline-offset-4={page.route.id === "/chart"}>Chart</a
+            class="nav-link relative rounded-sm whitespace-nowrap hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+            class:text-primary={page.route.id === "/chart"}>Chord Chart</a
         >
     </nav>
 
@@ -82,5 +82,37 @@
 <style>
     .brand {
         font-family: "Rock Salt", cursive;
+    }
+
+    .nav-link[aria-current="page"]::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        bottom: -0.2rem;
+        left: 0;
+        height: 0.125rem;
+        border-radius: 9999px;
+        background-color: currentColor;
+    }
+
+    :global([data-theme="dark"]) .nav-link {
+        color: var(--color-primary);
+    }
+
+    :global([data-theme="dark"]) .nav-link[aria-current="page"],
+    :global([data-theme="dark"]) .nav-link:hover {
+        color: var(--color-base-content);
+    }
+
+    :global([data-theme="dark"]) .nav-link[aria-current="page"]::after {
+        background-color: var(--color-primary);
+    }
+
+    .nav-divider::before {
+        border-radius: 9999px;
+    }
+
+    .nav-divider::after {
+        display: none;
     }
 </style>

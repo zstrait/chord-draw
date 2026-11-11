@@ -103,7 +103,7 @@
                         {#if !selected}
                             <button
                                 type="button"
-                                class="absolute inset-0 cursor-pointer rounded-xl border-0 bg-transparent p-0 hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                                class="absolute inset-0 cursor-pointer rounded-xl border-0 bg-transparent p-0 hover:bg-primary/2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                                 aria-label={`Edit chord, row ${rowIndex + 1}, column ${columnIndex + 1}`}
                                 onclick={() => onSelectChord(slot.id)}
                             ></button>
@@ -112,11 +112,12 @@
                 {:else}
                     <button
                         type="button"
-                        class="flex aspect-[11/14] w-52 cursor-pointer items-center justify-center rounded-xl border-2 border-primary/30 bg-transparent text-primary/60 hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        class="flex aspect-[11/14] w-52 cursor-pointer items-center justify-center rounded-xl border-2 border-primary/30 bg-transparent text-primary hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                         aria-label={`Add chord, row ${rowIndex + 1}, column ${columnIndex + 1}`}
                         onclick={() => onAddChord(rowIndex, columnIndex)}
                     >
                         <CirclePlus
+                            class="opacity-60"
                             size={52}
                             strokeWidth={1.5}
                             aria-hidden="true"
@@ -129,7 +130,7 @@
     {#each dimensions as dimension}
         {@const vertical = dimension === "columns"}
         <div
-            class="flex items-center gap-3 text-primary/60"
+            class="flex items-center gap-3 text-primary"
             class:flex-col={vertical}
             class:col-start-1={!vertical}
             class:col-start-2={vertical}
@@ -154,12 +155,14 @@
                 >
                     {#if change === 1}
                         <CirclePlus
+                            class="opacity-60"
                             size={44}
                             strokeWidth={1.5}
                             aria-hidden="true"
                         />
                     {:else}
                         <CircleMinus
+                            class="opacity-60"
                             size={44}
                             strokeWidth={1.5}
                             aria-hidden="true"
@@ -178,13 +181,30 @@
 </div>
 
 <style>
-    [data-chart-chord][aria-current="true"] {
-        --tw-ring-color: transparent;
+    [data-chart-chord]:is([aria-current="true"], :hover) {
         outline: 3px solid var(--color-primary);
         outline-offset: 2px;
     }
 
+    [data-chart-chord][aria-current="true"] {
+        --tw-ring-color: transparent;
+    }
+
+    [data-chart-chord]:not([aria-current="true"]):hover {
+        outline-width: 2px;
+        outline-color: color-mix(
+            in srgb,
+            var(--color-primary) 35%,
+            transparent
+        );
+    }
+
     :global([data-theme="dark"]) [data-chart-chord][aria-current="true"] {
         outline-color: #6096dc;
+    }
+
+    :global([data-theme="dark"])
+        [data-chart-chord]:not([aria-current="true"]):hover {
+        outline-color: color-mix(in srgb, #6096dc 35%, transparent);
     }
 </style>
