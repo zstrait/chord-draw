@@ -668,6 +668,10 @@
     }
 </script>
 
+<svelte:head>
+    <link rel="canonical" href="https://chorddraw.com/chart/" />
+</svelte:head>
+
 <svelte:window
     onfocusin={endInputEdit}
     onfocusout={endInputEdit}
